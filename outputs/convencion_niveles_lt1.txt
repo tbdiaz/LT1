@@ -1,0 +1,97 @@
+==========================================================================================
+CONVENCION DE NIVELES Y CLASIFICACION DEL MODELO · LT1
+==========================================================================================
+Unidades base: metros (m), kilonewtons (kN), kilopascales (kPa).
+
+REGLA (CONVENCION R1): en esta estructura "PLANTA CIELO PISO N°" es el
+  plano estructural de la LOSA cuyo NIVEL SUPERIOR (cara superior) esta en
+  z = PISO_N (data/geometria.py niveles_z). Se calibra con las anotaciones
+  EXPLICITAS "NIVEL SUPERIOR LOSA" ya documentadas por OCR:
+    - folio 102, sub-plano PLANTA CIELO PISO 3°  -> NIVEL SUPERIOR = 7.87 m
+      (= PISO_3);
+    - folio 103, PLANTA CIELO PISO 4°            -> NIVEL SUPERIOR ~ 11.83 m
+      (= PISO_4).
+  PISO OCUPADO N°: entrepiso ocupable entre PISO_{N-1} y PISO_N; su CIELO
+  (losa-techo) esta en PISO_N. Las vigas/losa del plano se situan en el
+  nivel del cielo; las columnas que lo enmarcan son el tramo PISO_{N-1}->PISO_N.
+  Un MISMO folio puede contener mas de una vista estructural: el folio 102
+  tiene la vista principal (CIELO PISO 2° -> PISO_2) y un sub-plano parcial
+  (CIELO PISO 3° -> PISO_3), origen de la reticula del bloque 1 del modelo.
+  Fuente unica y autoritativa: data/inventario.CONVENCION_NIVELES (los
+  consumidores nivel_por_plano / fuente_correlacion_plano_nivel se derivan
+  de ella; no hay otra definicion de niveles en el proyecto).
+
+------------------------------------------------------------------------------------------
+TABLA PLANO -> NIVEL ESTRUCTURAL
+------------------------------------------------------------------------------------------
+  plano vista      nombre literal                                    piso ocupado               nivel             z (m)   
+  100   principal  PLANTA NIVEL DE FUNDACIONES (grilla de V.F. + LOS fundaciones (base de la ed FUNDACION_SUP     -7.97   
+  101   principal  PLANTA CIELO 1° SUBTERRÁNEO (rótulo "1º S" en ele 1S (sótano; ocupa ≈ -7.97. PISO_1S           -4.01   
+  102   principal  PLANTA CIELO PISO 2°                              2° (ocupa -0.05..3.91)     PISO_2            +3.91   
+  102   sub_plano  PLANTA CIELO PISO 3° (sub-plano parcial, franja s 3° (ocupa 3.91..7.87)      PISO_3            +7.87   
+  103   principal  PLANTA CIELO PISO 4°                              4° (ocupa 7.87..11.83)     PISO_4            +11.83  
+
+ROL ESTRUCTURAL y JUSTIFICACION por vista:
+  · 100 [principal] PLANTA NIVEL DE FUNDACIONES (grilla de V.F. + LOSA e=25)
+      rol       : losa e=25 y grilla de V.F.; apoyo (base) de las columnas P.70x70 (nivel de apoyo del modelo)
+      justific.: Contenido del plano (V.F., LOSA e=25) + nivel superior de fundación del plano de elevación 300 (niveles_z)
+      fuente    : 2017_67-100 (1) + elevación 300
+  · 101 [principal] PLANTA CIELO 1° SUBTERRÁNEO (rótulo "1º S" en elevación 301)
+      rol       : losa/cielo del sótano en PISO_1S; muros de contención M.H.A., M.I., V.S.I.; columnas tramo FUNDACION_SUP→PISO_1S y PISO_1S→PISO_1 (esqueleto). Elementos sueltos PENDIENTE por posición.
+      justific.: Rótulo "1º S" de la elevación 301 + contenido (muros de contención, V.S.I., M.I.) coherente con subte
+      fuente    : 2017_67-101 + elevación 301
+  · 102 [principal] PLANTA CIELO PISO 2°
+      rol       : losa-techo del piso 2° en PISO_2 (z=3.91). Esqueleto retícula principal PISO_2 + irregulars de la vista principal (M102_01/02/03, V3045_01/02, M.H.A. e=25/e=30, ejes auxiliares Eb/Ec/Ga/H1/H2 y filas 1''/2a, sector bajo eje 3). Columnas tramo PISO_1→PISO_2 y PISO_2→PISO_3
+      justific.: Rótulo OCR del bloque de títulos "PLANTA CIELO PISO 2°" aplicado a la convención R1 (rótulo N° -> LOSA SUPERIOR en PISO_N, calibrada con las anotaciones explícitas del propio folio PISO 3°=7.87 y plano 103 PISO 4°≈11.83). No hay anotación explícita de LOSA para esta vista: asignación INFERIDA por R1.
+      fuente    : 2017_67-102 (rótulo OCR del bloque de títulos) + convención R1
+  · 102 [sub_plano] PLANTA CIELO PISO 3° (sub-plano parcial, franja superior del folio 102)
+      rol       : losa-techo del piso 3° en PISO_3 (z=7.87): retícula principal del bloque 1 del modelo (vigas V.60/80 y columnas P.70x70 tramo PISO_2→PISO_3). Es la franja del folio usada por comparacion_plano102.py para el control PISO_3.
+      justific.: Rótulo OCR "PLANTA CIELO PISO 3°" con ANOTACIÓN EXPLÍCITA NIVEL SUPERIOR LOSA = 7.87 m (= niveles_z['PISO_3'])
+      fuente    : 2017_67-102 (sub-plano, rótulo + anotación NIVEL SUPERIOR LOSA, OCR)
+  · 103 [principal] PLANTA CIELO PISO 4°
+      rol       : losa-techo del piso 4° en PISO_4 (z=11.83). Esqueleto retícula PISO_4 + irregulars del plano 103 (M103_01/02/03). Columnas tramo PISO_3→PISO_4
+      justific.: Rótulo OCR "PLANTA CIELO PISO 4°" con ANOTACIÓN EXPLÍCITA NIVEL SUPERIOR LOSA ≈ 11.83 m (= niveles_z['PISO_4'])
+      fuente    : 2017_67-103 (rótulo + anotación NIVEL SUPERIOR LOSA, OCR)
+
+Z DE NIVELES ESTRUCTURALES (data/geometria.py niveles_z):
+    FUNDACION_SUP       = -7.97 m
+    PISO_1S             = -4.01 m
+    PISO_1              = -0.05 m
+    PISO_2              = +3.91 m
+    PISO_3              = +7.87 m
+    PISO_4              = +11.83 m
+    CUBIERTA_SUP        = +12.58 m
+
+Fuente por plano (derivada de CONVENCION_NIVELES):
+  plano 100 -> FUNDACION_SUP
+      fuente: Rótulo "PLANTA NIVEL DE FUNDACIONES (grilla de V.F. + LOSA e=25)" -> FUNDACION_SUP (z=-7.97 m). Contenido del plano (V.F., LOSA e=25) + nivel superior de fundación del plano de elevación 300 (niveles_z). Fuente: 2017_67-100 (1) + elevación 300.
+  plano 101 -> PISO_1S
+      fuente: Rótulo "PLANTA CIELO 1° SUBTERRÁNEO (rótulo "1º S" en elevación 301)" -> PISO_1S (z=-4.01 m). Rótulo "1º S" de la elevación 301 + contenido (muros de contención, V.S.I., M.I.) coherente con subte. Fuente: 2017_67-101 + elevación 301.
+  plano 102 -> PISO_2
+      fuente: Rótulo "PLANTA CIELO PISO 2°" -> PISO_2 (z=3.91 m). Rótulo OCR del bloque de títulos "PLANTA CIELO PISO 2°" aplicado a la convención R1 (rótulo N° -> LOSA SUPERIOR en PISO_N, calibrada con las anotaciones explícitas del propio folio PISO 3°=7.87 y plano 103 PISO 4°≈11.83). No hay anotación explícita de LOSA para esta vista: asignación INFERIDA por R1.. Fuente: 2017_67-102 (rótulo OCR del bloque de títulos) + convención R1. El folio además contiene el sub-plano "PLANTA CIELO PISO 3° (sub-plano parcial, franja superior del folio 102)" -> PISO_3 (z=7.87 m): Rótulo OCR "PLANTA CIELO PISO 3°" con ANOTACIÓN EXPLÍCITA NIVEL SUPERIOR LOSA = 7.87 m (= niveles_z['PISO_3']).
+  plano 103 -> PISO_4
+      fuente: Rótulo "PLANTA CIELO PISO 4°" -> PISO_4 (z=11.83 m). Rótulo OCR "PLANTA CIELO PISO 4°" con ANOTACIÓN EXPLÍCITA NIVEL SUPERIOR LOSA ≈ 11.83 m (= niveles_z['PISO_4']). Fuente: 2017_67-103 (rótulo + anotación NIVEL SUPERIOR LOSA, OCR).
+
+==========================================================================================
+CLASIFICACION DEL MODELO A/B/C
+==========================================================================================
+A · GEOMETRIA LISTA PARA OPENSees (construida, verificada, sin material):
+    esqueleto retícula principal + bloque 1 (sub-plano CIELO PISO 3°):
+      columnas P.70x70 : 90
+      vigas    V.60/80 : 108
+      nodos            : 120
+      diafragmas rigidos ([600001, 600002, 600003, 600004]): 4 con 72 nodos esclavos
+      apoyos base      : 18
+
+B · POSICION RESPALDADA, LONGITUD/EXTREMOS PENDIENTES (sin construir):
+    muros nucleo M.H.A. e=20  : 6 (M102_01..03 en PISO_2, M103_01..03 en PISO_4; INFERIDO_RESPALDADO)
+    vigas      V.30/45 sector : 2 (V3045_01/02 en PISO_2; PENDIENTE_COORDENADA_Y_EXT_SUR)
+
+C · PENDIENTE DE POSICION (no construidas, sin nodos asociados):
+    registros PENDIENTE_COORDENADA en geometria_irregular: 118
+    elementos pendientes del inventario (todos los planos): 334 (por plano: {'100': 30, '101': 90, '102': 132, '103': 82})
+    (incluyen: M.H.A. e=25/e=30 del nucleo, ejes auxiliares Eb/Ec/Ga/H1/H2
+    filas 1''/2a, sector bajo eje 3 [V.60-30/80-40, V.60/VAR, V.M., P.M.,
+    P.M.I.], V.F. + LOSA e=25 del plano 100). Bloqueado por cotas
+    Y_EXT_SUR_102 / X_SUR_102 y por la lectura del plano 100.
+==========================================================================================

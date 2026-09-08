@@ -1,0 +1,252 @@
+==========================================================================================
+CONTROL GEOMETRIA COMPLETA LT1 · ELEMENTOS IRREGULARES Y SECUNDARIOS
+==========================================================================================
+Fuente: data/geometria_irregular.py (registro pdfminer por elem.) +
+        data/inventario.py (cantidades por rótulo, retícula principal).
+Unidades: metros (m). Sin material, sin elasticBeamColumn, sin cargas.
+
+TOTAL elementos irregulares registrados: 133
+  por estado: {'INFERIDO_RESPALDADO': 15, 'PENDIENTE_COORDENADA': 118}
+  muros: 41 · pilares metálicos: 22 ·
+  vigas metálicas: 12 · vigas irregulares/VAR: 23 · V.60/80 extra: 35
+
+MAPEO PDF->MODELO (plano 102, calibrado con 18 P.70x70 de la retícula):
+  x_pdf = 7.2604*X + 63.62  (error ±0.4 m (E-H), ±1.6 m (I), ±1.9 m (I'))
+  y_pdf = 6.7305*Y + 556.21  (error ±0.2 m (en las 3 filas de la retícula))
+  Valido solo para el area del edificio principal (X:(-3.0, 46.5), Y:(-20.8, 2.0))
+  El plano 101 usa el mapeo de 102 NO calibrado; el plano 103 = PLANTA CIELO
+  PISO 4° usa mapeo INFERIDO_RESPALDADO calibrado por el núcleo E-F común
+  con el 102 (x=X*8.189+264.77, y=Y*7.652+392.58).
+
+------------------------------------------------------------------------------------------
+1) MUROS M.H.A. / M.I. (todos, por plano y espesor)
+------------------------------------------------------------------------------------------
+  [M101_01] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~(1.95, -6.35)    PENDIENTE_COORDENADA   sin eje cercano verificable (dx=1.65, dy=2.45 m)
+  [M101_02] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~(2.39, -49.11)   PENDIENTE_COORDENADA   fuera del rango del edificio (vista de detalle)
+  [M101_03] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~(3.40, -7.19)    PENDIENTE_COORDENADA   sin eje cercano verificable (dx=0.20, dy=1.71 m)
+  [M101_04] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~(5.64, -59.58)   PENDIENTE_COORDENADA   fuera del rango del edificio (vista de detalle)
+  [M101_05] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~(5.66, -11.06)   PENDIENTE_COORDENADA   sin eje cercano verificable (dx=0.74, dy=2.16 m)
+  [M101_06] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~(5.67, -21.53)   PENDIENTE_COORDENADA   fuera del rango del edificio (vista de detalle)
+  [M101_07] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_08] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_09] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_10] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_11] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_12] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_13] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_14] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_15] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_16] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_17] M.H.A. e= 20   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_E15_01] M.H.A. e= 15   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_E15_02] M.H.A. e= 15   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_E30_01] M.H.A. e= 30   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_E30_02] M.H.A. e= 30   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_E30_03] M.H.A. e= 30   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M101_E30_04] M.H.A. e= 30   plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [MI101_01] M.I. e= 20     plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   etiqueta detectada en capa de texto sin posición
+  [M102_01] M.H.A. e= 20   plano 102 nivel PISO_2             pos~(0.76, -3.45)    INFERIDO_RESPALDADO    aproximado cerca de ejes E/1'' (dx=0.76, dy=0.45
+  [M102_02] M.H.A. e= 20   plano 102 nivel PISO_2             pos~(4.13, -3.45)    INFERIDO_RESPALDADO    aproximado cerca de ejes Eb/1'' (dx=0.53, dy=0.4
+  [M102_03] M.H.A. e= 20   plano 102 nivel PISO_2             pos~(4.07, -14.53)   INFERIDO_RESPALDADO    aproximado cerca de ejes Eb/2a (dx=0.47, dy=0.69
+  [M102_04] M.H.A. e= 20   plano 102 nivel PENDIENTE_NIVEL    pos~(-2.76, -41.68)  PENDIENTE_COORDENADA   fuera del rango del edificio (vista de detalle)
+  [M102_05] M.H.A. e= 20   plano 102 nivel PENDIENTE_NIVEL    pos~(0.58, -52.76)   PENDIENTE_COORDENADA   fuera del rango del edificio (vista de detalle)
+  [M102_06] M.H.A. e= 20   plano 102 nivel PENDIENTE_NIVEL    pos~(0.63, -41.68)   PENDIENTE_COORDENADA   fuera del rango del edificio (vista de detalle)
+  [M102_E25_01] M.H.A. e= 25   plano 102 nivel PISO_2             pos~(2.81, -14.00)   INFERIDO_RESPALDADO    aproximado cerca de ejes Eb/2a (dx=0.79, dy=0.15
+  [M102_E25_02] M.H.A. e= 25   plano 102 nivel PISO_2             pos~(6.11, -14.00)   INFERIDO_RESPALDADO    cerca de ejes Ec/2a (dx=0.29, dy=0.15 m)
+  [M102_E30_01] M.H.A. e= 30   plano 102 nivel PISO_2             pos~(3.08, -5.68)    INFERIDO_RESPALDADO    posición de rótulo confirmada de forma CRUZADA e
+  [M102_E30_02] M.H.A. e= 30   plano 102 nivel PISO_2             pos~(5.84, -5.53)    INFERIDO_RESPALDADO    posición de rótulo confirmada de forma CRUZADA e
+  [M103_01] M.H.A. e= 20   plano 103 nivel PISO_4             pos~(0.75, -3.45)    INFERIDO_RESPALDADO    aproximado cerca de ejes E/1'' (dx=0.75, dy=0.45
+  [M103_02] M.H.A. e= 20   plano 103 nivel PISO_4             pos~(4.11, -14.53)   INFERIDO_RESPALDADO    aproximado cerca de ejes Eb/2a (dx=0.51, dy=0.68
+  [M103_03] M.H.A. e= 20   plano 103 nivel PISO_4             pos~(4.16, -3.45)    INFERIDO_RESPALDADO    aproximado cerca de ejes Eb/1'' (dx=0.56, dy=0.4
+  [M103_E25_01] M.H.A. e= 25   plano 103 nivel PISO_4             pos~(2.71, -14.06)   INFERIDO_RESPALDADO    aproximado cerca de ejes Eb/2a (dx=0.89, dy=0.21
+  [M103_E25_02] M.H.A. e= 25   plano 103 nivel PISO_4             pos~(6.26, -13.93)   INFERIDO_RESPALDADO    cerca de ejes Ec/2a (dx=0.14, dy=0.08 m)
+  [M103_E30_01] M.H.A. e= 30   plano 103 nivel PISO_4             pos~(3.08, -5.57)    INFERIDO_RESPALDADO    posición de rótulo confirmada de forma CRUZADA e
+  [M103_E30_02] M.H.A. e= 30   plano 103 nivel PISO_4             pos~(5.89, -5.57)    INFERIDO_RESPALDADO    posición de rótulo confirmada de forma CRUZADA e
+
+------------------------------------------------------------------------------------------
+2) PILARES Y VIGAS METALICAS (P.M., P.M.I., V.M.)
+------------------------------------------------------------------------------------------
+  [PM102_01] P.M. 300x300x20        plano 102 nivel PENDIENTE_CORRELACION pos~(11.17, -22.30)  PENDIENTE_COORDENADA   fuera del rango del edificio (vista de detalle)
+  [PM102_02] P.M. 300x300x20        plano 102 nivel PENDIENTE_CORRELACION pos~(18.52, -21.96)  PENDIENTE_COORDENADA   fuera del rango del edificio (vista de detalle)
+  [PM102_03] P.M. 300x300x20        plano 102 nivel PENDIENTE_CORRELACION pos~(18.52, -15.48)  INFERIDO_RESPALDADO    aproximado cerca de ejes G/3 (dx=1.48, dy=0.67 m
+  [PMI102_01] P.M.I.                 plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF (y_pdf < 31
+  [PMI102_02] P.M.I.                 plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF (y_pdf < 31
+  [PMI102_03] P.M.I.                 plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF (y_pdf < 31
+  [PMI102_04] P.M.I.                 plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF (y_pdf < 31
+  [PMI102_05] P.M.I.                 plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF (y_pdf < 31
+  [PMI102_06] P.M.I.                 plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF (y_pdf < 31
+  [PMI102_07] P.M.I.                 plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF (y_pdf < 31
+  [PMI102_08] P.M.I.                 plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF (y_pdf < 31
+  [PMI101_01] P.M.I.                 plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   mapeo no calibrado para plan 101; contenido en z
+  [PMI101_02] P.M.I.                 plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   mapeo no calibrado para plan 101; contenido en z
+  [PMI101_03] P.M.I.                 plano 101 nivel PISO_1S            pos~---              PENDIENTE_COORDENADA   mapeo no calibrado para plan 101; contenido en z
+  [PM103_01] P.M. 300x300x20        plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [PM103_02] P.M. 300x300x20        plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [PM103_03] P.M. 300x300x20        plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [PM103_04] P.M. 300x300x20        plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [PM103_05] P.M. 300x300x20        plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [PM103_06] P.M. 300x300x20        plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [PM103_07] P.M. 300x300x20        plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [PM103_08] P.M. 300x300x20        plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [VM102_01] V.M. 300x300x5         plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF
+  [VM102_02] V.M. 300x300x5         plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF
+  [VM102_03] V.M. 300x300x5         plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF
+  [VM102_04] V.M. 300x300x5         plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF
+  [VM102_05] V.M. 300x300x5         plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF
+  [VM102_06] V.M. 300x300x5         plano 102 nivel PENDIENTE_CORRELACION pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF
+  [VM103_01] V.M. 300x300x5         plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [VM103_02] V.M. 300x300x5         plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [VM103_03] V.M. 300x300x5         plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [VM103_04] V.M. 300x300x5         plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [VM103_05] V.M. 300x300x5         plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+  [VM103_06] V.M. 300x300x5         plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de trazado
+
+------------------------------------------------------------------------------------------
+3) VIGAS IRREGULARES / VAR / SEGUNDA ETAPA
+------------------------------------------------------------------------------------------
+  [V3045_01] V. 30/45                   plano 102 nivel PISO_2             pos~(20.97, -18.86)  PENDIENTE_COORDENADA   sin eje cercano verificable (dx=0.48, dy=2
+  [V3045_02] V. 30/45                   plano 102 nivel PISO_2             pos~(25.77, -18.86)  PENDIENTE_COORDENADA   sin eje cercano verificable (dx=4.23, dy=2
+  [V6030_01] V. 60-30/80-40             plano 102 nivel PISO_2             pos~---              PENDIENTE_COORDENADA   en vista de detalle inferior del PDF (y_pd
+  [V6030_02] V. 60-30/80-40             plano 102 nivel PISO_2             pos~---              PENDIENTE_COORDENADA   cantidad detectada en inventario sin posic
+  [V6030_03] V. 60-30/80-40             plano 102 nivel PISO_2             pos~---              PENDIENTE_COORDENADA   cantidad detectada en inventario sin posic
+  [V6030_04] V. 60-30/80-40             plano 102 nivel PISO_2             pos~---              PENDIENTE_COORDENADA   cantidad detectada en inventario sin posic
+  [V6030_05] V. 60-30/80-40             plano 102 nivel PISO_2             pos~---              PENDIENTE_COORDENADA   cantidad detectada en inventario sin posic
+  [VI103_01] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_02] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_03] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_04] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_05] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_06] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_07] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_08] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_09] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_10] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_11] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_12] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_13] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_14] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_15] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+  [VI103_16] +V.I. 20/90 (2ºETAPA)      plano 103 nivel PISO_4             pos~---              PENDIENTE_COORDENADA   cantidad por inventario sin posicion de tr
+
+------------------------------------------------------------------------------------------
+4) MUROS/VIGAS DEL PLANO 102 CON POSICION APROXIMADA EN EDIFICIO
+------------------------------------------------------------------------------------------
+(estas posiciones SE usan como referencia; no crean elasticBeamColumn)
+  M102_01      M.H.A. e= 20   pos=(0.755, -3.448) INFERIDO_RESPALDADO
+  M102_02      M.H.A. e= 20   pos=(4.129, -3.448) INFERIDO_RESPALDADO
+  M102_03      M.H.A. e= 20   pos=(4.074, -14.532) INFERIDO_RESPALDADO
+  M102_E25_01  M.H.A. e= 25   pos=(2.807, -13.997) INFERIDO_RESPALDADO
+  M102_E25_02  M.H.A. e= 25   pos=(6.113, -13.997) INFERIDO_RESPALDADO
+  M102_E30_01  M.H.A. e= 30   pos=(3.082, -5.677) INFERIDO_RESPALDADO
+  M102_E30_02  M.H.A. e= 30   pos=(5.837, -5.529) INFERIDO_RESPALDADO
+  PM102_03     P.M. 300x300x20 pos=(18.522, -15.483) INFERIDO_RESPALDADO
+
+------------------------------------------------------------------------------------------
+5) PENDIENTES GEOMÉTRICOS ABIERTOS
+------------------------------------------------------------------------------------------
+  [TRAMO_NUCLEO_E_F]
+    descripcion      : Extremos exactos de cada tramo de muro M.H.A. (e=20/25/30) del núcleo sobre los ejes auxiliares Eb/Ec y filas 1''/2/2a
+    que falta        : PARCIALMENTE RESUELTO (v2). En PISO_2 (plan 102) se cerraron 6 tramos del núcleo usando las dimensiones visuales CONFIRMADAS por el usuario (núcleo superior 3.95x2.25; núcleo inferior 1.58) ancladas a los rótulos M102_01/02/03 y e=25/e=30 (eje común X=4.485): longitudes [3.65, 2.25, 2.25] superior y [3.39, 1.58, 1.58] inferior (ver MUROS_CERRADOS_PISO_2). Queda PENDIENTE el núcleo de PISO_4 (plan 103): mismas posiciones de rótulo pero SIN dimensiones confirmadas para cerrar sus extremos.
+    metodo_resolucion: PISO_2 resuelto con cotas del usuario + capa de texto; PISO_4 requiere cotas del plano 103
+    ESTADO           : PARCIALMENTE_RESUELTO
+      + RESUELTO: 6 tramos M.H.A. PISO_2 (e=20 [2], e=30 [2], e=25 [2]) con longitud y orientación respaldadas; nodos geométricos registrados (MUROS_CERRADOS_PISO_2). Sin convención OpenSees para muros: quedan fuera del análisis estructural.
+  [Y_EXT_SUR_102]
+    descripcion      : Coordenada Y del sector que sobresale por debajo del eje 3 (una sola variable geométrica)
+    que falta        : RESUELTO. Cota del borde sur del PISO_2 del plano 102, confirmada por INSPECCION VISUAL del usuario sobre la imagen del plano (NO OCR, NO inferencia): Y_EXT_SUR_102 = -20.270 m = Y(3) - 4.12 m. Los elementos del sector (V.30/45 en Y≈-18.9, V.60/VAR, V.60-30/80-40, P.M. 300x300x20) quedan dentro de la banda Y(3) >= Y >= Y_EXT_SUR_102.
+    metodo_resolucion: RESUELTO (evidencia directa del usuario)
+    ESTADO           : RESUELTO_CONFIRMADO_VISUAL
+  [X_SUR_102]
+    descripcion      : Eje X de los salientes y de los pilares P.M. 300x300x20 del sector inferior
+    que falta        : PARCIALMENTE RESUELTO (v2): los LÍMITES X de los salientes del PISO_2 están CONFIRMADOS_POR_INSPECCION_VISUAL_USUARIO (SALIENTE 1: X 10.00-17.49, Y hasta -20.27; SALIENTE 2: X 20.00-30.00, Y hasta -18.61). Sigue PENDIENTE la posición exacta de los P.M. 300x300x20 del sector (solo vistas de detalle del plan 102) y los extremos de V.30/45, V.60/VAR y V.60-30/80-40 del sector interior.
+    metodo_resolucion: PENDIENTE_COORDENADA para P.M. y extremos de vigas
+    ESTADO           : PENDIENTE_COORDENADA
+  [SALIENTES_PISO_2]
+    descripcion      : Rangos X/Y de los salientes del PISO_2 bajo el eje 3
+    que falta        : RESUELTO (v2). Cotas CONFIRMADAS_POR_INSPECCION_VISUAL_USUARIO sobre el plano 102 (NO OCR, NO inferencia): SALIENTE_1 X=10.00-17.49 m, Y=-16.15 (eje 3) a -20.27 m (Y_EXT_SUR_102); SALIENTE_2 X=20.00-30.00 m, Y=-16.15 a -18.61 m. Los bordes norte coinciden con el eje 3 (vigas de borde V.60/80 en Y≈-16.11 según capa de texto). La CARGA de estas áreas nueva se registra como PENDIENTE (el plano 700 no la respalda aún).
+    metodo_resolucion: RESUELTO (evidencia directa del usuario, v2)
+    ESTADO           : RESUELTO_CONFIRMADO_VISUAL
+  [ASOC_2A]
+    descripcion      : Elementos alrededor del eje 2a (asociación tramo-ejes pendiente)
+    que falta        : El muro del núcleo M102_03/M103_03 se ubica en Y≈-14.53, próximo al eje 2a (-13.845); la asociación tramo-eje 2a queda documentada con esa posición (diferencia ~0.69 m, dentro del error de rótulo).
+    metodo_resolucion: Leer del plano 102 las intersecciones con eje 2a
+    ESTADO           : DOCUMENTADO_RESPALDADO
+  [CORRELACION_102_NIVEL]
+    descripcion      : Correlación del plano 102 con nivel estructural
+    que falta        : RESUELTO: la fuente única es data/inventario.CONVENCION_NIVELES. El rótulo del plano 102 leído por OCR = 'PLANTA CIELO PISO 2°' -> PISO_2 (z=3.91 m, convención R1). La vista parcial superior del mismo folio es un SUB-PLANO 'PLANTA CIELO PISO 3°' con NIVEL SUPERIOR LOSA = 7.87 m (PISO_3), origen de la retícula del bloque 1 del modelo en PISO_3.
+    metodo_resolucion: Verificar rótulo del plano contra elevaciones 300-303
+    ESTADO           : RESUELTO
+  [CORRELACION_103_NIVEL]
+    descripcion      : Correlación del plano 103 con nivel estructural
+    que falta        : RESUELTO: el rótulo del plano 103 leído por OCR = 'PLANTA CIELO PISO 4°', con NIVEL SUPERIOR LOSA ≈ 11.83 m (corresponde a PISO_4 según data/geometria.py niveles_z['PISO_4'] = 11.83).
+    metodo_resolucion: Verificar rótulo del plano contra elevaciones 300-303
+    ESTADO           : RESUELTO
+  [MAPEO_103]
+    descripcion      : Calibración del mapeo PDF→modelo para plan 103
+    que falta        : RESUELTO (INFERIDO_RESPALDADO): mapeo x_pdf = X*8.189 + 264.77, y_pdf = Y*7.652 + 392.58 (MAPEO_PDF['103']), calibrado con los muros del núcleo E-F comunes con el plan 102. Incertidumbre ±1.5-2 m (offset de rótulo).
+    metodo_resolucion: Identificar P.70x70 en plan 103 y correlacionar con ejes
+    ESTADO           : RESUELTO_INFERIDO
+  [M_H_A_E25_E30_POSICION]
+    descripcion      : Posiciones de M.H.A. e=25 y e=30 del núcleo.
+    que falta        : PARCIALMENTE RESUELTO (v2). CORRECCIÓN: las etiquetas e=25/e=30 SÍ están en la capa de texto de los planos 102 y 103 (conteo verificado: 2+2 en cada vista principal). En PISO_2 se cerraron con las dimensiones CONFIRMADAS del usuario: núcleo superior (3.95x2.25; laterales e=30 en X=2.660/6.310) y núcleo inferior (1.58; laterales e=25 en X=2.790/6.180) -> MUROS_CERRADOS_PISO_2 (6 tramos con longitud). Los mismos espesores del plan 103 (PISO_4) mantienen posición INFERIDO_RESPALDADO pero faltan sus dimensiones para cerrar.
+    metodo_resolucion: PISO_2 resuelto (v2); PISO_4 requiere cotas del plano 103
+    ESTADO           : PARCIALMENTE_RESUELTO
+  [V_SECTOR_SUR_POSICIONES]
+    descripcion      : Posiciones exactas de V.30/45, V.60-30/80-40, V.60/VAR del sector sur bajo eje 3
+    que falta        : PARCIALMENTE RESUELTO (v2): los salientes 1 y 2 quedaron CONFIRMADOS (SALIENTES_PISO_2) y sus bordes coinciden con el eje 3 (V.60/80 de borde en Y≈-16.11). V.30/45 (rótulos 208/209 en X≈21.0/25.8, Y≈-18.86) quedan 0.25 m al sur del borde -18.61 del saliente 2 (dentro del error ±0.2-0.4 m del mapeo): interpretación como vigas de borde del saliente 2 pendiente de cota explícita. V.60/VAR (X≈18.9/23.8, Y≈-18.2) y V.60-30/80-40, V.60/VAR restantes y P.M. 300x300x20 siguen sin par de nodos (extremos). V.60-30/80-40 y V.60/VAR en vistas de detalle (y_pdf < 419.8) no mapeables.
+    metodo_resolucion: Cotas de extremos de las vigas del sector o lectura del raster del plano 102
+    ESTADO           : PENDIENTE_COORDENADA
+  [V_FUNDACION_100]
+    descripcion      : Trazado de vigas de fundación V.F. (plan 100)
+    que falta        : Par de nodos inicial/final de cada V.F. La capa de texto del plan 100 identifica V.F. 20/220 (h≈155/60), 20/180 (h≈180), 20/160, 20/120 (h≈100/120), 15/225 y LOSA e=25, pero sin cotas de posición por viga. Sin OCR del plan 100 (render a alta resolución) el trazado sigue PENDIENTE.
+    metodo_resolucion: Leer plan 100 con mapeo calibrado
+    ESTADO           : PENDIENTE_COORDENADA
+
+------------------------------------------------------------------------------------------
+6) INVENTARIO CONSOLIDADO POR PLANO (cantidades)
+------------------------------------------------------------------------------------------
+  Plano 101 -> nivel PISO_1S:
+      muros_ha          : e=15:2, e=20:10, e=30:4
+      muros_interior    : e=20:1
+      columnas_ha       : P.70x70:25, P.30x30:3, P.20x50:1
+      pilares_metal     : P.M.I.:3
+      vigas_ha          : V.60/80:28, V.20/80:5, V.20/130:3
+      vigas_inferior    : V.I. 15/VAR:2
+      vigas_superior_inv: V.S.I. 20/150:1, V.S.I. 15/125:1
+      vigas_fundacion   : V.F. 15/100:1
+  Plano 102 -> nivel PISO_2:
+      muros_ha          : e=20:6, e=25:2, e=30:2
+      columnas_ha       : P.70x70:36
+      columnas_metal    : P.M. 300x300x20:3
+      pilares_metal     : P.M.I.:8
+      vigas_ha          : V.60/80:57, V.30/45:2, V.60/VAR:5
+      vigas_ha_variable : V.60-30/80-40:5
+      vigas_metal       : V.M. 300x300x5 (ARR):6
+  Plano 103 -> nivel PISO_4:
+      muros_ha          : e=20:3, e=25:2, e=30:2
+      columnas_ha       : P.70x70:18
+      columnas_metal    : P.M. 300x300x20:8
+      vigas_ha          : V.60/80:31
+      vigas_inferior    : +V.I. 20/90 (2ªETAPA):16
+      vigas_metal       : V.M. 300x300x5 (ARR):6
+  Plano 100 -> nivel FUNDACION_SUP:
+      losa              : LOSA e=25:1
+      vigas_fundacion   : V.F. 20/220:3, V.F. 20/180:11, V.F. 20/160:4, V.F. 20/120:10, V.F. 15/225:1
+
+==========================================================================================
+NOTAS DE METODO
+  - Niveles correlacionados por rótulo OCR del bloque de títulos:
+      * Plan 102 = PLANTA CIELO PISO 2° (folio además lleva sub-plano
+        PISO 3° con NIVEL SUPERIOR LOSA = 7.87 m = PISO_3).
+      * Plan 103 = PLANTA CIELO PISO 4° (NIVEL SUPERIOR LOSA ≈ 11.83 m
+        = PISO_4 según data/geometria.py niveles_z['PISO_4']).
+  - e=25 y e=30 de M.H.A. en plano 102: solo OCR visual (NO en capa de
+    texto); posicion exacta PENDIENTE_COORDENADA (TRAMO_NUCLEO_E_F).
+  - Nucleo E-F e=20: posicion X≈0.75/4.15 en filas Y≈-3.45/-14.53
+    confirmada de forma CRUZADA entre plan 102 (PISO_2) y plan 103
+    (PISO_4) -> INFERIDO_RESPALDADO. Longitud de tramos pendiente.
+  - Elementos con y_pdf < 440 en planos 101/102/103 estan en vistas de
+    detalle separadas del mismo PDF; NO se mapean al edificio.
+  - Los P.M./V.M./P.M.I. aparecen solo en vistas de detalle del 102; el
+    sector real bajo el eje 3 necesita Y_EXT_SUR_102 para ubicarse.
+  - No se crean nodos ni elasticBeamColumn: geometria preparada.
+==========================================================================================

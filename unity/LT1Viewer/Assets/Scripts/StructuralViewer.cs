@@ -1,0 +1,163 @@
+using UnityEngine;
+
+public class StructuralViewer : MonoBehaviour
+{
+    private ModelLoader loader;
+    private bool modelLoaded;
+    private string loadError;
+
+    void Start()
+    {
+        loader = GetComponent<ModelLoader>();
+        if (loader == null)
+            loader = gameObject.AddComponent<ModelLoader>();
+
+        if (!loader.LoadModel())
+        {
+            loadError = "No se pudo cargar modelo_lt1.json";
+            Debug.LogError($"[LT1Viewer] {loadError}");
+            return;
+        }
+
+        loader.BuildScene();
+        modelLoaded = true;
+
+        ConfigureCamera();
+        LogSummary();
+    }
+
+    void ConfigureCamera()
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return;
+
+        if (cam.GetComponent<OrbitCamera>() == null)
+            cam.gameObject.AddComponent<OrbitCamera>();
+
+        OrbitCamera orbit = cam.GetComponent<OrbitCamera>();
+        orbit.SetTarget(loader.modelCenter);
+
+        float maxExtent = 0f;
+        foreach (var node in loader.modelData.nodes)
+        {
+            Vector3 pos = ModelLoader.StructToUnity(node.x, node.y, node.z);
+            float dist = Vector3.Distance(pos, loader.modelCenter);
+            if (dist > maxExtent) maxExtent = dist;
+        }
+
+        orbit.distance = Mathf.Max(maxExtent * 1.5f, 5f);
+        orbit.minDistance = Mathf.Max(maxExtent * 0.05f, 0.1f);
+        orbit.maxDistance = Mathf.Max(maxExtent * 5f, 50f);
+    }
+
+    void LogSummary()
+    {
+        if (loader.modelData == null) return;
+
+        int totalElements = loader.modelData.beams.Length + loader.modelData.columns.Length
+                            + loader.modelData.walls.Length;
+
+        string summary = $"LT1 Viewer - {loader.modelData.nodes.Length} nodes, " +
+                         $"{totalElements} elements (90+108+6), " +
+                         $"{loader.modelData.constraint_links.Length} constraintLinks, " +
+                         $"{loader.modelData.supports.Length} supports, " +
+                         $"{loader.modelData.diaphragms.Length} diaphragms";
+
+        if (loader.modelData.metadata != null)
+        {
+            var m = loader.modelData.metadata;
+            if (m.material != null)
+                summary += $"\nMaterial: E={m.material.E_kPa} kPa, nu={m.material.nu}, G={m.material.G_kPa} kPa";
+            if (m.unidades != null)
+                summary += $"\nUnits: {m.unidades.longitud}/{m.unidades.fuerza}/{m.unidades.tension}";
+            if (!string.IsNullOrEmpty(m.estado_modelo))
+                summary += $"\nEstado: {m.estado_modelo}";
+        }
+
+        if (loader.modelData.analysis != null)
+        {
+            var a = loader.modelData.analysis;
+            summary += $"\nAnalisis: {a.estado}, P={a.P_aplicada_kN} kN";
+            if (a.reacciones != null)
+                summary += $", R_sum={a.suma_Rz_kN} kN";
+        }
+
+        Debug.Log(summary);
+    }
+
+    void OnGUI()
+    {
+        DrawInfoPanel();
+        DrawStatusBar();
+    }
+
+    void DrawInfoPanel()
+    {
+        float pw = 320f;
+        float ph = modelLoaded ? 170f : 60f;
+        float x = 230f;
+        float y = 10f;
+
+        GUI.Box(new Rect(x, y, pw, ph), "LT1 Viewer");
+
+        GUILayout.BeginArea(new Rect(x + 10, y + 25, pw - 20, ph - 30));
+
+        if (!modelLoaded)
+        {
+            if (!string.IsNullOrEmpty(loadError))
+            {
+                GUIStyle rich = new GUIStyle(GUI.skin.label) { richText = true };
+                GUILayout.Label($"<color=red>{loadError}</color>", rich);
+            }
+            else
+                GUILayout.Label("Cargando modelo...");
+        }
+        else
+        {
+            int totalElements = loader.modelData.beams.Length + loader.modelData.columns.Length
+                                + loader.modelData.walls.Length;
+            GUILayout.Label($"Nodos: {loader.modelData.nodes.Length}  |  " +
+                           $"Elementos: {totalElements}  |  " +
+                           $"Apoyos: {loader.modelData.supports.Length}  |  " +
+                           $"Diafragmas: {loader.modelData.diaphragms.Length}");
+            GUILayout.Label($"Muros equiv: {loader.modelData.walls.Length}  |  " +
+                           $"RigidLinks: {loader.modelData.constraint_links.Length}  |  " +
+                           $"Pendientes: {(loader.modelData.pending_geometry != null ? loader.modelData.pending_geometry.Length : 0)}");
+
+            if (loader.modelData.metadata != null && loader.modelData.metadata.material != null)
+            {
+                var mat = loader.modelData.metadata.material;
+                GUILayout.Label($"Material: E={FormatKpa(mat.E_kPa)}  nu={mat.nu}  G={FormatKpa(mat.G_kPa)}");
+            }
+
+            if (loader.modelData.analysis != null)
+            {
+                var a = loader.modelData.analysis;
+                GUILayout.Label($"Analisis: {a.estado}  |  P={a.P_aplicada_kN:F1} kN  |  err={a.err_rel:F4}");
+            }
+        }
+
+        GUILayout.EndArea();
+    }
+
+    void DrawStatusBar()
+    {
+        float h = 25f;
+        GUI.Box(new Rect(0, Screen.height - h, Screen.width, h), "");
+        GUIStyle centered = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 12
+        };
+        GUI.Label(new Rect(0, Screen.height - h, Screen.width, h),
+                  "LMB orbit | Scroll zoom | MMB pan | R reset | 1-8 toggles | N/E IDs | A axes | P pendientes",
+                  centered);
+    }
+
+    string FormatKpa(float kpa)
+    {
+        if (kpa >= 1e6f) return $"{kpa / 1e6f:F1} GPa";
+        if (kpa >= 1e3f) return $"{kpa / 1e3f:F0} MPa";
+        return $"{kpa:F0} kPa";
+    }
+}

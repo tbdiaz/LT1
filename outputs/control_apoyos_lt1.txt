@@ -1,0 +1,63 @@
+==============================================================================
+CONTROL APOYOS Y DIAFRAGMAS RIGIDOS · LT1
+==============================================================================
+Nivel de apoyo: FUNDACION_SUP = -7.97 m (nivel superior de fundacion)
+Evidencia:
+  - ELEVACION 302 (EJE 2): columna P.70x70 continua de PISO_1S (-4.01)
+    hasta FUNDACION_SUP (-7.97), cota 3.96 m; callouts P.70x70 en todo
+    el recorrido; fondo de fundacion -9.17 m (elev. 300/302).
+  - PLANTA FUNDACIONES (100): grilla de V.F. en el nivel superior.
+  - Tramo creado FUNDACION_SUP -> PISO_1S (18 columnas P.70x70).
+Restriccion de base (6 GDL): (Ux, Uy, Uz, Rx, Ry, Rz) = (1,1,1,1,1,1)
+  = empotramiento (no es condicion parcial arbitraria).
+------------------------------------------------------------------------------
+APOYOS
+ nodeTag nivel          ejeX ejeY  restriccion
+       1 FUNDACION_SUP     E    1  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+       3 FUNDACION_SUP     E    2  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+       5 FUNDACION_SUP     E    3  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     301 FUNDACION_SUP     F    1  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     303 FUNDACION_SUP     F    2  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     305 FUNDACION_SUP     F    3  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     401 FUNDACION_SUP     G    1  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     403 FUNDACION_SUP     G    2  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     405 FUNDACION_SUP     G    3  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     601 FUNDACION_SUP     H    1  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     603 FUNDACION_SUP     H    2  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     605 FUNDACION_SUP     H    3  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     901 FUNDACION_SUP     I    1  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     903 FUNDACION_SUP     I    2  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+     905 FUNDACION_SUP     I    3  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+    1001 FUNDACION_SUP    I'    1  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+    1003 FUNDACION_SUP    I'    2  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+    1005 FUNDACION_SUP    I'    3  (1, 1, 1, 1, 1, 1)   (6 GDL, empotrado)
+TOTAL APOYOS: 18
+
+------------------------------------------------------------------------------
+DIAFRAGMAS RIGIDOS
+Metodo: ops.rigidDiaphragm(perpDirn=3, masterTag, *slaveTags)
+Direccion perpendicular al diafragma: global Z (vertical).
+DOF compatibilizados (plano XY): Ux (1), Uy (2), Rz (6).
+DOF libres: Uz (3, vertical), Rx (4), Ry (5).
+
+  PISO_1  : nodo maestro 600001  slaves=18  centroide=(23.750, -8.350, -0.050)
+            slaves: 20001,20003,20005,20301,20303,20305,20401,20403,20405,20601,20603,20605,20901,20903,20905,21001,21003,21005
+  PISO_2  : nodo maestro 600002  slaves=18  centroide=(23.750, -8.350, 3.910)
+            slaves: 30001,30003,30005,30301,30303,30305,30401,30403,30405,30601,30603,30605,30901,30903,30905,31001,31003,31005
+  PISO_3  : nodo maestro 600003  slaves=18  centroide=(23.750, -8.350, 7.870)
+            slaves: 40001,40003,40005,40301,40303,40305,40401,40403,40405,40601,40603,40605,40901,40903,40905,41001,41003,41005
+  PISO_4  : nodo maestro 600004  slaves=18  centroide=(23.750, -8.350, 11.830)
+            slaves: 50001,50003,50005,50301,50303,50305,50401,50403,50405,50601,50603,50605,50901,50903,50905,51001,51003,51005
+
+NODOS DE MURO EQUIVALENTE: NO son slaves del diafragma.
+Cada nodo de muro (base/tope) se conecta a su nivel mediante la restriccion
+cinematica real ops.rigidLink('beam', MASTER_del_diafragma, nodo_muro)
+(12 links; NO son elementos, no aparecen en ops.getEleTags()).
+Justificacion empirica (repro minimo, constraints Transformation):
+  . slave directo del diafragma -> matriz singular (pivote en Uz/Rx/Ry);
+  . rigidLink al nodo ancla estructural -> NO propaga el plan (err 0.24/0.62 m);
+  . rigidLink al MASTER  ->  el nodo de muro sigue el plano con error 0.0.
+
+PISO_1S: SIN diafragma (nivel de transito de columnas sin vigas del
+esqueleto; V.S.I./losas del 1° sub. quedan pendientes de modelar).
+==============================================================================

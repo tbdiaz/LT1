@@ -1,0 +1,203 @@
+==========================================================================================
+CONTROL PREPARACION MODELO OPENSEES CLASE A · LT1
+Material H°A° DEFINIDO por INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO
+==========================================================================================
+ESTADOS
+  GEOMETRIA_CLASE_A = LISTA
+  APOYOS = LISTOS
+  DIAFRAGMAS = LISTOS
+  SECCIONES = LISTAS
+  GEOMTRANSF = LISTAS
+  TRIBUTACION = LISTA
+  CARGAS_GRAVEDAD = PREPARADAS Y APLICADAS
+  MATERIAL = LISTO
+  ELEMENTOS_OPENSEES = CREADOS (204)
+  RIGIDLINKS_MUROS = 12 (restricciones cinemáticas al master del diafragma)
+  ANALISIS = OK_COMPLETADO
+
+1) GEOMETRIA CLASE A
+     nodos estructurales: 120 | masters: 4 | ops.getNodeTags(): 124
+     columnas P.70x70 : 90 | vigas V.60/80 : 108 | muros equiv. : 6 | rigidLink de muro : 12 (ok: True) | elementTags : 204 (tags únicos: True)
+     problemas detectados en el pre-check: ninguno
+
+2) APOYOS (FUNDACION_SUP z=-7.97 m)
+     18 apoyos, 6 GDL empotrados cada uno.
+
+3) DIAFRAGMAS RIGIDOS
+     PISO_1: master 600001 · 18 slaves · z=-0.050
+     PISO_2: master 600002 · 18 slaves · z=3.910
+     PISO_3: master 600003 · 18 slaves · z=7.870
+     PISO_4: master 600004 · 18 slaves · z=11.830
+
+4) SECCIONES COMPUESTAS (A, J, Iy, Iz computables)
+     +V.I. 20/87 (2ºETAPA) A=0.1740 m2 · J=1.984077e-03 · Iy=1.097505e-02 · Iz=5.800000e-04
+     +V.I. 20/90 (2ºETAPA) A=0.1800 m2 · J=2.064068e-03 · Iy=1.215000e-02 · Iz=6.000000e-04
+     P. 20x50   A=0.1000 m2 · J=9.980433e-04 · Iy=2.083333e-03 · Iz=3.333333e-04
+     P. 30x30   A=0.0900 m2 · J=1.139400e-03 · Iy=6.750000e-04 · Iz=6.750000e-04
+     P. 70x70   A=0.4900 m2 · J=3.377407e-02 · Iy=2.000833e-02 · Iz=2.000833e-02
+     P.M. 300x300x20 A=0.0224 m2 · J=4.390400e-04 · Iy=2.941867e-04 · Iz=2.941867e-04
+     V. 20/130  A=0.2600 m2 · J=3.130682e-03 · Iy=3.661667e-02 · Iz=8.666667e-04
+     V. 20/80   A=0.1600 m2 · J=1.797442e-03 · Iy=8.533333e-03 · Iz=5.333333e-04
+     V. 30/45   A=0.1350 m2 · J=2.376733e-03 · Iy=2.278125e-03 · Iz=1.012500e-03
+     V. 40/60   A=0.2400 m2 · J=7.511651e-03 · Iy=7.200000e-03 · Iz=3.200000e-03
+     V. 60/80   A=0.4800 m2 · J=3.109477e-02 · Iy=2.560000e-02 · Iz=1.440000e-02
+     V.F. 15/100 A=0.1500 m2 · J=1.018692e-03 · Iy=1.250000e-02 · Iz=2.812500e-04
+     V.F. 15/225 A=0.3375 m2 · J=2.424938e-03 · Iy=1.423828e-01 · Iz=6.328125e-04
+     V.F. 20/120 A=0.2400 m2 · J=2.864021e-03 · Iy=2.880000e-02 · Iz=8.000000e-04
+     V.F. 20/160 A=0.3200 m2 · J=3.930673e-03 · Iy=6.826667e-02 · Iz=1.066667e-03
+     V.F. 20/180 A=0.3600 m2 · J=4.464004e-03 · Iy=9.720000e-02 · Iz=1.200000e-03
+     V.F. 20/220 A=0.4400 m2 · J=5.530669e-03 · Iy=1.774667e-01 · Iz=1.466667e-03
+     V.I. 15/169 A=0.2535 m2 · J=1.794938e-03 · Iy=6.033511e-02 · Iz=4.753125e-04
+     V.M. 300x300x5 (ARR) A=0.0059 m2 · J=1.283619e-04 · Iy=8.559917e-05 · Iz=8.559917e-05
+     V.S.I. 15/125 A=0.1875 m2 · J=1.299939e-03 · Iy=2.441406e-02 · Iz=3.515625e-04
+     V.S.I. 20/150 A=0.3000 m2 · J=3.664009e-03 · Iy=5.625000e-02 · Iz=1.000000e-03
+
+5) GEOMTRANSF (vecXZ)
+     columna_vertical tag 10001 · DEFINIDA
+     viga_x           tag 10002 · DEFINIDA
+     viga_y           tag 10003 · DEFINIDA
+
+6) TRIBUTACION (matriz 40 paños, cierre por-nivel)
+     PISO_1: P_losa=  5115.590 kN · bordes sin viga: ninguno
+     PISO_2: P_losa=  5030.272 kN · bordes sin viga: ninguno
+     PISO_3: P_losa=  4925.537 kN · bordes sin viga: ninguno
+     PISO_4: P_losa=  5111.226 kN · bordes sin viga: ninguno
+     TOTAL q_G (PISO_1..4): 20182.625 kN
+
+7) CARGAS GRAVEDAD PREPARADAS Y APLICADAS (108 vigas)
+     tag     nivel   orient   L[m]      A_trib[m2]  P[kN]      w[kN/m]
+      200028  PISO_1  X        10.000      24.697    184.072     18.407
+      200029  PISO_1  X        10.000      47.807    356.307     35.631
+      200030  PISO_1  X        10.000      23.109    172.235     17.224
+      200031  PISO_1  X        10.000      24.697    184.072     18.407
+      200032  PISO_1  X        10.000      47.807    356.307     35.631
+      200033  PISO_1  X        10.000      23.109    172.235     17.224
+      200034  PISO_1  X        10.000      24.697    184.072     18.407
+      200035  PISO_1  X        10.000      47.807    356.307     35.631
+      200036  PISO_1  X        10.000      23.109    172.235     17.224
+      200037  PISO_1  X        10.000      24.697    184.072     18.407
+      200038  PISO_1  X        10.000      47.807    356.307     35.631
+      200039  PISO_1  X        10.000      23.109    172.235     17.224
+      200040  PISO_1  X         2.500       1.562     11.645      4.658
+      200041  PISO_1  X         2.500       3.125     23.291      9.316
+      200042  PISO_1  X         2.500       1.562     11.645      4.658
+      200043  PISO_1  Y         8.900      19.803    147.589     16.583
+      200044  PISO_1  Y         8.900      39.605    295.178     33.166
+      200045  PISO_1  Y         8.900      39.605    295.178     33.166
+      200046  PISO_1  Y         8.900      39.605    295.178     33.166
+      200047  PISO_1  Y         8.900      29.365    218.859     24.591
+      200048  PISO_1  Y         8.900       9.562     71.270      8.008
+      200049  PISO_1  Y         7.250      13.141     97.938     13.509
+      200050  PISO_1  Y         7.250      26.281    195.876     27.017
+      200051  PISO_1  Y         7.250      26.281    195.876     27.017
+      200052  PISO_1  Y         7.250      26.281    195.876     27.017
+      200053  PISO_1  Y         7.250      20.641    153.836     21.219
+      200054  PISO_1  Y         7.250       7.500     55.898      7.710
+      200055  PISO_2  X        10.000      24.697    184.072     18.407
+      200056  PISO_2  X        10.000      47.807    356.307     35.631
+      200057  PISO_2  X        10.000      23.109    172.235     17.224
+      200058  PISO_2  X        10.000      24.697    184.072     18.407
+      200059  PISO_2  X        10.000      47.807    356.307     35.631
+      200060  PISO_2  X        10.000      23.109    172.235     17.224
+      200061  PISO_2  X        10.000      24.697    184.072     18.407
+      200062  PISO_2  X        10.000      47.807    342.710     34.271
+      200063  PISO_2  X        10.000      23.109    158.638     15.864
+      200064  PISO_2  X        10.000      24.697    184.072     18.407
+      200065  PISO_2  X        10.000      47.807    342.710     34.271
+      200066  PISO_2  X        10.000      23.109    158.638     15.864
+      200067  PISO_2  X         2.500       1.562     11.645      4.658
+      200068  PISO_2  X         2.500       3.125     23.291      9.316
+      200069  PISO_2  X         2.500       1.562     11.645      4.658
+      200070  PISO_2  Y         8.900      19.803    147.589     16.583
+      200071  PISO_2  Y         8.900      39.605    295.178     33.166
+      200072  PISO_2  Y         8.900      39.605    295.178     33.166
+      200073  PISO_2  Y         8.900      39.605    295.178     33.166
+      200074  PISO_2  Y         8.900      29.365    218.859     24.591
+      200075  PISO_2  Y         8.900       9.562     71.270      8.008
+      200076  PISO_2  Y         7.250      13.141     97.938     13.509
+      200077  PISO_2  Y         7.250      26.281    195.876     27.017
+      200078  PISO_2  Y         7.250      26.281    188.144     25.951
+      200079  PISO_2  Y         7.250      26.281    180.412     24.884
+      200080  PISO_2  Y         7.250      20.641    146.104     20.152
+      200081  PISO_2  Y         7.250       7.500     55.898      7.710
+      200001  PISO_3  X        10.000      24.697    169.540     16.954
+      200002  PISO_3  X        10.000      24.697    169.540     16.954
+      200003  PISO_3  X        10.000      24.697    184.072     18.407
+      200004  PISO_3  X        10.000      24.697    184.072     18.407
+      200005  PISO_3  X         2.500       1.562     11.645      4.658
+      200006  PISO_3  X        10.000      47.807    341.775     34.178
+      200007  PISO_3  X        10.000      47.807    341.775     34.178
+      200008  PISO_3  X        10.000      47.807    342.710     34.271
+      200009  PISO_3  X        10.000      47.807    342.710     34.271
+      200010  PISO_3  X         2.500       3.125     23.291      9.316
+      200011  PISO_3  X        10.000      23.109    172.235     17.224
+      200012  PISO_3  X        10.000      23.109    172.235     17.224
+      200013  PISO_3  X        10.000      23.109    158.638     15.864
+      200014  PISO_3  X        10.000      23.109    158.638     15.864
+      200015  PISO_3  X         2.500       1.562     11.645      4.658
+      200016  PISO_3  Y         8.900      19.803    135.937     15.274
+      200017  PISO_3  Y         7.250      13.141     97.938     13.509
+      200018  PISO_3  Y         8.900      39.605    271.875     30.548
+      200019  PISO_3  Y         7.250      26.281    195.876     27.017
+      200020  PISO_3  Y         8.900      39.605    283.526     31.857
+      200021  PISO_3  Y         7.250      26.281    188.144     25.951
+      200022  PISO_3  Y         8.900      39.605    295.178     33.166
+      200023  PISO_3  Y         7.250      26.281    180.412     24.884
+      200024  PISO_3  Y         8.900      29.365    218.859     24.591
+      200025  PISO_3  Y         7.250      20.641    146.104     20.152
+      200026  PISO_3  Y         8.900       9.562     71.270      8.008
+      200027  PISO_3  Y         7.250       7.500     55.898      7.710
+      200082  PISO_4  X        10.000      24.697    205.870     20.587
+      200083  PISO_4  X        10.000      47.807    378.105     37.811
+      200084  PISO_4  X        10.000      23.109    172.235     17.224
+      200085  PISO_4  X        10.000      24.697    205.870     20.587
+      200086  PISO_4  X        10.000      47.807    378.105     37.811
+      200087  PISO_4  X        10.000      23.109    172.235     17.224
+      200088  PISO_4  X        10.000      24.697    169.540     16.954
+      200089  PISO_4  X        10.000      47.807    341.775     34.178
+      200090  PISO_4  X        10.000      23.109    172.235     17.224
+      200091  PISO_4  X        10.000      24.697    169.540     16.954
+      200092  PISO_4  X        10.000      47.807    341.775     34.178
+      200093  PISO_4  X        10.000      23.109    172.235     17.224
+      200094  PISO_4  X         2.500       1.562      7.661      3.065
+      200095  PISO_4  X         2.500       3.125     19.307      7.723
+      200096  PISO_4  X         2.500       1.562     11.645      4.658
+      200097  PISO_4  Y         8.900      19.803    165.067     18.547
+      200098  PISO_4  Y         8.900      39.605    330.134     37.094
+      200099  PISO_4  Y         8.900      39.605    301.004     33.821
+      200100  PISO_4  Y         8.900      39.605    271.875     30.548
+      200101  PISO_4  Y         8.900      29.365    182.825     20.542
+      200102  PISO_4  Y         8.900       9.562     46.888      5.268
+      200103  PISO_4  Y         7.250      13.141     97.938     13.509
+      200104  PISO_4  Y         7.250      26.281    195.876     27.017
+      200105  PISO_4  Y         7.250      26.281    195.876     27.017
+      200106  PISO_4  Y         7.250      26.281    195.876     27.017
+      200107  PISO_4  Y         7.250      20.641    153.836     21.219
+      200108  PISO_4  Y         7.250       7.500     55.898      7.710
+     Σ cargas preparadas: 20182.625 kN · 108 registros · estado PREPARADA
+     NOTA: SC (sobrecarga), cargas puntuales y lineales especiales quedan
+     registradas en data/cargas.py y NO forman parte de q_G.
+
+8) ANALISIS DE GRAVEDAD (ejecutado)
+     estado: OK_COMPLETADO
+     pipeline: timeSeries('Linear',1) + pattern('Plain',1,1) + eleLoad beamUniform(Wy=0, Wz=-w)
+     constraints('Transformation') · numberer('RCM') · system('BandGeneral')
+     test('NormDispIncr', 1e-6, 30, 2) · algorithm('Linear') · integrator('LoadControl', 1.0)
+     analysis('Static') · analyze(1) · loadConst('-time', 0)
+
+9) VERIFICACIONES POST-ANALISIS
+     P aplicada = 20182.6251 kN
+     Σ Rz = 20182.6251 kN · err abs = 1.818989e-11 · err rel = 9.013e-16
+     desplazamiento máximo = 2.729000e-03 m (nodo 50303) · max|Uz| = 2.700438e-03 m
+     NaN/Inf: ninguno
+     diafragmas compatibles: True
+
+MATERIAL (INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO)
+     clase de hormigón (G25 = clase/resistencia, NO módulo de corte G): G25
+     E_kPa = 25000000.0 · nu = 0.2 · G_kPa = 10416667.0
+     verificación G: G = E/[2(1+nu)] = 25e6/[2(1.20)] = 10 416 666.67 kPa (registrado 10 416 667 por redondeo documentado)
+     1 kN/m² = 1 kPa · G25 es la CLASE/resistencia del hormigón; NO es el módulo de corte G (coincidencia de notación).
+     fuente: E=25000000 kPa, nu=0.20 y G=10416667 kPa: INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO (G25 = clase/resistencia del hormigón, NO módulo de corte G). NO atribuir a planos ni a documentos del proyecto.
+     Con E y G definidos, el run creó los 204 elasticBeamColumn (90 columnas + 108 vigas + 6 muros equivalentes), los 12 rigidLink de muro al master del diafragma y ejecutó el análisis
+     de gravedad. Estado: MATERIAL LISTO · ELEMENTOS CREADOS · ANALISIS EJECUTADO.
+==========================================================================================

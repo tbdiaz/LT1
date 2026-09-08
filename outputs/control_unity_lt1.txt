@@ -1,0 +1,76 @@
+==============================================================================
+CONTROL ETAPA UNITY LT1 - VALIDACION ESTATICA DEL JSON
+==============================================================================
+JSON : outputs/unity/modelo_lt1.json (parseado OK)
+
+RESULTADO: PASA TODAS LAS VERIFICACIONES ESTATICAS
+
+  verificaciones: 33/33 OK
+  [OK ] 124 nodos totales  (total=124 (estructural=120, master=4))
+  [OK ] 120 estructurales / 4 masters  (estructurales=120, masters=4)
+  [OK ] 108 vigas  (108)
+  [OK ] 90 columnas  (90)
+  [OK ] 6 muros equivalentes  (6)
+  [OK ] 12 rigidLink (constraint)  (12)
+  [OK ] 18 apoyos  (18)
+  [OK ] 4 diafragmas  (4)
+  [OK ] 204 elasticBeamColumn  (beams+columns+walls = 108+90+6=204)
+  [OK ] rigidLink NO en elasticBeamColumn  (constraint_links es array independiente, sin campo elasticBeamColumn)
+  [OK ] tags unicos en nodes  (124 tags / 124 unicos)
+  [OK ] tags unicos en beams  (108 tags / 108 unicos)
+  [OK ] tags unicos en columns  (90 tags / 90 unicos)
+  [OK ] tags unicos en walls  (6 tags / 6 unicos)
+  [OK ] tags unicos en supports  (18 tags / 18 unicos)
+  [OK ] elementTags unicos globales  (204 / 204)
+  [OK ] coordenadas finitas (124 nodos)
+  [OK ] pending_geometry presente  (8 items)
+  [OK ] pendiente listado: nucleo_piso_4
+  [OK ] pendiente listado: muros_subterraneo_plan101
+  [OK ] pendiente listado: V.30/45
+  [OK ] pendiente listado: V.60/VAR
+  [OK ] pendiente listado: V.60-30/80-40
+  [OK ] pendiente listado: P.M.
+  [OK ] pendiente listado: V.M.
+  [OK ] pendiente listado: carga_salientes
+  [OK ] analisis OK_COMPLETADO  (OK_COMPLETADO)
+  [OK ] P_gravedad ~ 20182.625 kN  (P=20182.62506575)
+  [OK ] SumaRz ~ 20182.625 kN  (SumaRz=20182.625065750017)
+  [OK ] error relativo ~ 9.01e-16  (err_rel=9.01265022572653e-16)
+  [OK ] max_desplazamiento finito  (maxU=0.002728999686258711)
+  [OK ] reacciones 18 / desplazamientos 124  (reac=18, desp=124)
+  [OK ] estado MODELO_ANALIZABLE...  (MODELO_ANALIZABLE_CON_GEOMETRIA_RESPALDADA_ACTUAL)
+==============================================================================
+==============================================================================
+CONTROL ETAPA UNITY LT1 - PARTE UNITY-SIDE (registro de esta sesion)
+==============================================================================
+Fecha de registro : 2026-09-07 (sesion P1L2 UNITY)
+Estado Unity Editor: NO EJECUTABLE EN ESTE EQUIPO
+  - Unico editor instalado: 2022.3.76f1 (Extended LTS). Exige licencia
+    Unity Industry/Enterprise; el batchmode termina con EXIT=198.
+  - Proyecto apuntado a 2022.3.20f1 (LTS normal, compatible con licencia
+    Personal). Al abrirse en un editor con licencia valida Unity lo
+    actualizara a la revision instalada.
+
+Compilacion C# (validada fuera de Unity)
+  - Metodo     : Roslyn (csc) del editor 2022.3.76f1 + NetCoreRuntime,
+                 referenciando UnityEngine.UnityModules + UnityEditor +
+                 NetStandard 2.1 ref. Se compilo todo Assets/Scripts + Assets/Editor.
+  - Resultado  : 0 errores CS (EXIT=0), ensamblado de 40960 bytes generado.
+
+Escena LT1Viewer.unity
+  - Estado     : NO CREADA (requiere abrir el proyecto en Unity Editor).
+  - Generador  : Assets/Editor/LT1SceneBuilder.cs -> menu "LT1 > Build LT1Viewer Scene".
+                 Alternativa manual (60s): Scene root -> empty GO "LT1Viewer"
+                 + componentes (ModelLoader, StructuralViewer, SelectionController,
+                 VisibilityController, OrbitCamera, IdLabelController,
+                 LocalAxesController, TributaryAreaInspector) + Main Camera
+                 (OrbitCamera, tag MainCamera) + Directional Light.
+
+Instrucciones manuales para el usuario
+  1. Abrir unity/LT1Viewer con un Unity Editor 2022.3 LTS con licencia valida.
+  2. Esperar import y compilacion (Console sin errores: los .cs compilan ya 0/0).
+  3. Menu "LT1 > Build LT1Viewer Scene" para crear Assets/Scenes/LT1Viewer.unity
+     (o crear la escena manualmente como se indica arriba).
+  4. Abrir la escena, presionar Play. Toggles 1-8, P = panel de pendientes.
+     Verificacion visual de nodos/vigas/columnas/muros/rigidLinks/diafragmas.
+==============================================================================

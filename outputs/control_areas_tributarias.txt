@@ -1,0 +1,228 @@
+================================================================================
+CONTROL AREAS TRIBUTARIAS Y CARGAS DE LOSA · LT1
+  (q_G por-paño celda por celda, NO uniforme)
+================================================================================
+Fuente: plano 700 celda por celda (tiles OCR Vision, Matrix 5x5).
+  PP.LOSA = 500 kgf/m² = 4.903 kPa (e=0.20 m, gamma=2500 kgf/m³)
+  q_G = PP.LOSA + PM.ADIC (variable por zona/paño)
+  SC se registra aparte; NO incluida en q_G.
+Resolución e: 0.20 m (pisos) ≠ 0.25 m (fundaciones, plan 100 hoja fund.).
+Método tributario: bisectrices (Voronoi de vigas) sobre paños regulares.
+--------------------------------------------------------------------------------
+
+NIVEL PISO_1  (z=-0.05 m)
+  paños: 10 | A_losa total: 686.375 m2
+  P_losa_total = Σ(q_G_paño × A_paño) = 5115.590 kN
+  P_vigas      = 5115.590 kN
+  error relativo conservacion: 0.000e+00 (OK)
+  vigas con carga: 27 | sin carga: 0
+  --- Paños por nivel ---
+  paño           area[m2]  qG[kPa]  SC[kPa] fuente
+  PISO_1_P11        89.00   7.4531   0.0000 ZONAL
+  PISO_1_P12        72.50   7.4531   0.0000 ZONAL
+  PISO_1_P21        89.00   7.4531   0.0000 ZONAL
+  PISO_1_P22        72.50   7.4531   0.0000 ZONAL
+  PISO_1_P31        89.00   7.4531   0.0000 ZONAL
+  PISO_1_P32        72.50   7.4531   0.0000 ZONAL
+  PISO_1_P41        89.00   7.4531   0.0000 ZONAL
+  PISO_1_P42        72.50   7.4531   0.0000 ZONAL
+  PISO_1_P51        22.25   7.4531   0.0000 ZONAL
+  PISO_1_P52        18.12   7.4531   0.0000 ZONAL
+  --- Vigas por nivel ---
+       tag orient       L[m] A_trib[m2]      P[kN]    w[kN/m]          borde
+    200028 X          10.000     24.697    184.072     18.407  PISO_1_P11:Y0
+    200029 X          10.000     47.807    356.307     35.631  PISO_1_P11:Y1,PISO_1_P12:Y0
+    200030 X          10.000     23.109    172.235     17.224  PISO_1_P12:Y1
+    200031 X          10.000     24.697    184.072     18.407  PISO_1_P21:Y0
+    200032 X          10.000     47.807    356.307     35.631  PISO_1_P21:Y1,PISO_1_P22:Y0
+    200033 X          10.000     23.109    172.235     17.224  PISO_1_P22:Y1
+    200034 X          10.000     24.697    184.072     18.407  PISO_1_P31:Y0
+    200035 X          10.000     47.807    356.307     35.631  PISO_1_P31:Y1,PISO_1_P32:Y0
+    200036 X          10.000     23.109    172.235     17.224  PISO_1_P32:Y1
+    200037 X          10.000     24.697    184.072     18.407  PISO_1_P41:Y0
+    200038 X          10.000     47.807    356.307     35.631  PISO_1_P41:Y1,PISO_1_P42:Y0
+    200039 X          10.000     23.109    172.235     17.224  PISO_1_P42:Y1
+    200040 X           2.500      1.562     11.645      4.658  PISO_1_P51:Y0
+    200041 X           2.500      3.125     23.291      9.316  PISO_1_P51:Y1,PISO_1_P52:Y0
+    200042 X           2.500      1.562     11.645      4.658  PISO_1_P52:Y1
+    200043 Y           8.900     19.803    147.589     16.583  PISO_1_P11:X0
+    200044 Y           8.900     39.605    295.178     33.166  PISO_1_P11:X1,PISO_1_P21:X0
+    200045 Y           8.900     39.605    295.178     33.166  PISO_1_P21:X1,PISO_1_P31:X0
+    200046 Y           8.900     39.605    295.178     33.166  PISO_1_P31:X1,PISO_1_P41:X0
+    200047 Y           8.900     29.365    218.859     24.591  PISO_1_P41:X1,PISO_1_P51:X0
+    200048 Y           8.900      9.562     71.270      8.008  PISO_1_P51:X1
+    200049 Y           7.250     13.141     97.938     13.509  PISO_1_P12:X0
+    200050 Y           7.250     26.281    195.876     27.017  PISO_1_P12:X1,PISO_1_P22:X0
+    200051 Y           7.250     26.281    195.876     27.017  PISO_1_P22:X1,PISO_1_P32:X0
+    200052 Y           7.250     26.281    195.876     27.017  PISO_1_P32:X1,PISO_1_P42:X0
+    200053 Y           7.250     20.641    153.836     21.219  PISO_1_P42:X1,PISO_1_P52:X0
+    200054 Y           7.250      7.500     55.898      7.710  PISO_1_P52:X1
+  SC zonal: [0.0]
+
+NIVEL PISO_2  (z=3.91 m)
+  paños: 10 | A_losa total: 686.375 m2
+  P_losa_total = Σ(q_G_paño × A_paño) = 5030.272 kN
+  P_vigas      = 5030.272 kN
+  error relativo conservacion: 0.000e+00 (OK)
+  vigas con carga: 27 | sin carga: 0
+  --- Paños por nivel ---
+  paño           area[m2]  qG[kPa]  SC[kPa] fuente
+  PISO_2_P11        89.00   7.4531   0.0000 ZONAL
+  PISO_2_P12        72.50   7.4531   0.0000 ZONAL
+  PISO_2_P21        89.00   7.4531   0.0000 ZONAL
+  PISO_2_P22        72.50   7.4531   0.0000 ZONAL
+  PISO_2_P31        89.00   7.4531   0.0000 ZONAL
+  PISO_2_P32        72.50   6.8647   0.0000 ZONAL
+  PISO_2_P41        89.00   7.4531   0.0000 ZONAL
+  PISO_2_P42        72.50   6.8647   0.0000 ZONAL
+  PISO_2_P51        22.25   7.4531   0.0000 ZONAL
+  PISO_2_P52        18.12   7.4531   0.0000 ZONAL
+  --- Vigas por nivel ---
+       tag orient       L[m] A_trib[m2]      P[kN]    w[kN/m]          borde
+    200055 X          10.000     24.697    184.072     18.407  PISO_2_P11:Y0
+    200056 X          10.000     47.807    356.307     35.631  PISO_2_P11:Y1,PISO_2_P12:Y0
+    200057 X          10.000     23.109    172.235     17.224  PISO_2_P12:Y1
+    200058 X          10.000     24.697    184.072     18.407  PISO_2_P21:Y0
+    200059 X          10.000     47.807    356.307     35.631  PISO_2_P21:Y1,PISO_2_P22:Y0
+    200060 X          10.000     23.109    172.235     17.224  PISO_2_P22:Y1
+    200061 X          10.000     24.697    184.072     18.407  PISO_2_P31:Y0
+    200062 X          10.000     47.807    342.710     34.271  PISO_2_P31:Y1,PISO_2_P32:Y0
+    200063 X          10.000     23.109    158.638     15.864  PISO_2_P32:Y1
+    200064 X          10.000     24.697    184.072     18.407  PISO_2_P41:Y0
+    200065 X          10.000     47.807    342.710     34.271  PISO_2_P41:Y1,PISO_2_P42:Y0
+    200066 X          10.000     23.109    158.638     15.864  PISO_2_P42:Y1
+    200067 X           2.500      1.562     11.645      4.658  PISO_2_P51:Y0
+    200068 X           2.500      3.125     23.291      9.316  PISO_2_P51:Y1,PISO_2_P52:Y0
+    200069 X           2.500      1.562     11.645      4.658  PISO_2_P52:Y1
+    200070 Y           8.900     19.803    147.589     16.583  PISO_2_P11:X0
+    200071 Y           8.900     39.605    295.178     33.166  PISO_2_P11:X1,PISO_2_P21:X0
+    200072 Y           8.900     39.605    295.178     33.166  PISO_2_P21:X1,PISO_2_P31:X0
+    200073 Y           8.900     39.605    295.178     33.166  PISO_2_P31:X1,PISO_2_P41:X0
+    200074 Y           8.900     29.365    218.859     24.591  PISO_2_P41:X1,PISO_2_P51:X0
+    200075 Y           8.900      9.562     71.270      8.008  PISO_2_P51:X1
+    200076 Y           7.250     13.141     97.938     13.509  PISO_2_P12:X0
+    200077 Y           7.250     26.281    195.876     27.017  PISO_2_P12:X1,PISO_2_P22:X0
+    200078 Y           7.250     26.281    188.144     25.951  PISO_2_P22:X1,PISO_2_P32:X0
+    200079 Y           7.250     26.281    180.412     24.884  PISO_2_P32:X1,PISO_2_P42:X0
+    200080 Y           7.250     20.641    146.104     20.152  PISO_2_P42:X1,PISO_2_P52:X0
+    200081 Y           7.250      7.500     55.898      7.710  PISO_2_P52:X1
+  SC zonal: [0.0]
+
+NIVEL PISO_3  (z=7.87 m)
+  paños: 10 | A_losa total: 686.375 m2
+  P_losa_total = Σ(q_G_paño × A_paño) = 4925.537 kN
+  P_vigas      = 4925.537 kN
+  error relativo conservacion: 1.846e-16 (OK)
+  vigas con carga: 27 | sin carga: 0
+  --- Paños por nivel ---
+  paño           area[m2]  qG[kPa]  SC[kPa] fuente
+  PISO_3_P11        89.00   6.8647   0.0000 ZONAL
+  PISO_3_P12        72.50   7.4531   0.0000 ZONAL
+  PISO_3_P21        89.00   6.8647   0.0000 ZONAL
+  PISO_3_P22        72.50   7.4531   0.0000 ZONAL
+  PISO_3_P31        89.00   7.4531   0.0000 ZONAL
+  PISO_3_P32        72.50   6.8647   0.0000 ZONAL
+  PISO_3_P41        89.00   7.4531   0.0000 ZONAL
+  PISO_3_P42        72.50   6.8647   0.0000 ZONAL
+  PISO_3_P51        22.25   7.4531   0.0000 ZONAL
+  PISO_3_P52        18.12   7.4531   0.0000 ZONAL
+  --- Vigas por nivel ---
+       tag orient       L[m] A_trib[m2]      P[kN]    w[kN/m]          borde
+    200001 X          10.000     24.697    169.540     16.954  PISO_3_P11:Y0
+    200002 X          10.000     24.697    169.540     16.954  PISO_3_P21:Y0
+    200003 X          10.000     24.697    184.072     18.407  PISO_3_P31:Y0
+    200004 X          10.000     24.697    184.072     18.407  PISO_3_P41:Y0
+    200005 X           2.500      1.562     11.645      4.658  PISO_3_P51:Y0
+    200006 X          10.000     47.807    341.775     34.178  PISO_3_P11:Y1,PISO_3_P12:Y0
+    200007 X          10.000     47.807    341.775     34.178  PISO_3_P21:Y1,PISO_3_P22:Y0
+    200008 X          10.000     47.807    342.710     34.271  PISO_3_P31:Y1,PISO_3_P32:Y0
+    200009 X          10.000     47.807    342.710     34.271  PISO_3_P41:Y1,PISO_3_P42:Y0
+    200010 X           2.500      3.125     23.291      9.316  PISO_3_P51:Y1,PISO_3_P52:Y0
+    200011 X          10.000     23.109    172.235     17.224  PISO_3_P12:Y1
+    200012 X          10.000     23.109    172.235     17.224  PISO_3_P22:Y1
+    200013 X          10.000     23.109    158.638     15.864  PISO_3_P32:Y1
+    200014 X          10.000     23.109    158.638     15.864  PISO_3_P42:Y1
+    200015 X           2.500      1.562     11.645      4.658  PISO_3_P52:Y1
+    200016 Y           8.900     19.803    135.937     15.274  PISO_3_P11:X0
+    200017 Y           7.250     13.141     97.938     13.509  PISO_3_P12:X0
+    200018 Y           8.900     39.605    271.875     30.548  PISO_3_P11:X1,PISO_3_P21:X0
+    200019 Y           7.250     26.281    195.876     27.017  PISO_3_P12:X1,PISO_3_P22:X0
+    200020 Y           8.900     39.605    283.526     31.857  PISO_3_P21:X1,PISO_3_P31:X0
+    200021 Y           7.250     26.281    188.144     25.951  PISO_3_P22:X1,PISO_3_P32:X0
+    200022 Y           8.900     39.605    295.178     33.166  PISO_3_P31:X1,PISO_3_P41:X0
+    200023 Y           7.250     26.281    180.412     24.884  PISO_3_P32:X1,PISO_3_P42:X0
+    200024 Y           8.900     29.365    218.859     24.591  PISO_3_P41:X1,PISO_3_P51:X0
+    200025 Y           7.250     20.641    146.104     20.152  PISO_3_P42:X1,PISO_3_P52:X0
+    200026 Y           8.900      9.562     71.270      8.008  PISO_3_P51:X1
+    200027 Y           7.250      7.500     55.898      7.710  PISO_3_P52:X1
+  SC zonal: [0.0]
+
+NIVEL PISO_4  (z=11.83 m)
+  paños: 10 | A_losa total: 686.375 m2
+  P_losa_total = Σ(q_G_paño × A_paño) = 5111.226 kN
+  P_vigas      = 5111.226 kN
+  error relativo conservacion: 0.000e+00 (OK)
+  vigas con carga: 27 | sin carga: 0
+  --- Paños por nivel ---
+  paño           area[m2]  qG[kPa]  SC[kPa] fuente
+  PISO_4_P11        89.00   8.3357   0.0000 ZONAL
+  PISO_4_P12        72.50   7.4531   0.0000 ZONAL
+  PISO_4_P21        89.00   8.3357   0.0000 ZONAL
+  PISO_4_P22        72.50   7.4531   0.0000 ZONAL
+  PISO_4_P31        89.00   6.8647   0.0000 ZONAL
+  PISO_4_P32        72.50   7.4531   0.0000 ZONAL
+  PISO_4_P41        89.00   6.8647   0.0000 ZONAL
+  PISO_4_P42        72.50   7.4531   0.0000 ZONAL
+  PISO_4_P51        22.25   4.9033   0.0000 ZONAL
+  PISO_4_P52        18.12   7.4531   0.0000 ZONAL
+  --- Vigas por nivel ---
+       tag orient       L[m] A_trib[m2]      P[kN]    w[kN/m]          borde
+    200082 X          10.000     24.697    205.870     20.587  PISO_4_P11:Y0
+    200083 X          10.000     47.807    378.105     37.811  PISO_4_P11:Y1,PISO_4_P12:Y0
+    200084 X          10.000     23.109    172.235     17.224  PISO_4_P12:Y1
+    200085 X          10.000     24.697    205.870     20.587  PISO_4_P21:Y0
+    200086 X          10.000     47.807    378.105     37.811  PISO_4_P21:Y1,PISO_4_P22:Y0
+    200087 X          10.000     23.109    172.235     17.224  PISO_4_P22:Y1
+    200088 X          10.000     24.697    169.540     16.954  PISO_4_P31:Y0
+    200089 X          10.000     47.807    341.775     34.178  PISO_4_P31:Y1,PISO_4_P32:Y0
+    200090 X          10.000     23.109    172.235     17.224  PISO_4_P32:Y1
+    200091 X          10.000     24.697    169.540     16.954  PISO_4_P41:Y0
+    200092 X          10.000     47.807    341.775     34.178  PISO_4_P41:Y1,PISO_4_P42:Y0
+    200093 X          10.000     23.109    172.235     17.224  PISO_4_P42:Y1
+    200094 X           2.500      1.562      7.661      3.065  PISO_4_P51:Y0
+    200095 X           2.500      3.125     19.307      7.723  PISO_4_P51:Y1,PISO_4_P52:Y0
+    200096 X           2.500      1.562     11.645      4.658  PISO_4_P52:Y1
+    200097 Y           8.900     19.803    165.067     18.547  PISO_4_P11:X0
+    200098 Y           8.900     39.605    330.134     37.094  PISO_4_P11:X1,PISO_4_P21:X0
+    200099 Y           8.900     39.605    301.004     33.821  PISO_4_P21:X1,PISO_4_P31:X0
+    200100 Y           8.900     39.605    271.875     30.548  PISO_4_P31:X1,PISO_4_P41:X0
+    200101 Y           8.900     29.365    182.825     20.542  PISO_4_P41:X1,PISO_4_P51:X0
+    200102 Y           8.900      9.562     46.888      5.268  PISO_4_P51:X1
+    200103 Y           7.250     13.141     97.938     13.509  PISO_4_P12:X0
+    200104 Y           7.250     26.281    195.876     27.017  PISO_4_P12:X1,PISO_4_P22:X0
+    200105 Y           7.250     26.281    195.876     27.017  PISO_4_P22:X1,PISO_4_P32:X0
+    200106 Y           7.250     26.281    195.876     27.017  PISO_4_P32:X1,PISO_4_P42:X0
+    200107 Y           7.250     20.641    153.836     21.219  PISO_4_P42:X1,PISO_4_P52:X0
+    200108 Y           7.250      7.500     55.898      7.710  PISO_4_P52:X1
+  SC zonal: [0.0]
+
+================================================================================
+PENDIENTES / NOTAS ZONALES
+  - PISO_2 zona (col3, row2): celda OCULTA sin OCR legible -> NO_RESOLUBLE_PENDIENTE. Se mantiene PM=260, SC=250 como hipótesis conservadora NO definitiva. NO usar como dato definitivo hasta confirmar en el plano 700.
+  - PISO_3 zona (col3, row2): OCR leyó '= 2800 Kg/m'; INFERIDO_POR_CONTINUIDAD_GRAFICA a PM=260 por continuidad col3 fila1->fila2 del mismo piso. Requiere confirmación visual.
+  - PISO_4 zona (col3, row1): CONFIRMADO_VISUALMENTE como CARGA LINEAL (texto literal del plano: PM=7600 kgf/m, SC=800 kgf/m). No hay q_G de área en esa celda: solo PP.LOSA = 500 kgf/m². La carga lineal se registra aparte para vigas de la bahía I-I'.
+  - PISO_1 fila2 (col1..3): el plano muestra 1 sola fila de celdas (abarcan ambas direcciones Y); fila2 INFERIDO_POR_CONTINUIDAD_GRAFICA = fila1.
+
+CARGAS PUNTUALES (registradas, NO aplicadas):
+  - PM.ADIC PUNTUAL 13000 kg en PISO_2 (celda superior derecha (tile t02, y≈0.49)) [PENDIENTE_UBICACION_EXACTA]
+  - PM.ADIC PUNTUAL 7000 kg en PISO_2 (celda superior derecha (tile t02, y≈0.47)) [PENDIENTE_UBICACION_EXACTA]
+  - PM.ADIC PUNTUAL 10000 kg en PISO_3 (celda superior derecha (tile t12, y≈0.50)) [PENDIENTE_UBICACION_EXACTA]
+  - PM.ADIC PUNTUAL 6000 kg en PISO_3 (celda superior derecha (tile t12, y≈0.49)) [PENDIENTE_UBICACION_EXACTA]
+
+CARGAS LINEALES (registradas, NO aplicadas):
+  - PM.ADIC LINEAL 7600 kgf/m en PISO_4 zona col3 row1 (bahía I-I', Y=1-2) [PENDIENTE_CONFIRMACION]
+  - SC LINEAL 800 kgf/m en PISO_4 zona col3 row1 (bahía I-I', Y=1-2) [PENDIENTE_CONFIRMACION]
+
+PISO_1S: sin vigas del esqueleto -> sin transferencia de losa (PENDIENTE V.S.I./losas del 1° sub).
+No se aplica ops.eleLoad() (materiales PENDIENTES); la aplicación será inmediata cuando existan los elasticBeamColumn.
+================================================================================

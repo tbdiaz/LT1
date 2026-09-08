@@ -1,0 +1,59 @@
+================================================================================================
+INVENTARIO DE MUROS M.H.A. / M.I. · MODELO LT1 (P1L2)
+================================================================================================
+Estados (4): CONFIRMADO_PLANO | CONFIRMADO_POR_INSPECCION_VISUAL
+             USUARIO | INFERIDO_RESPALDADO | PENDIENTE_COORDENADA
+LONGITUD: todos los tramos sin extremos cotados -> PENDIENTE -> NO
+modelados en OpenSees (regla: extremos suficientes; no inventar).
+
+NIVEL        PLANO ID             SECCION        e[cm]  X[m]    Y[m]     ESTADO                 ROL
+------------------------------------------------------------------------------------------------
+PENDIENTE_NIVEL 102   M102_04        M.H.A. e= 20       20   -2.76   -41.68 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PENDIENTE_NIVEL 102   M102_05        M.H.A. e= 20       20    0.58   -52.76 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PENDIENTE_NIVEL 102   M102_06        M.H.A. e= 20       20    0.63   -41.68 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_1S      101   M101_01        M.H.A. e= 20       20    1.95    -6.35 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_02        M.H.A. e= 20       20    2.39   -49.11 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_03        M.H.A. e= 20       20    3.40    -7.19 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_04        M.H.A. e= 20       20    5.64   -59.58 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_05        M.H.A. e= 20       20    5.66   -11.06 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_06        M.H.A. e= 20       20    5.67   -21.53 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_07        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_08        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_09        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_10        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_11        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_12        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_13        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_14        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_15        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_16        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_17        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_E15_01    M.H.A. e= 15       15    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_E15_02    M.H.A. e= 15       15    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_E30_01    M.H.A. e= 30       30    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_E30_02    M.H.A. e= 30       30    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_E30_03    M.H.A. e= 30       30    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   M101_E30_04    M.H.A. e= 30       30    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contención subte)
+PISO_1S      101   MI101_01       M.I. e= 20         20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_SECUNDARIA (interior subte)
+PISO_2       102   M102_01        M.H.A. e= 20       20    0.76    -3.45 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_2       102   M102_02        M.H.A. e= 20       20    4.13    -3.45 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_2       102   M102_03        M.H.A. e= 20       20    4.07   -14.53 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_2       102   M102_E25_01    M.H.A. e= 25       25    2.81   -14.00 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_2       102   M102_E25_02    M.H.A. e= 25       25    6.11   -14.00 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_2       102   M102_E30_01    M.H.A. e= 30       30    3.08    -5.68 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_2       102   M102_E30_02    M.H.A. e= 30       30    5.84    -5.53 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_4       103   M103_01        M.H.A. e= 20       20    0.75    -3.45 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_4       103   M103_02        M.H.A. e= 20       20    4.11   -14.53 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_4       103   M103_03        M.H.A. e= 20       20    4.16    -3.45 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_4       103   M103_E25_01    M.H.A. e= 25       25    2.71   -14.06 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_4       103   M103_E25_02    M.H.A. e= 25       25    6.26   -13.93 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_4       103   M103_E30_01    M.H.A. e= 30       30    3.08    -5.57 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+PISO_4       103   M103_E30_02    M.H.A. e= 30       30    5.89    -5.57 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (núcleo E-F)
+
+NOTAS:
+  - Plan 101 (PISO_1S): conteo por capa de texto CONFIRMADO_PLANO; el
+    mapeo 101 no esta calibrado -> posiciones individuales PENDIENTE.
+  - Muros del nucleo e=25/e=30 (102/103): e-ticas EN la capa de texto;
+    posiciones de rotulo cruzadas 102<->103 (diferencia <0.1 m).
+  - M102_04/05/06: vistas de detalle del plan 102 (y_pdf<440), no edificio.
+  - TOTAL: 41 tramos / 0 muros modelados en OpenSees: 0 (sin longitudes).

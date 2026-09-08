@@ -1,0 +1,162 @@
+==========================================================================================
+CONTROL MUROS EQUIVALENTES LT1
+==========================================================================================
+Unidades base: metros (m), kilonewtons (kN), kilopascales (kPa)
+
+1) CONVENCION APLICADA
+     id: CONVENCION_MURO_COLUMNA_EQUIVALENTE
+     descripcion: Muros M.H.A. -> COLUMNA EQUIVALENTE en OpenSees (elasticBeamColumn vertical, entre niveles Z consecutivos)
+     fuente: INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO
+     estado documental: NO atribuir a los planos. Convención entregada por el usuario/curso (igual estatus que E/nu/G del H°A°).
+     Seccion rectangular equivalente (se reutiliza la convencion J del
+     proyecto, _constante_torsional_rect; NO se inventa formula nueva):
+         A = e * L_m
+         Iy = b_local_y * h_local_z^3 / 12  (flexión alrededor del eje local y)
+         Iz = h_local_z * b_local_y^3 / 12  (flexión alrededor del eje local z)
+         J = _constante_torsional_rect(b, h) (St. Venant, misma convención del proyecto; a = min(b,h), c = max(b,h))
+     Ejes fuertes/debiles segun la orientacion real del muro (elemento
+     vertical: x local=+Z, y local=-Y, z local=+X, vecxz=(1,0,0)):
+         E-W (paralelo X): en plano = +X = eje local z -> Iy fuerte (e·L^3/12), Iz débil (L·e^3/12)
+         N-S (paralelo Y): en plano = Y = eje local y -> Iz fuerte (e·L^3/12), Iy débil (L·e^3/12)
+
+2) MUROS ACTIVADOS (previamente en MUROS_CERRADOS_PISO_2, activo=False)
+     NSUP_01     e=0.20 m · L_planta=3.650 m · E-W (horizontal) en plano=X · tag=400001
+     NSUP_02     e=0.30 m · L_planta=2.250 m · N-S (vertical)   en plano=Y · tag=400002
+     NSUP_03     e=0.30 m · L_planta=2.250 m · N-S (vertical)   en plano=Y · tag=400003
+     NINF_01     e=0.20 m · L_planta=3.390 m · E-W (horizontal) en plano=X · tag=400004
+     NINF_02     e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400005
+     NINF_03     e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400006
+     total activados: 6
+
+3) TRAMOS VERTICALES CREADOS (continuidad respaldada)
+     Interpretacion (CONVENCION_NIVELES de data/inventario.py): los
+     muros del plan 102 'CIELO PISO 2°' son enmarcados por el tramo
+     PISO_1 -> PISO_2.
+     NSUP_01     PISO_1 (z=-0.05) -> PISO_2 (z=3.91) | L_vertical=3.96 m | nodos 500100/500200
+                 rigidLink('beam', master 600001 [PISO_1], nodo_muro 500100) [base]
+                 rigidLink('beam', master 600002 [PISO_2], nodo_muro 500200) [tope]
+     NSUP_02     PISO_1 (z=-0.05) -> PISO_2 (z=3.91) | L_vertical=3.96 m | nodos 500101/500201
+                 rigidLink('beam', master 600001 [PISO_1], nodo_muro 500101) [base]
+                 rigidLink('beam', master 600002 [PISO_2], nodo_muro 500201) [tope]
+     NSUP_03     PISO_1 (z=-0.05) -> PISO_2 (z=3.91) | L_vertical=3.96 m | nodos 500102/500202
+                 rigidLink('beam', master 600001 [PISO_1], nodo_muro 500102) [base]
+                 rigidLink('beam', master 600002 [PISO_2], nodo_muro 500202) [tope]
+     NINF_01     PISO_1 (z=-0.05) -> PISO_2 (z=3.91) | L_vertical=3.96 m | nodos 500103/500203
+                 rigidLink('beam', master 600001 [PISO_1], nodo_muro 500103) [base]
+                 rigidLink('beam', master 600002 [PISO_2], nodo_muro 500203) [tope]
+     NINF_02     PISO_1 (z=-0.05) -> PISO_2 (z=3.91) | L_vertical=3.96 m | nodos 500104/500204
+                 rigidLink('beam', master 600001 [PISO_1], nodo_muro 500104) [base]
+                 rigidLink('beam', master 600002 [PISO_2], nodo_muro 500204) [tope]
+     NINF_03     PISO_1 (z=-0.05) -> PISO_2 (z=3.91) | L_vertical=3.96 m | nodos 500105/500205
+                 rigidLink('beam', master 600001 [PISO_1], nodo_muro 500105) [base]
+                 rigidLink('beam', master 600002 [PISO_2], nodo_muro 500205) [tope]
+     Los nodos de muro NO son slaves del diafragma. Cada base/tope hereda
+     el movimiento de cuerpo rigido de su nivel por RESTRICCION CINEMATICA
+     REAL ops.rigidLink('beam', master_del_diafragma, nodo_muro) (12).
+     Justificacion empirica (constraints Transformation): slave directo ->
+     matriz singular; rigidLink al ancla estructural -> no propaga el plano;
+     rigidLink al MASTER -> error 0.0 vs. plano.
+     El nucleo del plan 103 (PISO_4) NO se modela (extremos sin cerrar)
+     y se reporta PENDIENTE.
+
+4) PROPIEDADES A · Iy · Iz · J (por muro, rectangulo e x L)
+     clave        A[m2]     Iy[m4]        Iz[m4]        J[m4]     b_local_y  h_local_z
+     NSUP_01      0.7300  8.104521e-01  2.433333e-03  9.397334e-03      0.200     3.650
+     NSUP_02      0.6750  5.062500e-03  2.847656e-01  1.854904e-02      2.250     0.300
+     NSUP_03      0.6750  5.062500e-03  2.847656e-01  1.854904e-02      2.250     0.300
+     NINF_01      0.6780  6.493037e-01  2.260000e-03  8.704000e-03      0.200     3.390
+     NINF_02      0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
+     NINF_03      0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
+
+5) NODOS EN EL MODELO
+     estructurales (base opensees + 12 de muros): 120
+     masters de diafragma: 4
+     ops.getNodeTags(): 124
+     Nodos de muro: NO slaves del diafragma; conectados por rigidLink al
+     master del diafragma de su nivel (constraint real, 12 links)
+       nodo_muro 500100 [base de NSUP_01] -> master 600001 (PISO_1)
+       nodo_muro 500200 [tope de NSUP_01] -> master 600002 (PISO_2)
+       nodo_muro 500101 [base de NSUP_02] -> master 600001 (PISO_1)
+       nodo_muro 500201 [tope de NSUP_02] -> master 600002 (PISO_2)
+       nodo_muro 500102 [base de NSUP_03] -> master 600001 (PISO_1)
+       nodo_muro 500202 [tope de NSUP_03] -> master 600002 (PISO_2)
+       nodo_muro 500103 [base de NINF_01] -> master 600001 (PISO_1)
+       nodo_muro 500203 [tope de NINF_01] -> master 600002 (PISO_2)
+       nodo_muro 500104 [base de NINF_02] -> master 600001 (PISO_1)
+       nodo_muro 500204 [tope de NINF_02] -> master 600002 (PISO_2)
+       nodo_muro 500105 [base de NINF_03] -> master 600001 (PISO_1)
+       nodo_muro 500205 [tope de NINF_03] -> master 600002 (PISO_2)
+
+6) VIGAS V.60/80 (marcos esqueleto)
+     108 creadas (PISO_1..PISO_4, 27 por nivel)
+
+7) COLUMNAS P.70x70
+     90 creadas (5 tramos x 18 = 90)
+
+8) MUROS EQUIVALENTES
+     6 (elasticBeamColumn verticales)
+
+9) TOTAL elasticBeamColumn (conteo REAL por tags desde ops.getEleTags())
+     ops.getEleTags() = 204
+       columnas: 90 · vigas: 108 · muros equivalentes: 6
+     consistencia: 204 == 90+108+6+0 (vínculos/sin_clasificar: 0) -> OK
+     constraint rígido de muro (rigidLink, NO eleTag): 12
+     (resuelve la inconsistencia previa 106+92 vs 108+90: solo cuenta
+     lo realmente cargado en OpenSees)
+
+10) ANALISIS DE GRAVEDAD (rebuild completo, elasticBeamColumn)
+     estado: OK_COMPLETADO · analyze(1) retorno: 0
+     pipeline: Transformacion/RCM/BandGeneral/NormDispIncr 1e-6/Linear/LoadControl
+
+11) SUMATORIA DE REACCIONES (gravedad)
+     P_gravitatoria aplicada (q_G sobre 108 vigas): 20182.6251 kN
+     Σ Rz (18 apoyos, 6 GDL): 20182.6251 kN
+     |Σ Rz - P| = 1.818989e-11 kN
+
+12) ERROR RELATIVO DE EQUILIBRIO
+     err_rel = 9.013e-16 (tolerancia documentada rel <= 1e-06)
+     Σ Rx = 9.7766e-13 kN · Σ Ry = -1.6587e-13 kN
+     max|U| = 2.729000e-03 m (nodo 50303) · max|Uz| = 2.700438e-03 m
+     Cargas conservadas: NO se agrego peso propio de muros (no esta
+     en la convencion de carga del proyecto) y NO se invento carga de
+     salientes.
+
+13) DIAFRAGMAS RIGIDOS COMPATIBLES + RIGIDLINK DE MUROS
+     PISO_1: master 600001 · 18 slaves · ok=True · max_error=0.000e+00 m
+     PISO_2: master 600002 · 18 slaves · ok=True · max_error=0.000e+00 m
+     PISO_3: master 600003 · 18 slaves · ok=True · max_error=0.000e+00 m
+     PISO_4: master 600004 · 18 slaves · ok=True · max_error=0.000e+00 m
+     compatibilidad global del diafragma: True
+     rigidLink de muro (u_muro = u_master + th_master x r, 6 DOF): 12 links · ok=True · max_error=1.694e-21 m
+
+14) AVISOS / PENDIENTES
+     - Nucleo PISO_4 (plan 103): extremos del nucleo sin cerrar -> el
+       tramo PISO_3->PISO_4 NO se modela (no inventar).
+     - Muros subte (plan 101, 24) y dormitorios M.H.A. e25/e30: posiciones
+       PENDIENTES -> sin modelar.
+     - Salientes del PISO_2 registrados geometricamente pero SIN carga
+       (superficies pendientes: saliente 1 ~30.9 m2, saliente 2 ~24.6 m2).
+     - V.30/45 (2), V.60/VAR (5), V.60-30/80-40 (5), P.M. 300x300x20,
+       V.M.: extremos/posicion pendientes.
+     - Decisión PISO_1->PISO_2 por convencion documentada del proyecto
+       (CONVENCION_NIVELES); la pregunta al usuario quedo sin contestar y
+       se avanzo con la opcion recomendada (si se contradice, se ajusta).
+
+15) ARCHIVOS MODIFICADOS
+     - data/secciones.py: CONVENCION_ACADEMICA_MUROS + props_muro_columna_equivalente
+     - src/modelo_lt1.py: nodos de muro conectados por RESTRICCION real
+       ops.rigidLink('beam', master_del_diafragma, nodo_muro) x12 (se
+       ELIMINARON los elasticBeamColumn artificiales 450001-450012 de
+       'vinculacion' no respaldada), elementos de muros, guard de
+       cargas, conteos reales (204), controles y figura (se retiraron las
+       variables temporales de depuracion
+       LT1_MUROS/LT1_COLSEC/LT1_SYSTEM/LT1_NUM)
+     - data/geometria_irregular.py + data/inventario.py (geom. v2 previa)
+     - tools/generar_correccion_geometria_v2_lt1.py (generador v2)
+
+16) OUTPUTS GENERADOS
+     - outputs/control_muros_equivalentes_lt1.txt
+     - outputs/modelo_con_muros_equivalentes_lt1.png
+     - previos preservados: control_geometria_corregida_v2_lt1.txt,
+       inventario_muros_v2_lt1.txt, modelo_geometria_corregida_v2_lt1.png
+==========================================================================================

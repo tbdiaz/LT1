@@ -1,0 +1,76 @@
+==================================================================================================
+INVENTARIO DE MUROS LT1 · v2 (nucleos + salientes PISO_2)
+==================================================================================================
+Seccion A — 6 muros del nucleo PISO_2 CERRADOS (GEOMETRIA_MODELADA,
+NO activos en OpenSees: sin convencion de muro):
+
+  ID       NIVEL   ESP   ORIENT         LONG[m]  COORD_X1  COORD_Y1  COORD_X2  COORD_Y2  ESTADO
+--------------------------------------------------------------------------------------------------
+  NSUP_01  PISO_2  e=20  E-W (horizontal) 3.650    2.660     -3.448    6.310     -3.448    INFERIDO_RESPALDADO
+  NSUP_02  PISO_2  e=30  N-S (vertical) 2.250    2.660     -5.698    2.660     -3.448    INFERIDO_RESPALDADO
+  NSUP_03  PISO_2  e=30  N-S (vertical) 2.250    6.310     -5.698    6.310     -3.448    INFERIDO_RESPALDADO
+  NINF_01  PISO_2  e=20  E-W (horizontal) 3.390    2.790     -14.532   6.180     -14.532   INFERIDO_RESPALDADO
+  NINF_02  PISO_2  e=25  N-S (vertical) 1.580    2.790     -12.952   2.790     -14.532   INFERIDO_RESPALDADO
+  NINF_03  PISO_2  e=25  N-S (vertical) 1.580    6.180     -12.952   6.180     -14.532   INFERIDO_RESPALDADO
+
+  Evidencia (por muro):
+    NSUP_01: muro superior e=20 del núcleo superior; fila de rótulos M102_01/02 en Y=-3.448; ancho de núcleo 3.95 m CONFIRMADO por el usuario; eje común X=4.485.
+    NSUP_02: muro lateral izquierdo e=30 del núcleo superior; rótulo vertical e=30 en X≈3.06; alto del núcleo 2.25 m CONFIRMADO.
+    NSUP_03: muro lateral derecho e=30 del núcleo superior; rótulo vertical e=30 en X≈5.91; alto del núcleo 2.25 m CONFIRMADO.
+    NINF_01: muro inferior e=20 del núcleo inferior; rótulo M102_03 en Y=-14.532; separación e=25 (2.79-6.18) INFERIDO_RESPALDADO.
+    NINF_02: muro lateral izquierdo e=25 del núcleo inferior; rótulo vertical e=25 en X≈2.79; alto del núcleo 1.58 m CONFIRMADO.
+    NINF_03: muro lateral derecho e=25 del núcleo inferior; rótulo vertical e=25 en X≈6.18; alto del núcleo 1.58 m CONFIRMADO.
+
+Seccion B — registro completo por plano (estado, posicion y rol):
+
+  NIVEL        PLANO ID             SECCION        e[cm]  X[m]    Y[m]     ESTADO                 ROL
+--------------------------------------------------------------------------------------------------
+  PENDIENTE_NIVEL 102   M102_04        M.H.A. e= 20       20   -2.76   -41.68 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (nucleo PISO_2)
+  PENDIENTE_NIVEL 102   M102_05        M.H.A. e= 20       20    0.58   -52.76 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (nucleo PISO_2)
+  PENDIENTE_NIVEL 102   M102_06        M.H.A. e= 20       20    0.63   -41.68 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (nucleo PISO_2)
+  PISO_1S      101   M101_01        M.H.A. e= 20       20    1.95    -6.35 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_02        M.H.A. e= 20       20    2.39   -49.11 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_03        M.H.A. e= 20       20    3.40    -7.19 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_04        M.H.A. e= 20       20    5.64   -59.58 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_05        M.H.A. e= 20       20    5.66   -11.06 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_06        M.H.A. e= 20       20    5.67   -21.53 PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_07        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_08        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_09        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_10        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_11        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_12        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_13        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_14        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_15        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_16        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_17        M.H.A. e= 20       20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_E15_01    M.H.A. e= 15       15    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_E15_02    M.H.A. e= 15       15    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_E30_01    M.H.A. e= 30       30    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_E30_02    M.H.A. e= 30       30    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_E30_03    M.H.A. e= 30       30    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   M101_E30_04    M.H.A. e= 30       30    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_PRINCIPAL (contencion subte)
+  PISO_1S      101   MI101_01       M.I. e= 20         20    n/a       n/a  PENDIENTE_COORDENADA   ESTRUCTURA_SECUNDARIA (interior subte)
+  PISO_2       102   M102_01        M.H.A. e= 20       20    0.76    -3.45 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_2)
+  PISO_2       102   M102_02        M.H.A. e= 20       20    4.13    -3.45 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_2)
+  PISO_2       102   M102_03        M.H.A. e= 20       20    4.07   -14.53 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_2)
+  PISO_2       102   M102_E25_01    M.H.A. e= 25       25    2.81   -14.00 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_2)
+  PISO_2       102   M102_E25_02    M.H.A. e= 25       25    6.11   -14.00 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_2)
+  PISO_2       102   M102_E30_01    M.H.A. e= 30       30    3.08    -5.68 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_2)
+  PISO_2       102   M102_E30_02    M.H.A. e= 30       30    5.84    -5.53 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_2)
+  PISO_4       103   M103_01        M.H.A. e= 20       20    0.75    -3.45 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_4, extremos PENDIENTE)
+  PISO_4       103   M103_02        M.H.A. e= 20       20    4.11   -14.53 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_4, extremos PENDIENTE)
+  PISO_4       103   M103_03        M.H.A. e= 20       20    4.16    -3.45 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_4, extremos PENDIENTE)
+  PISO_4       103   M103_E25_01    M.H.A. e= 25       25    2.71   -14.06 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_4, extremos PENDIENTE)
+  PISO_4       103   M103_E25_02    M.H.A. e= 25       25    6.26   -13.93 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_4, extremos PENDIENTE)
+  PISO_4       103   M103_E30_01    M.H.A. e= 30       30    3.08    -5.57 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_4, extremos PENDIENTE)
+  PISO_4       103   M103_E30_02    M.H.A. e= 30       30    5.89    -5.57 INFERIDO_RESPALDADO    ESTRUCTURA_PRINCIPAL (nucleo PISO_4, extremos PENDIENTE)
+
+Seccion C — geometria v2 resuelta (SALIENTES + NODOS):
+
+  SALIENTE_1: X 10.00-17.49 · Y -16.15--20.27 · CONFIRMADO_POR_INSPECCION_VISUAL_USUARIO
+  SALIENTE_2: X 20.00-30.00 · Y -16.15--18.61 · CONFIRMADO_POR_INSPECCION_VISUAL_USUARIO
+  Nodos geometricos nuevos (12): NS_TL(2.66,-3.45), NS_TR(6.31,-3.45), NS_BL(2.66,-5.70), NS_BR(6.31,-5.70), NI_TL(2.79,-12.95), NI_TR(6.18,-12.95), NI_BL(2.79,-14.53), NI_BR(6.18,-14.53), S1_SW(10.00,-20.27), S1_SE(17.49,-20.27), S2_SW(20.00,-18.61), S2_SE(30.00,-18.61)
+  TOTAL: 41 muros registrados en planos + 6 cerrados del nucleo PISO_2;
+  muros activos en OpenSees: 0 (sin convencion de muro en el proyecto).

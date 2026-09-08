@@ -1,0 +1,85 @@
+==========================================================================================
+RESOLUCION DE PENDIENTES GEOMETRICOS · MODELO LT1
+==========================================================================================
+Estado de los 10 pendientes raiz de geometria irregular, con confianza,
+evidencia y propagacion al modelo. Unidades: metros (m).
+
+CONFIANZA: VERIFICADO = evidencia directa (OCR/capa de texto);
+  INFERIDO_RESPALDADO = inferencia con validacion cruzada;
+  PARCIAL = parte resuelta, resto pendiente;
+  NO_RESUELTO = bloqueado (requiere inspeccion humana).
+
+Resumen: 5 resueltos · 2 parcialmente resueltos · 3 abiertos (de 10 pendientes).
+==========================================================================================
+
+ 1. [CORRELACION_102_NIVEL]
+    ESTADO    : RESUELTO
+    CONFIANZA : VERIFICADO
+    EVIDENCIA : OCR del rótulo del plano 102: 'PLANTA CIELO PISO 2°'. El folio además contiene un sub-plano 'PLANTA CIELO PISO 3°' con NIVEL SUPERIOR LOSA = 7.87 m (= PISO_3, consistente con data/geometria.py). Por tanto plan 102 -> PISO_2.
+    IMPACTO   : Todos los elementos del plan 102 (muros núcleo, V.30/45, V.60-30/80-40) se asignan al nivel PISO_2 (z=3.91 m).
+
+ 2. [CORRELACION_103_NIVEL]
+    ESTADO    : RESUELTO
+    CONFIANZA : VERIFICADO
+    EVIDENCIA : OCR del rótulo del plano 103: 'PLANTA CIELO PISO 4°' con NIVEL SUPERIOR LOSA ≈ 11.83 m (= PISO_4 según data/geometria.py niveles_z['PISO_4'] = 11.83).
+    IMPACTO   : Todos los elementos del plan 103 (M.H.A. núcleo, PM/VM, +V.I. 20/90 2ª etapa) se asignan al nivel PISO_4 (z=11.83 m).
+
+ 3. [MAPEO_103]
+    ESTADO    : RESUELTO_INFERIDO
+    CONFIANZA : INFERIDO_RESPALDADO
+    EVIDENCIA : Calibración por 2 muros del núcleo E-F comunes con el plan 102 (las mismas posiciones que en M102_02/M102_03). Resulta: x = X*8.189 + 264.77, y = Y*7.652 + 392.58 (pdf pt -> modelo m), validado además por el rango del plano. Incertidumbre ±1.5-2 m por offset de rótulo de muro.
+    IMPACTO   : M103_01 -> (0.75, -3.45), M103_02 -> (4.11, -14.53), M103_03 -> (4.16, -3.45); todos INFERIDO_RESPALDADO en PISO_4. Confirma el núcleo e=20 en ambos niveles.
+
+ 4. [TRAMO_NUCLEO_E_F]
+    ESTADO    : PARCIALMENTE_RESUELTO
+    CONFIANZA : INFERIDO_RESPALDADO (posición de rótulo, cruzada 102/103)
+    EVIDENCIA : Posición de rótulo RESUELTA para todos los espesores del núcleo E-F, confirmada de forma CRUZADA entre plan 102 (PISO_2) y plan 103 (PISO_4): fila Y≈-3.45 (e=20, X≈0.75/4.15), fila Y≈-5.6 (e=30, X≈3.08/5.85) y fila Y≈-14.0/-14.5 (e=25, X≈2.8/6.1; e=20, X≈4.1). Falta la LONGITUD exacta de cada tramo (extremos cotados).
+    IMPACTO   : Muros del núcleo registrados con posición en el inventario (M102/M103 e=20/25/30). NO se crean elasticBeamColumn sin longitud (extremos).
+
+ 5. [ASOC_2A]
+    ESTADO    : DOCUMENTADO_RESPALDADO
+    CONFIANZA : INFERIDO_RESPALDADO
+    EVIDENCIA : M102_03/M103_03 en Y≈-14.53, a 0.69 m del eje 2a (-13.845); dentro del error de rótulo (~±0.4 m en Y) queda asociado como elemento del eje 2a.
+    IMPACTO   : El núcleo E-F sur (programa sobre eje 2a) se documenta con la posición del rótulo; la intersección exacta tramo-eje queda abierta hasta leer la cota de longitud.
+
+ 6. [Y_EXT_SUR_102]
+    ESTADO    : RESUELTO_CONFIRMADO_VISUAL
+    CONFIANZA : CONFIRMADO_POR_INSPECCION_VISUAL_USUARIO
+    EVIDENCIA : Cota del borde sur del PISO_2 del plano 102 confirmada por inspección visual del usuario sobre la imagen del plano (NO OCR, NO inferencia): Y_EXT_SUR_102 = -20.270 m = Y(3) - 4.12 m.
+    IMPACTO   : Borde sur del PISO_2 fijado en -20.270 m. Los elementos del sector (V.30/45 en Y≈-18.86) quedan dentro de la banda confirmada, pero su trazado (par de nodos, límite X de la saliente) sigue PENDIENTE.
+
+ 7. [X_SUR_102]
+    ESTADO    : PENDIENTE_COORDENADA
+    CONFIANZA : PARCIAL: alineación con Ga=21.45
+    EVIDENCIA : V.30/45 rótulo 208 -> X≈21.0 (próximo a Ga=21.45) y rótulo 209 -> X≈25.8 (entre G=20 y H=30). Los P.M. 300x300x20 del sector saliente aparecen solo en vistas de detalle del plan 102.
+    IMPACTO   : La correlación del eje X de los P.M. del sector sur y la extensión X de la saliente siguen abiertas hasta confirmar la alineación con un eje certificado.
+
+ 8. [M_H_A_E25_E30_POSICION]
+    ESTADO    : PARCIALMENTE_RESUELTO
+    CONFIANZA : INFERIDO_RESPALDADO (capa de texto + cruce 102/103)
+    EVIDENCIA : CORRECCIÓN: las etiquetas e=25/e=30 SÍ están en la capa de texto de los planos 102 y 103 (2+2 en cada vista principal). Posición de rótulo resuelta y confirmada de forma CRUZADA: e=30 en fila Y≈-5.6 (X≈3.08/5.85), e=25 en fila Y≈-14.0 (X≈2.8/6.1).
+    IMPACTO   : Posición de los muros e=25/e=30 del núcleo registrada. La longitud de cada tramo (extremos) sigue pendiente.
+
+ 9. [V_SECTOR_SUR_POSICIONES]
+    ESTADO    : PENDIENTE_COORDENADA
+    CONFIANZA : PARCIAL: V.30/45 dentro de la banda sur CONFIRMADA; extremos sin cota
+    EVIDENCIA : V.30/45 (rótulos 208/209) ubicados en Y≈-18.86, DENTRO de la banda sur confirmada por el usuario (Y(3)>=Y>=Y_EXT_SUR_102=-20.27). V.60-30/80-40, V.60/VAR, V.M. y P.M.I. del sector están en vistas de detalle del plan 102 (y_pdf < 419.8) y no se pueden mapear al edificio. Para todos los elementos del sector falta el par de nodos (extremos) y el límite X.
+    IMPACTO   : Posición de V.30/45 registrada (INFERIDO_RESPALDADO_EXTREMOS_PENDIENTE). El resto del sector sur queda abierto.
+
+10. [V_FUNDACION_100]
+    ESTADO    : PENDIENTE_COORDENADA
+    CONFIANZA : NO_RESUELTO (parcial)
+    EVIDENCIA : La capa de texto del plan 100 identifica V.F. 20/220, 20/180, 20/160, 20/120, 15/225 y LOSA e=25, con alturas h=155/60/100/120/180/516, pero sin cotas de posición de cada viga. No hay OCR del plan 100 con mapeo calibrado.
+    IMPACTO   : El trazado de vigas de fundación queda pendiente. Se puede retomar cuando se lea el plan 100 con mapeo calibrado.
+
+==========================================================================================
+NOTAS DE METODO
+  - Los 3 muros del nucleo E-F del plan 103 (M103_01..03) se mapearon con
+    el mapeo calibrado de 103 y quedan en PISO_4 INFERIDO_RESPALDADO.
+  - Los V.30/45 del sector sur (V3045_01/02) quedan en PISO_2 con
+    posicion (20.97/-25.77, -18.86).
+  - Los e=25/e=30 del nucleo NO estan en capa de texto y el OCR visual
+    no los lee: queda PENDIENTE y no se inventan posiciones.
+  - No se crean nodos ni elasticBeamColumn para irregulares: geometria
+    queda preparada para la siguiente etapa (material/convencion muro).
+==========================================================================================

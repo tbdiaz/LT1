@@ -1,0 +1,148 @@
+==================================================================================================
+CONTROL GEOMETRIA CORREGIDA LT1 · v2 (nucleos + salientes PISO_2)
+==================================================================================================
+Unidades: m, kN, kPa. Estados: CONFIRMADO_POR_INSPECCION_VISUAL_USUARIO
+(dato del usuario, ni OCR ni inferencia) / INFERIDO_RESPALDADO / PENDIENTE.
+
+--------------------------------------------------------------------------------------------------
+1) COTAS NUEVAS CONFIRMADAS POR EL USUARIO (plano 102, inspección visual)
+--------------------------------------------------------------------------------------------------
+  NUCLEO SUPERIOR (entre ejes 1'' y 2 aprox.):  horizontal 3.95 m · vertical 2.25 m
+      muro superior M.H.A. e=20 ; laterales izquierdo/derecho e=30.
+  NUCLEO INFERIOR (entre ejes 2 y 3 aprox.):    vertical 1.58 m
+      laterales izquierdo/derecho e=25 ; muro inferior e=20. Ancho solo si hay
+      respaldo (si no: NO se inventa).
+  SALIENTE 1: X 10.00-17.49 m ; Y -16.15 (eje 3) a -20.27 m (= Y_EXT_SUR_102).
+  SALIENTE 2: X 20.00-30.00 m ; Y -16.15 a -18.61 m.
+  Borde norte de ambos salientes = eje 3 (vigas de borde V.60/80 en Y≈-16.11,
+  capa de texto). El dato previo 'franjas F-G/G-H' queda corregido por estos rangos.
+
+--------------------------------------------------------------------------------------------------
+2) RESOLUCION NUCLEO SUPERIOR (PISO_2, plan 102)
+--------------------------------------------------------------------------------------------------
+  Anclajes (capa de texto del propio plano, mapeo calibrado):
+    fila e=20 M102_01/02 -> Y_top = -3.448 (muro superior horizontal)
+    rotulos verticales e=30 -> X 3.06 / 5.91 (midpoint = 4.485)
+    rotulos verticales e=25 -> X 2.79 / 6.18 (midpoint = 4.485)
+  EJE COMUN de los 4 rotulos laterales: X = 4.485 m (los dos nucleos comparten eje).
+  Rectangulo: Y [ -3.448 ; -3.448-2.25 = -5.698 ] ; ancho exterior 3.95 m -> ejes
+    de muros laterales X = 4.485 +/- (3.95-0.30)/2 = 2.660 / 6.310.
+  La dimension 3.95 NO se asumio como largo de un solo muro: se resolvio como
+    rectangulo de nucleo (regla del usuario).
+
+--------------------------------------------------------------------------------------------------
+3) RESOLUCION NUCLEO INFERIOR (PISO_2, plan 102)
+--------------------------------------------------------------------------------------------------
+    fila e=20 M102_03 -> muro inferior en Y = -14.532
+    alto CONFIRMADO 1.58 m -> Y_top = -14.532+1.58 = -12.952
+    anchado: rotulos e=25 directamente sobre los muros (X 2.790 / 6.180) ->
+      ancho exterior 3.64 m, estado INFERIDO_RESPALDADO (no confirmado por cota).
+  Extremos de todos los tramos quedan determinados => se registran 6 muros
+  geometricos (ver 5).
+
+--------------------------------------------------------------------------------------------------
+4) SALIENTES PISO_2 (CONFIRMADOS, no se modifican)
+--------------------------------------------------------------------------------------------------
+  SALIENTE_1: X 10.00-17.49 · Y -16.15--20.27
+      Cotas entregadas por el usuario (inspección visual del plano 102): X 10.00-17.49 m, Y -16.15 (eje 3) a -20.27 m (= Y_EXT_SUR_102). Borde oeste = eje F. Borde sur profundo confirmado.
+  SALIENTE_2: X 20.00-30.00 · Y -16.15--18.61
+      Cotas entregadas por el usuario (inspección visual del plano 102): X 20.00-30.00 m (entre F y G), Y -16.15 (eje 3) a -18.61 m. Borde sur menos profundo que el saliente 1.
+  Nodos geometricos de esquinas sur: S1_SW/S1_SE y S2_SW/S2_SE (ver 6). Los
+  bordes norte coinciden con ejes existentes (F/G en eje 3). No existen vigas
+  cerradas dentro de los salientes: V.30/45 y V.60/VAR registrados como pendientes
+  (extremos sin cota).
+
+--------------------------------------------------------------------------------------------------
+5) MUROS CERRADOS GEOMETRICAMENTE (MUROS_CERRADOS_PISO_2, 6)
+--------------------------------------------------------------------------------------------------
+  ID       SECCION      ORIENT         nodo_i  nodo_j  L[m]    X/Y (m)                    ACTIVO_OS
+--------------------------------------------------------------------------------------------------
+  NSUP_01  M.H.A. e= 20 E-W (horizontal) NS_TL   NS_TR    3.650 (2.660,-3.448)-(6.310,-3.448) NO
+  NSUP_02  M.H.A. e= 30 N-S (vertical) NS_BL   NS_TL    2.250 (2.660,-5.698)-(2.660,-3.448) NO
+  NSUP_03  M.H.A. e= 30 N-S (vertical) NS_BR   NS_TR    2.250 (6.310,-5.698)-(6.310,-3.448) NO
+  NINF_01  M.H.A. e= 20 E-W (horizontal) NI_BL   NI_BR    3.390 (2.790,-14.532)-(6.180,-14.532) NO
+  NINF_02  M.H.A. e= 25 N-S (vertical) NI_TL   NI_BL    1.580 (2.790,-12.952)-(2.790,-14.532) NO
+  NINF_03  M.H.A. e= 25 N-S (vertical) NI_TR   NI_BR    1.580 (6.180,-12.952)-(6.180,-14.532) NO
+  Motivo NO activo en OpenSees: no existe convencion academica establecida en este
+  proyecto para transformar un muro M.H.A. en elemento equivalente (el modelo no
+  contiene muros). Por AGENTS no se inventa convencion: geometria/nodos se crean y
+  se registran; el analisis estructural queda pendiente de la convencion.
+
+--------------------------------------------------------------------------------------------------
+6) NODOS GEOMETRICOS NUEVOS (registrados, NO OpenSees)
+--------------------------------------------------------------------------------------------------
+  ID      X[m]      Y[m]      Z[m]    ORIGEN
+--------------------------------------------------------------------------------------------------
+  NS_TL       2.660    -3.448    3.91 núcleo superior: extremo sup. muro lateral izq. e=30
+  NS_TR       6.310    -3.448    3.91 núcleo superior: extremo sup. muro lateral der. e=30
+  NS_BL       2.660    -5.698    3.91 núcleo superior: extremo inf. muro lateral izq. e=30
+  NS_BR       6.310    -5.698    3.91 núcleo superior: extremo inf. muro lateral der. e=30
+  NI_TL       2.790   -12.952    3.91 núcleo inferior: extremo sup. muro lateral izq. e=25
+  NI_TR       6.180   -12.952    3.91 núcleo inferior: extremo sup. muro lateral der. e=25
+  NI_BL       2.790   -14.532    3.91 núcleo inferior: extremo inf. muro lateral izq. e=25
+  NI_BR       6.180   -14.532    3.91 núcleo inferior: extremo inf. muro lateral der. e=25
+  S1_SW      10.000   -20.270    3.91 saliente 1: esquina sur-oeste (eje F + Y_EXT_SUR_102)
+  S1_SE      17.490   -20.270    3.91 saliente 1: esquina sur-este (X=17.49, cota del usuario)
+  S2_SW      20.000   -18.610    3.91 saliente 2: esquina sur-oeste (eje F, cota del usuario)
+  S2_SE      30.000   -18.610    3.91 saliente 2: esquina sur-este (eje G, cota del usuario)
+  Total nodos geometricos nuevos: 12 (8 nucleo + 2 saliente 1 + 2 saliente 2).
+
+--------------------------------------------------------------------------------------------------
+7) CONTEO GLOBAL (dos contadores)
+--------------------------------------------------------------------------------------------------
+  MODELO OPENSEES PREVIO (sin cambios): 112 nodos (108 estructurales + 4 masters) y
+    198 elasticBeamColumn (108 V.60/80 + 90 P.70x70).
+  NODOS:  totales geometricos = 112 (OpenSees) + 12 (nuevos geometricos) = 124 ;
+          activos OpenSees = 112.
+  ELEMENTOS: totales geometricos = 198 (OpenSees) + 6 (muros nucleo PISO_2) = 204 ;
+          activos OpenSees = 198 (0 nuevos: ver 5).
+  El modelo NO se presenta como cerrado: quedan Pendientes (ver 10).
+
+--------------------------------------------------------------------------------------------------
+8) CARGA GRAVITACIONAL (GEOMETRIA_MODELADA / RESPALDADA / PENDIENTE)
+--------------------------------------------------------------------------------------------------
+    PISO_1: superficie de losa = 686.375 m2
+    PISO_2: superficie de losa = 686.375 m2
+    PISO_3: superficie de losa = 686.375 m2
+    PISO_4: superficie de losa = 686.375 m2
+  P gravitatoria total (PISO_1..4) aplicada = 20182.625 kN
+  CARGA_GRAVITACIONAL_RESPALDADA: la existente (plan 700 / paños de la reticula,
+    686.375 m2 por nivel). NO CAMBIA en v2.
+  CARGA_PENDIENTE: areas nuevas de SALIENTE_1 (≈30.9 m²) y SALIENTE_2 (≈24.6 m²).
+    El plano 700 no respalda q_G para esas areas -> NO se aplica carga arbitraria.
+    Si en el futuro se confirma losa cargada, la superficie/carga se recalculan.
+
+
+--------------------------------------------------------------------------------------------------
+9) VERIFICACION OPENSEES (reconstruido tras datos v2)
+--------------------------------------------------------------------------------------------------
+  analyze(1) OK · P = ΣRz = 20182.625 kN · err rel = 1.803e-16 (tol 1e-6)
+  [OK] tags elemento duplicados: 0
+  [OK] longitudes <= 0: 0
+  [OK] duplicados geométricos: 0
+  [OK] nodos estructurales huérfanos: 0
+
+--------------------------------------------------------------------------------------------------
+10) ELEMENTOS / GEOMETRIA PENDIENTE (extensos sin cerrar)
+--------------------------------------------------------------------------------------------------
+  - Nucleo PISO_4 (plan 103): posiciones e=20/25/30 INFERIDO_RESPALDADO, extremos
+    sin dims confirmadas (M103_01/02/03, M103_E25/E30).
+  - V.30/45 (2): rotulos X≈21.0/25.8, Y≈-18.86 -> extremos PENDIENTE; 0.25 m al sur
+    del borde -18.61 del saliente 2 (dentro del error ±0.2-0.4 m del mapeo) -> posible
+    borde sur sin cota explicita.
+  - V.60/VAR (5), V.60-30/80-40 (5): sin par de nodos; la mayoria en vistas de
+    detalle (y_pdf < 419.8) no mapeables al edificio.
+  - P.M. 300x300x20 (3 [102] / 8 [103]) y V.M.: solo vistas de detalle / inventario.
+  - Muros del subte (plan 101, e=15/20/30, M.I.): 24 registros, posiciones PENDIENTE.
+  - Muros restantes del nucleo (plan 102 PISO_2 fuera de los 6 cerrados): ninguno.
+
+--------------------------------------------------------------------------------------------------
+11) OUTPUTS v2 GENERADOS
+--------------------------------------------------------------------------------------------------
+  outputs/modelo_geometria_corregida_v2_lt1.png
+  outputs/control_geometria_corregida_v2_lt1.txt   (este archivo)
+  outputs/inventario_muros_v2_lt1.txt
+
+==================================================================================================
+FIN CONTROL GEOMETRIA CORREGIDA LT1 · v2
+==================================================================================================

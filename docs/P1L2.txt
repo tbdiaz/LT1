@@ -1,0 +1,55 @@
+﻿Semana 2 — LAB: edificio completo + gravedad + viewer Unity
+Objetivo
+Levantar el modelo completo del edificio y usar Unity como herramienta de inspección/preproceso.
+Modelo estructural
+Debe incluir:
+* vigas;
+* columnas;
+* muros equivalentes;
+* apoyos;
+* diafragmas rígidos;
+* secciones;
+* materiales.
+* cargas definidas por losa (para casos)}
+* areas tributarias con las que descargar sobre vigas
+Carga gravitacional
+La carga de piso se define como:
+q_G = peso propio de losa + terminaciones uniformes.
+No se modelará la losa con elementos finitos.
+La carga q_G debe transferirse a vigas mediante áreas tributarias explícitas.
+Unity mínimo
+El viewer debe permitir:
+* orbitar/navegar;
+* activar/desactivar nodos;
+* vigas;
+* columnas;
+* muros;
+* apoyos;
+* diafragmas;
+* IDs;
+* ejes locales.
+Además, debe existir una primera versión del Tributary Area Inspector o una representación equivalente.
+Demostración
+El profesor podrá pedir:
+* “muéstrame este elemento del plano”;
+* “¿qué elementTag tiene?”;
+* “¿qué apoyos tiene?”;
+* “¿cuál es su eje local?”;
+* “¿qué área tributaria carga esta viga?”;
+* “¿cuántos kN de losa llegan a ella?”.
+Verificaciones
+* carga total de losa por piso;
+* suma de áreas tributarias;
+* conservación de carga;
+* equilibrio global;
+* compatibilidad del diafragma.
+Forma de entrega
+* Entrega grupal, grupos de 3 estudiantes.
+* Todo código debe estar en el repositorio Git.
+* En Canvas se entrega:
+   1. enlace al repositorio;
+   2. commit hash o tag exacto a evaluar;
+   3. enlace directo al informe Markdown correspondiente cuando aplique.
+* La entrega de laboratorio se demuestra en vivo.
+* El profesor podrá escoger al azar a cualquier integrante para explicar cualquier parte del sistema.
+* Una demostración que funciona pero que el grupo no puede explicar no se considera completamente lograda.
