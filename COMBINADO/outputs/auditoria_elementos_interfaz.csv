@@ -1,0 +1,49 @@
+modulo,tipo,tag_original,seccion,nodo_i,nodo_j,x1,y1,z1,x2,y2,z2,longitud_m,par_otro_modulo,decision,motivo
+LT2,columna,3011,P70x70,18,66,31.25,0.0,-7.97,31.25,0.0,-4.01,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3012,P70x70,66,114,31.25,0.0,-4.01,31.25,0.0,-0.05,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3013,P70x70,114,162,31.25,0.0,-0.05,31.25,0.0,3.91,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3014,P70x70,162,210,31.25,0.0,3.91,31.25,0.0,7.87,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3015,P70x70,210,268,31.25,0.0,7.87,31.25,0.0,11.83,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3031,P70x70,21,69,31.25,8.9,-7.97,31.25,8.9,-4.01,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3032,P70x70,69,117,31.25,8.9,-4.01,31.25,8.9,-0.05,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3033,P70x70,117,165,31.25,8.9,-0.05,31.25,8.9,3.91,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3034,P70x70,165,213,31.25,8.9,3.91,31.25,8.9,7.87,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3035,P70x70,213,271,31.25,8.9,7.87,31.25,8.9,11.83,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3046,P70x70,22,70,31.25,16.15,-7.97,31.25,16.15,-4.01,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3047,P70x70,70,118,31.25,16.15,-4.01,31.25,16.15,-0.05,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3048,P70x70,118,166,31.25,16.15,-0.05,31.25,16.15,3.91,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3049,P70x70,166,214,31.25,16.15,3.91,31.25,16.15,7.87,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT2,columna,3050,P70x70,214,272,31.25,16.15,7.87,31.25,16.15,11.83,3.96,,CONSERVAR,Columna P70x70 nativa LT2 en la interfaz; da soporte al nodo compartido.
+LT1,columna,111000,P. 70x70,20001,30001,31.25,-0.0,-0.05,31.25,-0.0,3.91,3.96,P003_L2_L3,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P003_L2_L3 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,111001,P. 70x70,20003,30003,31.25,8.9,-0.05,31.25,8.9,3.91,3.96,P007_L2_L3,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P007_L2_L3 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,111002,P. 70x70,20005,30005,31.25,16.15,-0.05,31.25,16.15,3.91,3.96,P010_L2_L3,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P010_L2_L3 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,100000,P. 70x70,30001,40001,31.25,-0.0,3.91,31.25,-0.0,7.87,3.96,P003_L3_L4,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P003_L3_L4 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,100002,P. 70x70,30003,40003,31.25,8.9,3.91,31.25,8.9,7.87,3.96,P007_L3_L4,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P007_L3_L4 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,100004,P. 70x70,30005,40005,31.25,16.15,3.91,31.25,16.15,7.87,3.96,P010_L3_L4,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P010_L3_L4 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,112000,P. 70x70,40001,50001,31.25,-0.0,7.87,31.25,-0.0,11.83,3.96,P003_L4_ROOF,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P003_L4_ROOF (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,112001,P. 70x70,40003,50003,31.25,8.9,7.87,31.25,8.9,11.83,3.96,P007_L4_ROOF,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P007_L4_ROOF (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,112002,P. 70x70,40005,50005,31.25,16.15,7.87,31.25,16.15,11.83,3.96,P010_L4_ROOF,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P010_L4_ROOF (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,110000,P. 70x70,10001,20001,31.25,-0.0,-4.01,31.25,-0.0,-0.05,3.96,P003_L1_L2,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P003_L1_L2 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,110001,P. 70x70,10003,20003,31.25,8.9,-4.01,31.25,8.9,-0.05,3.96,P007_L1_L2,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P007_L1_L2 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,110002,P. 70x70,10005,20005,31.25,16.15,-4.01,31.25,16.15,-0.05,3.96,P010_L1_L2,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P010_L1_L2 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,113000,P. 70x70,1,10001,31.25,-0.0,-7.97,31.25,-0.0,-4.01,3.96,P003_B1_L1,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P003_B1_L1 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,113001,P. 70x70,3,10003,31.25,8.9,-7.97,31.25,8.9,-4.01,3.96,P007_B1_L1,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P007_B1_L1 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,columna,113002,P. 70x70,5,10005,31.25,16.15,-7.97,31.25,16.15,-4.01,3.96,P010_B1_L1,DESCARTAR,"Duplicado geometrico exacto con columna LT2 nativa P010_B1_L1 (P70x70, mismo tramo; difiere E: LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 (regla 3)."
+LT1,viga,200043,V. 60/80,20001,20003,31.25,-0.0,-0.05,31.25,8.9,-0.05,8.9,,CONSERVAR,Viga de borde LT1 eje E; LT2 no tiene viga en ese tramo (no duplicada).
+LT1,viga,200049,V. 60/80,20003,20005,31.25,8.9,-0.05,31.25,16.15,-0.05,7.25,,CONSERVAR,Viga de borde LT1 eje E; LT2 no tiene viga en ese tramo (no duplicada).
+LT1,viga,200070,V. 60/80,30001,30003,31.25,-0.0,3.91,31.25,8.9,3.91,8.9,,CONSERVAR,Viga de borde LT1 eje E; LT2 no tiene viga en ese tramo (no duplicada).
+LT1,viga,200076,V. 60/80,30003,30005,31.25,8.9,3.91,31.25,16.15,3.91,7.25,,CONSERVAR,Viga de borde LT1 eje E; LT2 no tiene viga en ese tramo (no duplicada).
+LT1,viga,200016,V. 60/80,40001,40003,31.25,-0.0,7.87,31.25,8.9,7.87,8.9,,CONSERVAR,Viga de borde LT1 eje E; LT2 no tiene viga en ese tramo (no duplicada).
+LT1,viga,200017,V. 60/80,40003,40005,31.25,8.9,7.87,31.25,16.15,7.87,7.25,,CONSERVAR,Viga de borde LT1 eje E; LT2 no tiene viga en ese tramo (no duplicada).
+LT1,viga,200097,V. 60/80,50001,50003,31.25,-0.0,11.83,31.25,8.9,11.83,8.9,,CONSERVAR,Viga de borde LT1 eje E; LT2 no tiene viga en ese tramo (no duplicada).
+LT1,viga,200103,V. 60/80,50003,50005,31.25,8.9,11.83,31.25,16.15,11.83,7.25,,CONSERVAR,Viga de borde LT1 eje E; LT2 no tiene viga en ese tramo (no duplicada).
+LT2,muro,4051/4052,M.H.A. e=0.25 m,19,67,31.25,3.18,-7.97,31.25,3.18,-4.01,3.095,,CONSERVAR,Muro LT2 en el borde este (solo LT2).
+LT2,muro,4053/4054,M.H.A. e=0.25 m,67,115,31.25,3.18,-4.01,31.25,3.18,-0.05,3.095,,CONSERVAR,Muro LT2 en el borde este (solo LT2).
+LT2,muro,4055/4056,M.H.A. e=0.25 m,115,163,31.25,3.18,-0.05,31.25,3.18,3.91,3.095,,CONSERVAR,Muro LT2 en el borde este (solo LT2).
+LT2,muro,4057/4058,M.H.A. e=0.25 m,163,211,31.25,3.18,3.91,31.25,3.18,7.87,3.095,,CONSERVAR,Muro LT2 en el borde este (solo LT2).
+LT2,muro,4059/4060,M.H.A. e=0.25 m,211,269,31.25,3.18,7.87,31.25,3.18,11.83,3.095,,CONSERVAR,Muro LT2 en el borde este (solo LT2).
+LT2,muro,4071/4072,M.H.A. e=0.25 m,18,66,31.25,0.0,-7.97,31.25,0.0,-4.01,3.18,,CONSERVAR,Muro LT2 en el borde este (solo LT2).
+LT2,muro,4073/4074,M.H.A. e=0.25 m,66,114,31.25,0.0,-4.01,31.25,0.0,-0.05,3.18,,CONSERVAR,Muro LT2 en el borde este (solo LT2).
+LT2,muro,4075/4076,M.H.A. e=0.25 m,114,162,31.25,0.0,-0.05,31.25,0.0,3.91,3.18,,CONSERVAR,Muro LT2 en el borde este (solo LT2).
+LT2,muro,4077/4078,M.H.A. e=0.25 m,162,210,31.25,0.0,3.91,31.25,0.0,7.87,3.18,,CONSERVAR,Muro LT2 en el borde este (solo LT2).
+LT2,muro,4079/4080,M.H.A. e=0.25 m,210,268,31.25,0.0,7.87,31.25,0.0,11.83,3.18,,CONSERVAR,Muro LT2 en el borde este (solo LT2).
