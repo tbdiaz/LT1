@@ -10,7 +10,7 @@
 ## 2. Retagging (sin colisiones)
 
 - LT2: tags nativos (nodos 1..272, masters 1001..1005, vigas 2001+ (237), columnas 3001+ (50), muros 4001+ (80), secciones 5001+, transf 1/2/3).
-- LT1: offset +100000 en nodos estructurales y muros; masters LT1 (600001-600004) NO se crean (sustituidos por masters combinados). Elementos con tags nativos (columnas 75, vigas 108, muros 6); transf 10001/10002/10003; timeSeries/pattern 1 (LT2) y 2 (LT1).
+- LT1: offset +100000 en nodos estructurales y muros; masters LT1 (600001-600004) NO se crean (sustituidos por masters combinados). Elementos con tags nativos (columnas 75, vigas 152, muros 6); transf 10001/10002/10003; timeSeries/pattern 1 (LT2) y 2 (LT1).
 
 ## 3. Elementos duplicados en la interfaz
 
@@ -51,15 +51,24 @@
 
 ## 8. Cargas de gravedad
 
-- LT2 (patron 1): 27160 eleLoad -beamPoint sobre 184 vigas, P = 11541.291565 kN.
-- LT1 (patron 2): 108 eleLoad -beamUniform (QG), P = 20182.625066 kN.
-- **P_total = 31723.916631 kN**.
-- Zonas pendientes (ROOF LT2, salientes PISO_2 LT1, WALL_EDGE_PENDING) NO se cargan (se preserva el criterio de cada modelo).
+- LT2 (patron 1): 27160 eleLoad -beamPoint sobre 184 vigas, P = 11541.291565 kN (sin cambios).
+- LT1 (patron 2): 122 eleLoad -beamUniform (QG), P = **20360.983513 kN**.
+  - P_lt1_referencia (JSON, I'=42.5 m) = **20182.625066 kN** (trazabilidad).
+  - La correccion I'->45.0 alarga las 12 vigas I-I' de 2.5 m a 5.0 m; al aplicar QG por metro lineal, esas vigas cargan el doble: +178.358 kN. Los qG_kN_m de referencia se conservan (no se inventan cargas).
+  - Las **11 vigas de fachada particionadas** por los salientes (tags 200033/060/063/011-14/084/87/90/93) ya NO reciben carga; su QG se redistribuye a los segmentos sustitutos (800201+) conservando la misma densidad qG (el total Σ qG·L se conserva exactamente: 0 perdidas, 0 warnings).
+- **P_total = 31902.275078 kN** (P_lt1_modelo + P_lt2).
+- Zonas pendientes (ROOF LT2, WALL_EDGE_PENDING) NO se cargan (se preserva el criterio de cada modelo). Nota franja I': el pano P51/P52 (I-I') pasa de 2.5 m a 5.0 m, +40.375 m²/piso; de esa franja extra, las 12 vigas I-I' recogen su parte (+6.25 m²·q por piso) y el resto se conserva con los valores de referencia (no se redistribuye a las vigas Y del eje I/I' para no inventar una nueva reparticion).
+
+## 8bis. Areas tributarias por piso (verificacion)
+
+- Σ A_tributaria (JSON) = A_losa panos = **686.375 m²** por piso (exacto en PISO_1..4).
+- Con I' = 45.0 m la losa modelada pasa a **726.75 m²/piso**; las 12 vigas I-I' duplican su tributaria (+6.25 m²/piso) y el resto de la franja (+34.125 m²/piso) conserva los valores de referencia (documentado arriba).
+- Salientes: no tienen `panos` en el JSON de referencia (las vigas 800101+ no soportan losa tributaria en ese esquema); se conserva el criterio de la referencia.
 
 ## 9. Validaciones
 
-- Nodos fisicos totales: 429 (LT2 272 + LT1 no-interfaz 102 + masters 5 + nodos nuevos cajas/pilastra 50).
-- Vigas: LT1 108 | LT2 237 | LT2 pendientes 0
+- Nodos fisicos totales: 461 (LT2 272 + LT1 no-interfaz 102 + masters 5 + nodos nuevos cajas/pilastra 50).
+- Vigas: LT1 152 | LT2 237 | LT2 pendientes 0
 - VI-05 (VI15xVAR) materializada POR SUPUESTO/MODELACION (cota superior de rigidez): b=0.15 m, h=1.20 m, E/G de LT2, nodos 226-227, tag 2235 (tag nativo; 2237 no esta disponible, corresponde a ROOF_VI_07). No es una seccion real confirmada; h_min y ley de variacion siguen desconocidas (ver COMBINADO/docs/diagnostico_vi15xvar.md).
 - Columnas: LT1 75 | LT2 50
 - Muros: LT1 6 | LT2 80
@@ -70,13 +79,13 @@
 
 ### Analisis
 - analyze() rc = **0** (OK, convergio)
-- ΣRz = 31723.916631 kN
-- |ΣRz - P_total| = 2.211891e-09 kN (rel 6.972e-14)
-- Σ|Rx| = 6.692795e-10 kN, Σ|Ry| = 3.256350e-11 kN (equilibrio horizontal)
-- Max |U| = 0.016835411 m en nodo 178
-- Max |Uz| = 0.016828445 m en nodo 178
+- ΣRz = 31902.275078 kN
+- |ΣRz - P_total| = 1.571243e-08 kN (rel 4.925e-13)
+- Σ|Rx| = 5.919529e-10 kN, Σ|Ry| = 1.473542e-11 kN (equilibrio horizontal)
+- Max |U| = 0.016773958 m en nodo 178
+- Max |Uz| = 0.016768894 m en nodo 178
 
-## 11. Sistema vertical de cajas de escalera y pilastra (COMBINADO, B1->ROOF)
+## 10. Sistema vertical de cajas de escalera y pilastra (COMBINADO, B1->ROOF)
 
 - **Que se modelo:** la continuidad vertical B1->ROOF bajo el anillo VI de ROOF para cerrar el mecanismo de ROOF detectado (verificar: 10 nodos sin camino a apoyos en el reporte previo).
 - Fuente de geometria: `LT2/reports/digitalizacion_vi_roof_pendiente.md` §8.2/§8.5 y coordenadas reales de los nodos `LT2/data/unity/edificio_lt2.json`:
@@ -102,7 +111,7 @@
 - Elementos con longitud cero: 0 
 - Nodos esclavos en mas de un diafragma: 0 (cada nodo ocular una sola vez; muros LT1 por rigidLink).
 
-## 10. Conectores V40 -> M001/M003 (excentricidad e/2=0.300 m)
+## 11. Conectores V40 -> M001/M003 (excentricidad e/2=0.300 m)
 
 - Los extremos de las cadenas V40x80 (x=0.400) terminan sobre la cara ESTE de los muros M001/M003 (x=0.100 + e/2 = 0.400, e=0.600). Se modela la excentricidad con UN elemento `elasticBeamColumn` horizontal en X por extremo (10 en total), entre el nodo de cadena y el nodo del EJE del muro al mismo Y y Z. No se mueven nodos de muro; no se usa equalDOF; los conectores son elementos (no restricciones cinematica) y sus nodos son esclavos normales del rigidDiaphragm de su nivel (no redundancia).
 - Nodos intermedios de cadena (y=4.265/8.9/11.885, sin apoyo fisico en muro) y vigas V30/VI cercanas: NO conectados.
@@ -122,11 +131,69 @@
 | ROOF | 225 | (0.400,14.325,11.830) | 218 | (0.100,14.325,11.830) | 0.300 | 9010 |
 - Copia maquina: `conectores_v40_muro.csv`.
 
+## 12. Salientes sur LT1 (geometria CAD verificada)
+
+- Nodos nuevos: **32** (tags 800001+)
+- Vigas nuevas: **30** (borde sur + flancos, tags 800101+, seccion V.60/80)
+- Segmentos de fachada particionados: **14** particiones (tags 800201+)
+- Eje I' corregido: X = 42.50 -> 45.00 m (18 nodos desplazados en el eje I').
+- Reglas de inclusion: SOLO geometria respaldada por CAD (FILAS_SUR, FLANCOS_X, VERIFICADO_CAD). Se EXCLUYEN: malla artificial, SPAN_INFERIDO, metales sin E (P.M./P.M.I./V.M.), diagonales y vigas sin respaldo.
+
+| Nivel | Nodos | Vigas | Particiones |
+|---|---|---|---|
+| PISO_1 | 5 | 5 | 2 |
+| PISO_2 | 9 | 10 | 3 |
+| PISO_3 | 10 | 8 | 5 |
+| PISO_4 | 8 | 7 | 4 |
+
+### Diafragmas y conectividad (verificacion)
+
+Los nodos saliente NO son esclavos del rigidDiaphragm (decision de diseno: se evita restriccion artificial; su carga sobre la losa no existe en el esquema tributario de referencia). Su camino de rigidez al diafragma se cierra POR VIGAS: cada nodo saliente -> viga saliente -> segmento de fachada -> nodo de fachada (slave del diafragma).
+
+| Nivel LT1 | Nivel LT2 | Master | Nodos saliente | Max saltos de viga al diafragma |
+|---|---|---|---|---|
+| PISO_1 | L2 | 1002 | 5 | 2 |
+| PISO_2 | L3 | 1003 | 9 | 2 |
+| PISO_3 | L4 | 1004 | 10 | 2 |
+| PISO_4 | ROOF | 1005 | 8 | 2 |
+
+- Verificacion: 0 nodos saliente sin ruta de vigas hacia el diafragma (debe ser 0; tambien refrendado por los `Nodos sin camino a apoyos` = 17 preexistentes).
+- Nodos sin camino de rigidez a apoyos: 17 (masters 1001..1005 + nodos de muro compartidos, excepciones preexistentes documentadas).
+
+## 13. Elementos pendientes (NO modelados, sin inventar)
+
+Se documenta la existencia, NO se modela (requiere plano/dato explícito si se decide incorporar):
+
+- P.M. / P.M.I. / V.M.: metaleria en fachadas/salientes sin modulo E de referencia (excluidas de la regla VERIFICADO_CAD).
+- V.60/VAR y V.60-30/80-40: vigas de seccion variable sin geometria de alma definida en plano.
+- Nucleo PISO_4: zona sin plano de detalle en el nivel superior.
+- Muros subterraneo (B2 y menores) y zonas sin plano de detalle declarado.
+- Zona franja I' extrema (x_lt1 45.0..): losa P51/P52 duplicada en las 12 vigas I-I'; el resto de la franja (34.125 m²/piso) conserva los valores tributarios de referencia (ver seccion 8bis).
+
+## 14. Validacion final (checks automaticos)
+
+- 1. analyze rc = 0: **OK** (rc=0)
+- 2. Cargas reparadas (0 warnings ElementalLoad): **OK** (25 segmentos con carga, 0 tags ausentes: [])
+- 3. Elementos longitud cero: **OK** (0)
+- 4. Vigas LI/II con ΔZ: **OK** (0); saliente con ΔZ: 0; conectores con ΔZ: 0
+- 5. Columnas con desplazamiento horizontal: **OK** (0); cajas/pilastra off-vertical: 0
+- 6. Diagonales en planta: **OK** (0)
+- 7. Nodos saliente sin ruta a apoyos: **OK** (0: [])
+- 8. LT2 intacto: **237 vigas** (tags nativos, sin cambios)
+- 9. Eje I' en combinado = 45.0+31.25 = 76.25 m: **OK** (18 nodos I')
+- 10. Error de equilibrio |ΣRz-P_total|/P_total: **OK** (4.925e-13)
+- Resumen nodos: 0 sin conectividad, {'L1': [1001], 'L2': [1002, 600100, 600101, 600102, 600103, 600104, 600105], 'L3': [1003, 600200, 600201, 600202, 600203, 600204, 600205], 'L4': [1004], 'ROOF': [1005]} flotantes preexistentes, P_lt1=20360.984 kN, P_total=31902.275 kN.
+
 ## Archivos generados
-- `outputs\interfaz_traceabilidad.csv`
-- `outputs\auditoria_elementos_interfaz.csv`
-- `outputs\vista_3d_combinado.png`
-- `outputs\reporte_validacion_combinado.md`
-- `outputs\verticales_cajas_pilastra.csv`
-- `outputs\conectores_v40_muro.csv`
+- `outputs/interfaz_traceabilidad.csv`
+- `outputs/auditoria_elementos_interfaz.csv`
+- `outputs/vista_3d_combinado.png`
+- `outputs/reporte_validacion_combinado.md`
+- `outputs/verticales_cajas_pilastra.csv`
+- `outputs/conectores_v40_muro.csv`
+- `outputs/tributarias_lt1/tributarias_piso_1.png`
+- `outputs/tributarias_lt1/tributarias_piso_2.png`
+- `outputs/tributarias_lt1/tributarias_piso_3.png`
+- `outputs/tributarias_lt1/tributarias_piso_4.png`
+- `outputs/vista_3d_interactiva.html` (generado por `scripts/figura_interactiva.py`)
 

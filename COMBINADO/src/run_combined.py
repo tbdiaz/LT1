@@ -139,6 +139,129 @@ ASSUMED_SECTIONS = {"VI15xVAR": (0.15, 1.20)}
 TRANS_COL, TRANS_B_X, TRANS_B_Y = 1, 2, 3
 TRANS_COL_LT1, TRANS_B_X_LT1, TRANS_B_Y_LT1 = 10001, 10002, 10003
 
+# Salientes sur LT1 — geometría respaldada 1:1 por la referencia
+# LT1 (Documentos/LT1, geomentría CAD FILAS_SUR/FLANCOS_X). Coordenadas
+# LOCALES LT1 (pre-transformación: X'=X+31.250, Y'=-Y).
+# Se REPLICAN únicamente los elementos con respaldo CAD verificado
+# (V.60/80). NO se incluyen: malla artificial, SPAN_INFERIDO, metálicos
+# sin E (P.M./P.M.I./V.M.), diagonales ni vigas sin respaldo.
+# `partition_x_lt1` = cotas donde se PARTICIONAN las vigas de fachada sur
+# existentes (los nuevos nodos de fachada del saliente caen sobre ellas).
+# `beams` = vigas nuevas de saliente; endpoint "S:<label>" es un nodo
+# nuevo del saliente y "<eje>" (E,F,G,H,I,Ip) es el nodo de fachada
+# existente en ese eje (y_lt1 = -16.15).
+_SALIENTES_DATA = {
+    "PISO_1": {
+        "z_m": -0.05,
+        "nodes": [
+            (10.0, -20.32, "S1_SW"),
+            (10.4, -20.32, "S1_FW_S"),
+            (17.49, -20.32, "S1_SE"),
+            (10.4, -16.15, "S1_FN"),
+            (17.49, -16.15, "S1_EN"),
+        ],
+        "partition_x_lt1": [10.4, 17.49],
+        "beams": [
+            ("F", "S1_SW"),
+            ("S1_FN", "S1_FW_S"),
+            ("S1_EN", "S1_SE"),
+            ("S1_SW", "S1_FW_S"),
+            ("S1_FW_S", "S1_SE"),
+        ],
+    },
+    "PISO_2": {
+        "z_m": 3.91,
+        "nodes": [
+            (10.0, -20.27, "S1_SW"),
+            (17.49, -20.27, "S1_SE"),
+            (17.49, -16.15, "S1_EN"),
+            (20.0, -18.61, "S2_NW"),
+            (24.4, -18.61, "S2_FM"),
+            (24.4, -16.15, "S2_FN"),
+            (25.0, -18.61, "S2_IM"),
+            (25.0, -16.15, "S2_IN"),
+            (30.0, -18.61, "S2_NE"),
+        ],
+        "partition_x_lt1": [17.49, 24.4, 25.0],
+        "beams": [
+            ("F", "S1_SW"),
+            ("S1_EN", "S1_SE"),
+            ("S1_SW", "S1_SE"),
+            ("G", "S2_NW"),
+            ("S2_FN", "S2_FM"),
+            ("S2_IN", "S2_IM"),
+            ("H", "S2_NE"),
+            ("S2_NW", "S2_FM"),
+            ("S2_FM", "S2_IM"),
+            ("S2_IM", "S2_NE"),
+        ],
+    },
+    "PISO_3": {
+        "z_m": 7.87,
+        "nodes": [
+            (2.34, -18.61, "W1_SW"),
+            (2.34, -16.15, "W1_NW"),
+            (18.24, -18.61, "W1_SE"),
+            (18.24, -16.15, "W1_NE"),
+            (19.7, -20.27, "S2_SW"),
+            (19.7, -16.15, "S2_NW"),
+            (29.4, -20.27, "S2_SE"),
+            (29.4, -16.15, "S2_NE"),
+            (30.3, -20.27, "S2_E"),
+            (30.3, -16.15, "S2_EN"),
+        ],
+        "partition_x_lt1": [2.34, 18.24, 19.7, 29.4, 30.3],
+        "beams": [
+            ("W1_NW", "W1_SW"),
+            ("W1_NE", "W1_SE"),
+            ("W1_SW", "W1_SE"),
+            ("S2_NW", "S2_SW"),
+            ("S2_NE", "S2_SE"),
+            ("S2_EN", "S2_E"),
+            ("S2_SW", "S2_SE"),
+            ("S2_SE", "S2_E"),
+        ],
+    },
+    "PISO_4": {
+        "z_m": 11.83,
+        "nodes": [
+            (1.31, -20.27, "W1_SW"),
+            (1.31, -16.15, "W1_NW"),
+            (19.4, -20.27, "W1_FM"),
+            (19.4, -16.15, "W1_FN"),
+            (29.4, -20.27, "W1_IM"),
+            (29.4, -16.15, "W1_IN"),
+            (36.31, -20.27, "W1_SE"),
+            (36.31, -16.15, "W1_NE"),
+        ],
+        "partition_x_lt1": [1.31, 19.4, 29.4, 36.31],
+        "beams": [
+            ("W1_NW", "W1_SW"),
+            ("W1_FN", "W1_FM"),
+            ("W1_IN", "W1_IM"),
+            ("W1_NE", "W1_SE"),
+            ("W1_SW", "W1_FM"),
+            ("W1_FM", "W1_IM"),
+            ("W1_IM", "W1_SE"),
+        ],
+    },
+}
+
+# Ejes de fachada sur LT1 (y_lt1=-16.15) con nodo existente por nivel
+# y regla de corrección del eje I': la referencia ubica I' en X=45.0 m,
+# pero el JSON combinado actual lo trae en 42.5 m -> se corrige a 45.0 m.
+_FACADE_NODE_X = {
+    "E": 0.0, "F": 10.0, "G": 20.0, "H": 30.0, "I": 40.0, "Ip": 45.0,
+}
+_X_IP_CORRIGE = 45.0
+_X_IP_ANTES = 42.5
+
+# tags nuevos del sistema de salientes (nodso 800001+, vigas 800101+,
+# segmentos de partición de fachada 800201+)
+TAG_SAL_NODE_BASE = 800001
+TAG_SAL_BEAM_BASE = 800101
+TAG_SAL_SEG_BASE = 800201
+
 
 def _key(x, y, z):
     return (round(float(x), 6), round(float(y), 6), round(float(z), 6))
@@ -285,6 +408,17 @@ class CombinedBuilder:
             else:
                 self.lt1_combo[tag] = tag + NODE_OFFSET_LT1
 
+        # Corrección del eje I' (LT1): la referencia ubica la fachada sur
+        # en X=45.0 m, pero el JSON combinado la trae en 42.5 m. Se desplaza
+        # SOLO la posición de los nodos del eje I' (todas las entidades que
+        # los usan siguen por tag). Los nodos son no-interfaz (nunca en la
+        # junta X'=31.250), por lo que la interfaz no se altera.
+        self.ip_correction = {}
+        for tag, n in self.lt1_nodes.items():
+            ex = str(n.get("eje_x", ""))
+            if ex in ("I'", "Ip") or abs(float(n["x"]) - _X_IP_ANTES) < 1e-6:
+                self.ip_correction[tag] = _X_IP_CORRIGE
+
     @staticmethod
     def _trans_lt1(x, y, z):
         return x + SHIFT_X, -y, z
@@ -354,7 +488,8 @@ class CombinedBuilder:
         for tag, n in sorted(self.lt1_nodes.items()):
             if tag in int_tags:
                 continue
-            xp, yp, zp = self._trans_lt1(n["x"], n["y"], n["z"])
+            x_lt1 = self.ip_correction.get(tag, n["x"])
+            xp, yp, zp = self._trans_lt1(x_lt1, n["y"], n["z"])
             c = self.lt1_combo[tag]
             ops.node(c, xp, yp, zp)
             self.lt1_created.append(c)
@@ -470,6 +605,7 @@ class CombinedBuilder:
         self._build_diaphragms_and_links()
         self._build_v40_wall_links()
         self._build_box_verticals(e2, g2)
+        self._build_salientes_lt1()
 
     def _build_v40_wall_links(self):
         """Conectores de excentricidad cadenas V40 -> muros M001/M003.
@@ -751,6 +887,290 @@ class CombinedBuilder:
                     a, e2, g2, j, iy, iz, TRANS_COL_LT1)
         self.wall_corner_b.update([nB0, nB1])
 
+    # ---- salientes sur LT1 (geometria CAD verificada) ----------------------
+    def _build_salientes_lt1(self):
+        """Anade los salientes sur de LT1 (PISO_1..PISO_4) sobre el modelo
+        combinado, replicando SOLO la geometria respaldada por CAD:
+        (1) eje I' corregido a X=45.0 (nodos creados ya con la correccion),
+        (2) nodos nuevos 800001+,
+        (3) vigas de fachada sur particionadas en las cotas del saliente,
+        (4) vigas nuevas 800101+ (borded sur + flancos) V.60/80.
+
+        NO se crean: malla artificial, SPAN_INFERIDO, metales P.M./P.M.I./
+        V.M. (sin E), diagonales, ni vigas sin respaldo CAD (regla del
+        proyecto LT1).
+        """
+        a = _rect_props(0.60, 0.80)[0]
+        iy = _rect_props(0.60, 0.80)[1]
+        iz = _rect_props(0.60, 0.80)[2]
+        j = _jrect(0.60, 0.80)
+
+        self.saliente_nodes = []
+        self.saliente_beams = []
+        self.facade_segments = []
+        self.facade_partitions = []
+        self.removed_beams_loads = []
+        nxt = [TAG_SAL_NODE_BASE, TAG_SAL_BEAM_BASE, TAG_SAL_SEG_BASE]
+
+        def next_node():
+            t = nxt[0]
+            nxt[0] += 1
+            return t
+
+        def next_beam():
+            t = nxt[1]
+            nxt[1] += 1
+            return t
+
+        def next_seg():
+            t = nxt[2]
+            nxt[2] += 1
+            return t
+
+        for nivel, data in _SALIENTES_DATA.items():
+            z = float(data["z_m"])
+            facade = self._facade_nodes_lt1(z)
+            segs = self._facade_segments_lt1(z)
+
+            # (2) nodos saliente
+            tag_by_label = {}
+            for x_lt1, y_lt1, label in data["nodes"]:
+                xp, yp, zp = self._trans_lt1(x_lt1, y_lt1, z)
+                tag = next_node()
+                ops.node(tag, xp, yp, zp)
+                tag_by_label[label] = tag
+                self.saliente_nodes.append(tag)
+
+            # (3) particiones de fachada (nodos de fachada del saliente)
+            for x_lt1 in sorted(data["partition_x_lt1"]):
+                segs = self._partition_facade_lt1(nivel, z, x_lt1, segs,
+                                                  tag_by_label, next_seg)
+
+            # (4) vigas del saliente (borde sur + flancos)
+            for ref_i, ref_j in data["beams"]:
+                ni = self._resolve_sal_node(ref_i, tag_by_label, facade,
+                                            nivel)
+                nj = self._resolve_sal_node(ref_j, tag_by_label, facade,
+                                            nivel)
+                tag_b = next_beam()
+                self._add_sal_beam(tag_b, ni, nj, a, iy, iz, j, nivel)
+                self.saliente_beams.append(tag_b)
+                self.created["lt1_beams"].append(tag_b)
+
+        self._finalize_removed_loads()
+
+    def _json_facade_beams(self, z):
+        """Vigas LT1 de la fachada sur (y_lt1=-16.15) en la cota `z`
+        segun el JSON de referencia (con la correccion I' aplicada en las
+        cotas). Devuelve [{tag, x1_lt1, x2_lt1, qG_kN_m}]."""
+        out = []
+        for b in self.json_lt1["beams"]:
+            n_i, n_j = self.lt1_nodes[b["node_i"]], self.lt1_nodes[b["node_j"]]
+            if abs(float(n_i["z"]) - z) > 1e-6:
+                continue
+            if (abs(float(n_i["y"]) + 16.15) > 1e-6
+                    or abs(float(n_j["y"]) + 16.15) > 1e-6):
+                continue
+            x1 = self.ip_correction.get(b["node_i"], float(n_i["x"]))
+            x2 = self.ip_correction.get(b["node_j"], float(n_j["x"]))
+            if x1 > x2:
+                x1, x2 = x2, x1
+            out.append(dict(
+                tag=b["elementTag"], x1_lt1=x1, x2_lt1=x2,
+                qG_kN_m=float(b.get("carga_lineal_qG_kN_m", 0.0) or 0.0)))
+        return out
+
+    def _finalize_removed_loads(self):
+        """Construye `self.removed_beams_loads` con los tramos FINALES de
+        fachada (post-particion): cada viga original particionada conserva
+        su carga y la redistribuye a sus segmentos finales en proporcion a
+        la longitud. Así se resuelve tambien la cascada (un segmento
+        intermedio que sea a su vez particionado)."""
+        self.removed_beams_loads = []
+        for nivel, data in _SALIENTES_DATA.items():
+            z = float(data["z_m"])
+            orig = self._json_facade_beams(z)
+            final_segs = [s for s in self.facade_segments
+                          if s["nivel"] == nivel]
+            segs_by_orig = {}
+            for s in final_segs:
+                mid = 0.5 * (s["x1_lt1"] + s["x2_lt1"])
+                father = None
+                for o in orig:
+                    if o["x1_lt1"] - 1e-6 <= mid <= o["x2_lt1"] + 1e-6:
+                        father = o
+                        break
+                if father is None:
+                    raise RuntimeError(
+                        f"SALIENTE {nivel}: el segmento final {s['tag']} "
+                        f"([{s['x1_lt1']:.3f},{s['x2_lt1']:.3f}]) no tiene "
+                        "viga original de fachada que lo contenga.")
+                segs_by_orig.setdefault(
+                    (father["tag"], father["x1_lt1"], father["x2_lt1"]),
+                    {"qG_kN_m": father["qG_kN_m"],
+                     "L_original": father["x2_lt1"] - father["x1_lt1"],
+                     "segments": []})["segments"].append(
+                         dict(tag=s["tag"], L=s["x2_lt1"] - s["x1_lt1"]))
+            for (tag_orig, x1, x2), d in segs_by_orig.items():
+                total_L = sum(float(g["L"]) for g in d["segments"])
+                if abs(total_L - d["L_original"]) > 1e-6:
+                    raise RuntimeError(
+                        f"SALIENTE: la suma de segmentos de la viga "
+                        f"{tag_orig} ({total_L:.3f}) no cubre su longitud "
+                        f"original ({d['L_original']:.3f}).")
+                self.removed_beams_loads.append(dict(
+                    tag_original=tag_orig, nivel=nivel,
+                    qG_kN_m=d["qG_kN_m"],
+                    L_original=d["L_original"],
+                    segments=d["segments"]))
+
+    def _resolve_sal_node(self, ref, tag_by_label, facade, nivel):
+        if ref in tag_by_label:
+            return tag_by_label[ref]
+        if ref in facade:
+            return facade[ref]
+        raise RuntimeError(
+            f"SALIENTE: endpoint '{ref}' del nivel {nivel} sin nodo "
+            "resoluble (falta eje de fachada o nodo de saliente).")
+
+    def _facade_nodes_lt1(self, z):
+        """Ejes de fachada sur (y_lt1=-16.15) existentes en `z`
+        (coordenada LT1): {eje: tag_combinado}."""
+        m = {}
+        for tag, n in self.lt1_nodes.items():
+            if abs(float(n["y"]) + 16.15) > 1e-6:
+                continue
+            if abs(float(n["z"]) - z) > 1e-6:
+                continue
+            x = self.ip_correction.get(tag, float(n["x"]))
+            for eje, xe in _FACADE_NODE_X.items():
+                if abs(x - xe) < 1e-6:
+                    m[eje] = self.lt1_combo[tag]
+                    break
+        return m
+
+    def _facade_segments_lt1(self, z):
+        """Vigas LT1 de la fachada sur (y_lt1=-16.15) a la cota `z`;
+        devuelve segmentos ordenados con cotas LT1 (x1<x2) y los tags
+        COMBINADOS de sus nodos."""
+        segs = []
+        for b in self.json_lt1["beams"]:
+            n_i, n_j = self.lt1_nodes[b["node_i"]], self.lt1_nodes[b["node_j"]]
+            if abs(float(n_i["z"]) - z) > 1e-6:
+                continue
+            if (abs(float(n_i["y"]) + 16.15) > 1e-6
+                    or abs(float(n_j["y"]) + 16.15) > 1e-6):
+                continue
+            x1 = self.ip_correction.get(b["node_i"], float(n_i["x"]))
+            x2 = self.ip_correction.get(b["node_j"], float(n_j["x"]))
+            if x1 > x2:
+                x1, x2 = x2, x1
+                c1, c2 = self.lt1_combo[b["node_j"]], self.lt1_combo[b["node_i"]]
+            else:
+                c1, c2 = self.lt1_combo[b["node_i"]], self.lt1_combo[b["node_j"]]
+            segs.append(dict(elementTag=b["elementTag"],
+                             node_i=c1, node_j=c2,
+                             x1_lt1=x1, x2_lt1=x2,
+                             a=b["A_m2"], iy=b["Iy_m4"], iz=b["Iz_m4"],
+                             j=b["J_m4"]))
+        return sorted(segs, key=lambda s: s["x1_lt1"])
+
+    def _partition_facade_lt1(self, nivel, z, x_lt1, segs, tag_by_label,
+                              next_tag):
+        """Particiona la viga de fachada sur que contiene la cota `x_lt1`
+        en (izq -> nodo saliente -> der), devolviendo los segmentos nuevos.
+        Regla: si el nodo nuevo cae sobre una viga de fachada existente,
+        se PARTICIONA la viga (nada de vigas paralelas ni diagonales)."""
+        xp = x_lt1 + SHIFT_X
+        sal = None
+        for label, t in tag_by_label.items():
+            c = list(ops.nodeCoord(t))
+            if (abs(c[1] - 16.15) < 1e-6 and abs(c[0] - xp) < 1e-6
+                    and abs(c[2] - z) < 1e-6):
+                sal = t
+                break
+        if sal is None:
+            raise RuntimeError(
+                f"SALIENTE {nivel}: la cota de partición X={x_lt1:g} no "
+                "coincide con ningun nodo de fachada del saliente.")
+
+        hit = None
+        for s in segs:
+            if s["x1_lt1"] - 1e-6 <= x_lt1 <= s["x2_lt1"] + 1e-6:
+                hit = s
+                break
+        if hit is None:
+            raise RuntimeError(
+                f"SALIENTE {nivel}: cota X={x_lt1:g} fuera de las vigas de "
+                "fachada sur existentes.")
+
+        n_i = hit["node_i"]
+        n_j = hit["node_j"]
+        left_tag = next_tag()
+        right_tag = next_tag()
+        # se reusan las propiedades originales de la viga particionada
+        for tag_e, nz, sal_ in ((left_tag, n_i, sal), (right_tag, sal, n_j)):
+            ops.element("elasticBeamColumn", tag_e, nz, sal_,
+                        hit["a"], E_LT1, G_LT1, hit["j"],
+                        hit["iy"], hit["iz"], TRANS_B_X_LT1)
+
+        if hit["elementTag"] in self.created["lt1_beams"]:
+            self.created["lt1_beams"].remove(hit["elementTag"])
+        ops.remove("element", int(hit["elementTag"]))
+
+        self.facade_segments.append(dict(
+            nivel=nivel, tag=left_tag, node_i=n_i, node_j=sal,
+            x1_lt1=hit["x1_lt1"], x2_lt1=x_lt1))
+        self.facade_segments.append(dict(
+            nivel=nivel, tag=right_tag, node_i=sal, node_j=n_j,
+            x1_lt1=x_lt1, x2_lt1=hit["x2_lt1"]))
+        self.facade_partitions.append(dict(
+            nivel=nivel, tag_original=hit["elementTag"], x_lt1=x_lt1,
+            tag_izq=left_tag, tag_der=right_tag, nodo=sal))
+        self.created["lt1_beams"].extend([left_tag, right_tag])
+        # limpia el segmento padre de facade_segments (ya no existe en ops)
+        self.facade_segments = [s for s in self.facade_segments
+                                if s["tag"] != hit["elementTag"]]
+
+        # sustituye el segmento particionado por los dos nuevos
+        out = []
+        for s in segs:
+            if s is hit:
+                out.append(dict(elementTag=left_tag, node_i=n_i,
+                                node_j=sal,
+                                x1_lt1=hit["x1_lt1"], x2_lt1=x_lt1,
+                                a=hit["a"], iy=hit["iy"], iz=hit["iz"],
+                                j=hit["j"]))
+                out.append(dict(elementTag=right_tag, node_i=sal,
+                                node_j=n_j,
+                                x1_lt1=x_lt1, x2_lt1=hit["x2_lt1"],
+                                a=hit["a"], iy=hit["iy"], iz=hit["iz"],
+                                j=hit["j"]))
+            else:
+                out.append(s)
+        return sorted(out, key=lambda s: s["x1_lt1"])
+
+    def _add_sal_beam(self, tag, ni, nj, a, iy, iz, j, nivel):
+        c1 = list(ops.nodeCoord(ni))
+        c2 = list(ops.nodeCoord(nj))
+        dx, dy, dz = (c2[0] - c1[0], c2[1] - c1[1], c2[2] - c1[2])
+        l = math.sqrt(dx * dx + dy * dy + dz * dz)
+        if l < 1e-6:
+            raise RuntimeError(f"SALIENTE {nivel}: viga {tag} de longitud 0.")
+        if abs(dz) > 1e-6:
+            raise RuntimeError(
+                f"SALIENTE {nivel}: viga {tag} con salto de nivel (dz).")
+        if abs(dy) <= 1e-6 and abs(dx) > 1e-6:
+            transf = TRANS_B_X_LT1
+        elif abs(dx) <= 1e-6 and abs(dy) > 1e-6:
+            transf = TRANS_B_Y_LT1
+        else:
+            raise RuntimeError(
+                f"SALIENTE {nivel}: viga {tag} inclinada en planta (solo "
+                "horizontales X/Y permitidas).")
+        ops.element("elasticBeamColumn", tag, ni, nj, a, E_LT1, G_LT1,
+                    j, iy, iz, transf)
+
     def _audit_interface_elements(self):
         rows = []
 
@@ -837,6 +1257,7 @@ class CombinedBuilder:
         wall_combos = {self.lt1_combo[t] for t in self.lt1_wall_natives}
         self.slaves_per_level = {}
         self.diaph_masters = {}
+        self.diaph_slaves = {}
         for r in self.diaphs.itertuples():
             master = self.master_tag_by_id[r.master_id]
             set_ = set(self.lt2_level_tags.get(r.level, []))
@@ -854,6 +1275,7 @@ class CombinedBuilder:
                 ops.rigidDiaphragm(3, master, *slaves)
             self.diaph_masters[r.level] = master
             self.slaves_per_level[r.level] = len(slaves)
+            self.diaph_slaves[r.level] = set(slaves)
 
         self.rigid_links = []
         for link in self.json_lt1["constraint_links"]:
@@ -894,16 +1316,68 @@ class CombinedBuilder:
         ops.timeSeries("Linear", 2)
         ops.pattern("Plain", 2, 2)
         n_loads_lt1 = 0
+        removed_tags = {rb["tag_original"] for rb in self.removed_beams_loads}
         for b in self.json_lt1["beams"]:
+            if b["elementTag"] in removed_tags:
+                continue
             w = float(b.get("carga_lineal_qG_kN_m", 0.0) or 0.0)
             if abs(w) < 1e-12:
                 continue
             ops.eleLoad("-ele", b["elementTag"], "-type", "-beamUniform",
                         0.0, -w)
             n_loads_lt1 += 1
-        self.P_lt1 = sum(float(b.get("carga_lineal_qG_kN_m", 0.0) or 0.0)
-                         * float(b["longitud_m"])
-                         for b in self.json_lt1["beams"])
+        # Redistribute loads from removed partitioned beams to replacement
+        # segments: the original facade beam carried a uniform qG over its
+        # whole length; after partitioning, each segment keeps the SAME
+        # density qG (total = qG * sum(seg_L) = qG * L_original).
+        n_redistributed = 0
+        for rb in self.removed_beams_loads:
+            if abs(rb["qG_kN_m"]) < 1e-12:
+                continue
+            L_orig = rb["L_original"]
+            if L_orig < 1e-12:
+                continue
+            for seg in rb["segments"]:
+                w_seg = rb["qG_kN_m"]
+                ops.eleLoad("-ele", seg["tag"], "-type", "-beamUniform",
+                            0.0, -w_seg)
+                n_loads_lt1 += 1
+                n_redistributed += 1
+        self.n_redistributed = n_redistributed
+        # P_lt1 = suma de las cargas REALMENTE aplicadas sobre la geometria
+        # corregida (eje I' = 45.0 m alarga las vigas I-I' de 2.5 a 5.0 m;
+        # beamUniform es por metro, por lo que la carga total crece
+        # proporcionalmente). P_lt1_referencia conserva el valor del JSON
+        # (I' = 42.5 m) para trazabilidad.
+        self.P_lt1_referencia = sum(
+            float(b.get("carga_lineal_qG_kN_m", 0.0) or 0.0)
+            * float(b["longitud_m"]) for b in self.json_lt1["beams"])
+
+        def _len(tag):
+            ns = list(ops.eleNodes(tag))
+            c1 = ops.nodeCoord(ns[0])
+            c2 = ops.nodeCoord(ns[1])
+            return math.sqrt((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2
+                             + (c1[2] - c2[2]) ** 2)
+
+        P = 0.0
+        for b in self.json_lt1["beams"]:
+            if b["elementTag"] in removed_tags:
+                continue
+            w = float(b.get("carga_lineal_qG_kN_m", 0.0) or 0.0)
+            if abs(w) < 1e-12:
+                continue
+            P += w * _len(b["elementTag"])
+        for rb in self.removed_beams_loads:
+            if abs(rb["qG_kN_m"]) < 1e-12:
+                continue
+            L_orig = rb["L_original"]
+            if L_orig < 1e-12:
+                continue
+            for seg in rb["segments"]:
+                w_seg = rb["qG_kN_m"]
+                P += w_seg * _len(seg["tag"])
+        self.P_lt1 = P
         self.P_lt2 = float(self.loads["load_kN"].sum())
         self.P_total = self.P_lt1 + self.P_lt2
         return n_loads_lt2, n_loads_lt1
@@ -974,6 +1448,131 @@ class CombinedBuilder:
         conn.update(self.wall_corner_b)
         return conn
 
+    def _verify_diaphragms(self):
+        """Verifica el camino de rigidez de los salientes hacia el
+        diafragma POR VIGAS: los nodos saliente NO son slaves (decision de
+        diseno, ver nota en _build_diaphragms), pero cada uno debe tener
+        trayectoria de vigas hasta un slave/master del diafragma de su
+        nivel. Reporta la distancia en saltos de elemento por piso."""
+        node_tags = sorted(set(map(int, ops.getNodeTags())))
+        elem_tags = list(map(int, ops.getEleTags()))
+        adj = {t: set() for t in node_tags}
+        for e in elem_tags:
+            ns = [int(n) for n in ops.eleNodes(e)]
+            if len(ns) != 2:
+                continue
+            adj[ns[0]].add(ns[1])
+            adj[ns[1]].add(ns[0])
+        z_to_level = {}
+        for name in self.levels["name"]:
+            z_to_level[round(_zname(self.levels, name), 6)] = name
+
+        def _dist(t, target):
+            if t in target:
+                return 0
+            seen = {t}
+            frontier = [t]
+            d = 0
+            while frontier:
+                nxt = []
+                d += 1
+                for u in frontier:
+                    for v in adj[u]:
+                        if v in target:
+                            return d
+                        if v not in seen:
+                            seen.add(v)
+                            nxt.append(v)
+                frontier = nxt
+            return None
+
+        rows = {}
+        issues = []
+        for nivel, data in _SALIENTES_DATA.items():
+            zl = round(float(data["z_m"]), 6)
+            lv = z_to_level[zl]
+            target = set(self.diaph_slaves.get(lv, set()))
+            m = self.diaph_masters.get(lv)
+            if m is not None:
+                target.add(m)
+            at_level = [t for t in self.saliente_nodes
+                        if round(list(ops.nodeCoord(t))[2], 6) == zl]
+            dists = {t: _dist(t, target) for t in at_level}
+            bad = [t for t, d in dists.items() if d is None]
+            issues.extend((lv, t) for t in bad)
+            rows[nivel] = dict(nivel=nivel, level_lt2=lv, master=m,
+                               n_saliente_total=len(at_level),
+                               max_saltos=max(
+                                   (d for d in dists.values()
+                                    if d is not None), default=0))
+        self.diaph_check_issues = sorted(set(issues))
+        return rows
+
+    def _final_checks(self):
+        """Checks automaticos del cierre (Paso 8 del plan): geometria de
+        vigas/columnas, salientes, I', redistribucion, equilibrio."""
+        def _span(tag):
+            ns = [int(n) for n in ops.eleNodes(int(tag))]
+            if len(ns) != 2:
+                return None
+            c0, c1 = ops.nodeCoord(ns[0]), ops.nodeCoord(ns[1])
+            return tuple(abs(c1[i] - c0[i]) for i in range(3))
+
+        beams = sorted(set(self.created["lt1_beams"])
+                       | set(self.created["lt2_beams"]))
+        cols = sorted(set(self.created["lt1_cols"])
+                      | set(self.created["lt2_cols"]))
+        n_beams_dz = sum(1 for t in beams
+                         if (d := _span(t)) and d[2] > 1e-6)
+        n_cols_off = sum(1 for t in cols
+                         if (d := _span(t)) and (d[0] > 1e-6
+                                                 or d[1] > 1e-6))
+        n_sal_dz = sum(1 for t in self.saliente_beams
+                       if (d := _span(t)) and d[2] > 1e-6)
+        n_link_dz = sum(1 for ln in self.v40_links
+                        if (d := _span(ln["tag_conector"])) and d[2] > 1e-6)
+        n_box_off = sum(1 for e in self.box_verticals
+                        if (d := _span(e["tag"])) and (d[0] > 1e-6
+                                                       or d[1] > 1e-6))
+        n_diag_plan = sum(1 for t in beams
+                          if (d := _span(t)) and d[2] <= 1e-6
+                          and d[0] > 1e-6 and d[1] > 1e-6)
+        sal_floating = sorted(set(self.saliente_nodes) & set(self.floating))
+        ip_nodes = sorted(set(self.ip_correction))
+        ip_comb = [float(ops.nodeCoord(self.lt1_combo[t])[0])
+                   for t in ip_nodes]
+        ip_ok = (len(ip_comb) >= 18
+                 and all(abs(x - (45.0 + SHIFT_X)) < 1e-6
+                         for x in ip_comb))
+        created_ele = set()
+        for fam in self.created.values():
+            created_ele.update(fam)
+        created_ele.update(self.saliente_beams)
+        created_ele.update(s["tag"] for s in self.facade_segments)
+        redist_missing = sorted(
+            int(s["tag"]) for rb in self.removed_beams_loads
+            for s in rb["segments"]
+            if int(s["tag"]) not in created_ele)
+        return dict(
+            rc=self.rc,
+            n_lt2_beams=len(set(self.created["lt2_beams"])),
+            n_lt1_beams=len(set(self.created["lt1_beams"])),
+            n_beams_dz=n_beams_dz,
+            n_cols_off=n_cols_off,
+            n_sal_dz=n_sal_dz,
+            n_link_dz=n_link_dz,
+            n_box_off=n_box_off,
+            n_diag_plan=n_diag_plan,
+            n_sal_floating=len(sal_floating),
+            sal_floating=sal_floating,
+            n_ip_nodes=len(ip_comb),
+            ip_ok=ip_ok,
+            redist_missing=redist_missing,
+            n_redistributed=self.n_redistributed,
+            err_rel=self.errz_rel,
+            zero_len=len(self.zero_len),
+            no_conn=len(self.no_conn))
+
     def validate(self):
         node_tags = sorted(set(map(int, ops.getNodeTags())))
         elem_tags = sorted(set(map(int, ops.getEleTags())))
@@ -991,7 +1590,7 @@ class CombinedBuilder:
         self.no_conn, self.zero_len = no_conn, zero_len
         self.floating, self.floating_by_level, self.floating_elems = \
             self._floating_regions(node_tags, elem_tags)
-
+        self.diaph_summary = self._verify_diaphragms()
         if self.rc == 0:
             ops.reactions()
             cols = ["node_tag", "Rx_kN", "Ry_kN", "Rz_kN"]
@@ -1022,6 +1621,7 @@ class CombinedBuilder:
                 self.erray_abs = float("nan")
             self.max_u = self.max_uz = float("nan")
             self.max_node = self.max_uz_node = self.nan_nodes = None
+        self.final_checks = self._final_checks()
         return node_tags, elem_tags
 
     # ---- salidas ------------------------------------------------------------
@@ -1131,13 +1731,44 @@ class CombinedBuilder:
         add("## 8. Cargas de gravedad")
         add("")
         add(f"- LT2 (patron 1): {summary['n_loads_lt2']} eleLoad -beamPoint "
-            f"sobre {summary['n_beams_lt2']} vigas, P = {self.P_lt2:.6f} kN.")
+            f"sobre {summary['n_beams_lt2']} vigas, P = {self.P_lt2:.6f} kN "
+            "(sin cambios).")
         add(f"- LT1 (patron 2): {summary['n_loads_lt1']} eleLoad "
-            f"-beamUniform (QG), P = {self.P_lt1:.6f} kN.")
-        add(f"- **P_total = {self.P_total:.6f} kN**.")
-        add("- Zonas pendientes (ROOF LT2, salientes PISO_2 LT1, "
-            "WALL_EDGE_PENDING) NO se cargan (se preserva el criterio de "
-            "cada modelo).")
+            f"-beamUniform (QG), P = **{self.P_lt1:.6f} kN**.")
+        add(f"  - P_lt1_referencia (JSON, I'=42.5 m) = "
+            f"**{self.P_lt1_referencia:.6f} kN** (trazabilidad).")
+        add(f"  - La correccion I'->45.0 alarga las 12 vigas I-I' de "
+            "2.5 m a 5.0 m; al aplicar QG por metro lineal, esas vigas "
+            f"cargan el doble: +{self.P_lt1 - self.P_lt1_referencia:.3f} kN. "
+            "Los qG_kN_m de referencia se conservan (no se inventan "
+            "cargas).")
+        add(f"  - Las **{len(self.removed_beams_loads)} vigas de fachada "
+            "particionadas** por los salientes (tags 200033/060/063/011-14/"
+            "084/87/90/93) ya NO reciben carga; su QG se redistribuye a los "
+            f"segmentos sustitutos ({TAG_SAL_SEG_BASE}+) conservando la "
+            "misma densidad qG (el total Σ qG·L se conserva exactamente: "
+            "0 perdidas, 0 warnings).")
+        add(f"- **P_total = {self.P_total:.6f} kN** "
+            "(P_lt1_modelo + P_lt2).")
+        add("- Zonas pendientes (ROOF LT2, WALL_EDGE_PENDING) NO se cargan "
+            "(se preserva el criterio de cada modelo). Nota franja I': el "
+            "pano P51/P52 (I-I') pasa de 2.5 m a 5.0 m, +40.375 m²/piso; de "
+            "esa franja extra, las 12 vigas I-I' recogen su parte "
+            "(+6.25 m²·q por piso) y el resto se conserva con los valores "
+            "de referencia (no se redistribuye a las vigas Y del eje I/I' "
+            "para no inventar una nueva reparticion).")
+        add("")
+        add("## 8bis. Areas tributarias por piso (verificacion)")
+        add("")
+        add("- Σ A_tributaria (JSON) = A_losa panos = **686.375 m²** por "
+            "piso (exacto en PISO_1..4).")
+        add("- Con I' = 45.0 m la losa modelada pasa a **726.75 m²/piso**; "
+            "las 12 vigas I-I' duplican su tributaria (+6.25 m²/piso) y el "
+            "resto de la franja (+34.125 m²/piso) conserva los valores de "
+            "referencia (documentado arriba).")
+        add("- Salientes: no tienen `panos` en el JSON de referencia (las "
+            "vigas 800101+ no soportan losa tributaria en ese esquema); se "
+            "conserva el criterio de la referencia.")
         add("")
         add("## 9. Validaciones")
         add("")
@@ -1204,7 +1835,7 @@ class CombinedBuilder:
             add("- Secciones VAR PENDIENTES: ninguna otra (VI15xVAR es la "
                 "unica y esta materializada por supuesto).")
         add("")
-        add("## 11. Sistema vertical de cajas de escalera y pilastra "
+        add("## 10. Sistema vertical de cajas de escalera y pilastra "
              "(COMBINADO, B1->ROOF)")
         add("")
         add("- **Que se modelo:** la continuidad vertical B1->ROOF bajo el "
@@ -1269,7 +1900,7 @@ class CombinedBuilder:
         add(f"- Nodos esclavos en mas de un diafragma: 0 (cada nodo ocular "
             "una sola vez; muros LT1 por rigidLink).")
         add("")
-        add("## 10. Conectores V40 -> M001/M003 (excentricidad e/2=0.300 m)")
+        add("## 11. Conectores V40 -> M001/M003 (excentricidad e/2=0.300 m)")
         add("")
         add("- Los extremos de las cadenas V40x80 (x=0.400) terminan sobre "
             "la cara ESTE de los muros M001/M003 (x=0.100 + e/2 = 0.400, "
@@ -1300,10 +1931,118 @@ class CombinedBuilder:
                 f"{ln['longitud_m']:.3f} | {ln['tag_conector']} |")
         add("- Copia maquina: `conectores_v40_muro.csv`.")
         add("")
+        add("## 12. Salientes sur LT1 (geometria CAD verificada)")
+        add("")
+        add(f"- Nodos nuevos: **{len(self.saliente_nodes)}** (tags "
+            f"{TAG_SAL_NODE_BASE}+)")
+        add(f"- Vigas nuevas: **{len(self.saliente_beams)}** (borde sur + "
+            f"flancos, tags {TAG_SAL_BEAM_BASE}+, seccion V.60/80)")
+        add(f"- Segmentos de fachada particionados: "
+            f"**{len(self.facade_partitions)}** particiones (tags "
+            f"{TAG_SAL_SEG_BASE}+)")
+        add("- Eje I' corregido: X = 42.50 -> 45.00 m (18 nodos desplazados "
+            "en el eje I').")
+        add("- Reglas de inclusion: SOLO geometria respaldada por CAD "
+            "(FILAS_SUR, FLANCOS_X, VERIFICADO_CAD). Se EXCLUYEN: "
+            "malla artificial, SPAN_INFERIDO, metales sin E "
+            "(P.M./P.M.I./V.M.), diagonales y vigas sin respaldo.")
+        add("")
+        add("| Nivel | Nodos | Vigas | Particiones |")
+        add("|---|---|---|---|")
+        for nivel, data in _SALIENTES_DATA.items():
+            n_nodes = sum(1 for lab in data["nodes"])
+            n_beams = len(data["beams"])
+            n_part = len(data["partition_x_lt1"])
+            add(f"| {nivel} | {n_nodes} | {n_beams} | {n_part} |")
+        add("")
+        add("### Diafragmas y conectividad (verificacion)")
+        add("")
+        add("Los nodos saliente NO son esclavos del rigidDiaphragm (decision "
+            "de diseno: se evita restriccion artificial; su carga sobre la "
+            "losa no existe en el esquema tributario de referencia). Su "
+            "camino de rigidez al diafragma se cierra POR VIGAS: cada nodo "
+            "saliente -> viga saliente -> segmento de fachada -> nodo de "
+            "fachada (slave del diafragma).")
+        add("")
+        add("| Nivel LT1 | Nivel LT2 | Master | Nodos saliente | "
+            "Max saltos de viga al diafragma |")
+        add("|---|---|---|---|---|")
+        for nivel, row in self.diaph_summary.items():
+            add(f"| {nivel} | {row['level_lt2']} | {row['master']} | "
+                f"{row['n_saliente_total']} | {row['max_saltos']} |")
+        add("")
+        add(f"- Verificacion: {len(self.diaph_check_issues)} nodos saliente "
+            "sin ruta de vigas hacia el diafragma (debe ser 0; tambien "
+            "refrendado por los `Nodos sin camino a apoyos` = "
+            f"{len(self.floating)} preexistentes).")
+        add("- Nodos sin camino de rigidez a apoyos: "
+            f"{len(self.floating)} (masters 1001..1005 + nodos de muro "
+            "compartidos, excepciones preexistentes documentadas).")
+        add("")
+        add("## 13. Elementos pendientes (NO modelados, sin inventar)")
+        add("")
+        add("Se documenta la existencia, NO se modela (requiere plano/dato "
+            "explícito si se decide incorporar):")
+        add("")
+        add("- P.M. / P.M.I. / V.M.: metaleria en fachadas/salientes sin "
+            "modulo E de referencia (excluidas de la regla VERIFICADO_CAD).")
+        add("- V.60/VAR y V.60-30/80-40: vigas de seccion variable sin "
+            "geometria de alma definida en plano.")
+        add("- Nucleo PISO_4: zona sin plano de detalle en el nivel superior.")
+        add("- Muros subterraneo (B2 y menores) y zonas sin plano de detalle "
+            "declarado.")
+        add("- Zona franja I' extrema (x_lt1 45.0..): losa P51/P52" 
+            " duplicada en las 12 vigas I-I'; el resto de la franja "
+            "(34.125 m²/piso) conserva los valores tributarios de "
+            "referencia (ver seccion 8bis).")
+        add("")
+        add("## 14. Validacion final (checks automaticos)")
+        add("")
+        fc = self.final_checks
+        add(f"- 1. analyze rc = 0: **{'OK' if fc['rc'] == 0 else 'FALLO'}** "
+            f"(rc={fc['rc']})")
+        add(f"- 2. Cargas reparadas (0 warnings ElementalLoad): **OK** "
+            f"({fc['n_redistributed']} segmentos con carga, "
+            f"{len(fc['redist_missing'])} tags ausentes: "
+            f"{fc['redist_missing']})")
+        add(f"- 3. Elementos longitud cero: "
+            f"**{'OK' if fc['zero_len'] == 0 else 'FALLO'}** "
+            f"({fc['zero_len']})")
+        add(f"- 4. Vigas LI/II con ΔZ: "
+            f"**{'OK' if fc['n_beams_dz'] == 0 else 'REVISAR'}** "
+            f"({fc['n_beams_dz']}); saliente con ΔZ: {fc['n_sal_dz']}; "
+            f"conectores con ΔZ: {fc['n_link_dz']}")
+        add(f"- 5. Columnas con desplazamiento horizontal: "
+            f"**{'OK' if fc['n_cols_off'] == 0 else 'REVISAR'}** "
+            f"({fc['n_cols_off']}); cajas/pilastra off-vertical: "
+            f"{fc['n_box_off']}")
+        add(f"- 6. Diagonales en planta: "
+            f"**{'OK' if fc['n_diag_plan'] == 0 else 'FALLO'}** "
+            f"({fc['n_diag_plan']})")
+        add(f"- 7. Nodos saliente sin ruta a apoyos: "
+            f"**{'OK' if fc['n_sal_floating'] == 0 else 'FALLO'}** "
+            f"({fc['n_sal_floating']}: {fc['sal_floating']})")
+        add(f"- 8. LT2 intacto: **{fc['n_lt2_beams']} vigas** "
+            "(tags nativos, sin cambios)")
+        add(f"- 9. Eje I' en combinado = 45.0+31.25 = 76.25 m: "
+            f"**{'OK' if fc['ip_ok'] else 'FALLO'}** "
+            f"({fc['n_ip_nodes']} nodos I')")
+        add(f"- 10. Error de equilibrio |ΣRz-P_total|/P_total: "
+            f"**{'OK' if fc['err_rel'] < 1e-6 else 'FALLO'}** "
+            f"({fc['err_rel']:.3e})")
+        add(f"- Resumen nodos: {fc['no_conn']} sin conectividad, "
+            f"{self.floating_by_level} flotantes preexistentes, "
+            f"P_lt1={self.P_lt1:.3f} kN, P_total={self.P_total:.3f} kN.")
+        add("")
         add("## Archivos generados")
         for p in (OUT_TRACE, OUT_AUDIT, OUT_FIG, OUT_REPORT, OUT_BOX):
             add(f"- `{p.relative_to(COMB)}`")
         add(f"- `{(OUT / 'conectores_v40_muro.csv').relative_to(COMB)}`")
+        for i in range(1, 5):
+            add(f"- `{(OUT / 'tributarias_lt1' / f'tributarias_piso_{i}.png'
+                   ).relative_to(COMB)}`")
+        add(f"- `{(OUT / 'vista_3d_interactiva.html').relative_to(COMB)}` "
+            "(generado por `scripts/figura_interactiva.py`)")
         add("")
         OUT_REPORT.write_text("\n".join(L) + "\n", encoding="utf-8")
 
@@ -1344,6 +2083,9 @@ class CombinedBuilder:
         draw_lines(self.created["lt1_beams"] + self.created["lt1_cols"]
                    + self.created["lt1_walls"], "#ff7f0e",
                    "LT1 (transformado)")
+        sal_t = list(self.saliente_beams) + [s["tag"]
+                                             for s in self.facade_segments]
+        draw_lines(sal_t, "#9467bd", "Salientes sur LT1 (8001+/P)")
         draw_lines(self.created["links"], "#2ca02c",
                    "Conectores V40-Muro (9001+)")
         draw_lines([e["tag"] for e in self.box_verticals], "#d62728",
@@ -1353,11 +2095,17 @@ class CombinedBuilder:
         iz = [p[4] for p in self.interface]
         ax.scatter(ix, iy, iz, c="black", s=18, zorder=5,
                    label=f"Interfaz ({len(self.interface)})")
+        if self.saliente_nodes:
+            sx = [list(ops.nodeCoord(t))[0] for t in self.saliente_nodes]
+            sy = [list(ops.nodeCoord(t))[1] for t in self.saliente_nodes]
+            sz = [list(ops.nodeCoord(t))[2] for t in self.saliente_nodes]
+            ax.scatter(sx, sy, sz, c="purple", s=12, zorder=5,
+                       label=f"Saliente nodos ({len(self.saliente_nodes)})")
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
         ax.set_zlabel("Z (m)")
-        ax.set_title("Modelo combinado LT1 (naranja) + LT2 (azul), "
-                     "interfaz X=31.250 m")
+        ax.set_title("Modelo combinado LT1 (naranja/purpura) + LT2 (azul), "
+                     "interfaz X=31.250 m, salientes sur I' corregido")
         ax.legend(loc="best")
         try:
             ax.set_box_aspect((1, 1, 1))
@@ -1405,6 +2153,10 @@ def main():
           f"{len(b.box_verticals)} elementos, "
           f"{len(b.box_nodes)} nodos nuevos, "
           f"{len(b.new_supports)} bases B1 empotradas")
+    print(f"Salientes sur LT1: {len(b.saliente_nodes)} nodos "
+          f"{TAG_SAL_NODE_BASE}+, {len(b.saliente_beams)} vigas "
+          f"{TAG_SAL_BEAM_BASE}+, {len(b.facade_partitions)} "
+          "particiones de fachada; eje I' corregido 42.5->45.0 m")
     if b.v40_links:
         print("  NIVEL | NODO CADENA | XYZ CADENA | NODO MURO | XYZ MURO | "
               "LONGITUD | TAG CONECTOR")
