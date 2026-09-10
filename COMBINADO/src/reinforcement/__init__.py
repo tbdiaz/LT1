@@ -7,6 +7,8 @@ unicamente cuando la correspondencia es segura.
 
 Submodulos LT1:
 - `lt1_reinforcement_data`: transcripcion fiel de los planos de armadura LT1.
+- `lt1_wall_data`: armadura especifica de muros por elevacion/eje/nivel
+  (planos 300-303), que reemplaza a la antigua familia tipica de muros.
 - `lt1_geometry`: geometria del modelo LT1 (ejes, panos, muros, vigas).
 - `assign_lt1_reinforcement`: resolucion de zonas y asociacion a geometria.
 - `reinforcement_geometry`: generacion de barras 3D (capa separada).
@@ -27,6 +29,7 @@ from . import (
     lt1_beam_data,
     lt1_geometry,
     lt1_reinforcement_data,
+    lt1_wall_data,
     lt2_beam_data,
     lt2_geometry,
     lt2_reinforcement_data,
@@ -45,6 +48,7 @@ __all__ = [
     "lt1_beam_data",
     "lt1_geometry",
     "lt1_reinforcement_data",
+    "lt1_wall_data",
     "lt2_beam_data",
     "lt2_geometry",
     "lt2_reinforcement_data",
@@ -58,4 +62,4 @@ __all__ = [
 ]
 
 # Version del dataset (se incrementa al corregir transcripciones).
-REINFORCEMENT_DATASET_VERSION = "1.2.0"
+REINFORCEMENT_DATASET_VERSION = "1.3.0"

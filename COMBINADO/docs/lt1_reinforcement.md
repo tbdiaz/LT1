@@ -35,6 +35,8 @@ COMBINADO/
                                   BeamRule/StairRule/BeamRebarSegment/
                                   BeamStirrupZone/BeamRecord con "to_dict"
     lt1_reinforcement_data.py     transcripcion fiel de los planos (FUENTE)
+    lt1_wall_data.py              armadura ESPECIFICA de muros LT1 por
+                                  elevacion/eje/nivel (planos 300-303)
     lt1_beam_data.py              armadura longitudinal de VIGAS por beam_id
                                   (planos 400/401/402); referencias TP1/TP4
     lt1_geometry.py               lectura de outputs/unity/modelo_lt1.json
@@ -46,11 +48,15 @@ COMBINADO/
     validate_reinforcement.py     checks de datos + invariancia del modelo
   tests/
     test_reinforcement.py         tests rapidos + lento de invarianza
+    test_reinforcement_walls_lt1.py  tests de la correccion de muros 300-303
   docs/lt1_reinforcement.md       este documento
   outputs/reinforcement/
     armadura_lt1_reglas.csv       todas las reglas con su resolucion
     armadura_lt1_barras.csv       barras 3D generadas (sistema combinado)
     armadura_lt1_columnas.csv     una fila por columna LT1 (16 B22)
+    armadura_lt1_muros.csv        una fila por registro especifico de muro
+                                  (elevaciones 300-303)
+    armadura_lt1_necesita_confirmacion.csv  muros con valores a confirmar
     armadura_lt1_vigas.csv        una fila por barra/estribo de viga
     armadura_lt1_vigas_resumen.csv   resumen por beam_id (capas F, estribos)
     armadura_lt1_vigas_exact.csv     lista EXACT (leida del plano)
@@ -67,13 +73,13 @@ COMBINADO/
 | 203 | losa cielo 2° piso (inf/sup) | EXACT / needs |
 | 204 | losa cielo 3° piso (inf/sup) | EXACT / needs |
 | 205 | losa cielo 4° piso (inf/sup) | EXACT / needs |
-| 300 | muros: patron tipico de todos los pisos (1 regla) | TYPICAL |
+| 300 | muros: armadura especifica por elevacion/eje/nivel (300-303), 165 registros | NEEDS_DRAWING_VALUE_CONFIRMATION |
 | COL | columnas LT1: 16 B22 longitudinales (1 regla) | EXACT / RESOLVED |
 | 400 | vigas: familia representativa V.80/80 (2 reglas) | SUPERSEDED_BY_EXACT_BEAM_DRAWINGS |
 | 500 | escaleras (2 reglas de metadata) | DETAIL_FROM_DRAWING |
 
-Conteo total de reglas: **118** (95 mesh + 17 local + 1 wall + 1 column +
-2 beams + 2 stairs).
+Conteo total de reglas: **283** (95 mesh + 17 local + 165 muros por
+elevacion + 1 muro superseded historico + 1 column + 2 beams + 2 stairs).
 
 Las **columnas LT1** (90, todas seccion `P. 70x70`) reciben el dato
 confirmado por el usuario **16 B22 longitudinales** (`ColumnReinforcementRule`,
@@ -90,28 +96,70 @@ del plano 402 (`SECC_402`) con su detalle propio.
 
 ### Estados (Status)
 - `EXACT` - zona del plano mapeada sin ambiguedad a la grilla del modelo.
-- `TYPICAL` - patron tipico del tipo (muros).
 - `SUPERSEDED_BY_EXACT_BEAM_DRAWINGS` - reglas de viga REPRESENTATIVE que
   quedan como referencia historica, reemplazadas por la armadura EXACTA
   por beam_id de los planos 400/401/402 (`lt1_beam_data.py`).
+- `SUPERSEDED_BY_EXACT_WALL_ELEVATIONS` - el patron tipico de muros
+  (antiguo `TYPICAL`) queda como referencia historica, reemplazado por los
+  registros especificos de las elevaciones 300-303 (`lt1_wall_data.py`).
+  La regla NO se asigna a geometria (bucket `superseded`).
 - `NEEDS_EXACT_ZONE_MAPPING` - la zona menciona ejes fuera de la grilla
   LT1 (IB, H1-H2, 1BB, 1C, 8, Ga, J, 2a, 1'' y losas 111/219-221/313-315/
   322/324/404/415-416/426).
 - `NEEDS_NOTATION_CONFIRMATION` - nomenclatura que parece estribo (viga/
   eje 1, viga/eje 3, Φ16@14 + Φ12@12 en 200-S). No reinterpretada.
 - `NEEDS_DRAWING_VALUE_CONFIRMATION` - dato del plano no legible o no
-  asociable sin ambiguedad; NO se rellena por inferencia.
-- `DETAIL_FROM_DRAWING_REQUIRED` - escaleras.
+  asociable sin ambiguedad; NO se rellena por inferencia. Es el estado de
+  todos los registros de muro 300-303 (las cifras no son texto en el PDF).
+- `DETAIL_FROM_DRAWING_REQUIRED` - escaleras y el detalle `CORTE A` del
+  plano 300.
 
 ### Resolucion de zonas (asignacion, corrida de cierre)
 ```
 mesh : resolved 61 | unresolved 34
 local: resolved 15 | unresolved  2
-walls: resolved  1 | unresolved  0
+walls: resolved 165 (RESOLVED_METADATA por elevacion) | unresolved 0 |
+       superseded 1 (regla tipica historica, sin geometria)
 cols : resolved  1 (RESOLVED, 90 tags, geometry_pending) | unresolved 0
 beams: resolved  2 (RESOLVED_METADATA, SUPERSEDED) | unresolved 0
 stairs: resolved 0 | unresolved 2 (DETAIL_FROM_DRAWING_REQUIRED)
 ```
+
+### Muros: correccion final por elevaciones 300-303
+Antes: una regla tipica unica "E + 6T B10@10 ; M.H.A e=20 ; D.M.V B10@12 ;
+D.M.V B10@20" para TODOS los muros. Correccion: se contesta "solo
+muestran un muro típico" con la armadura ESPECIFICA por muro:
+
+- **Plano 300** (elevacion longitudinal principal, ejes `E',E,F',F,G,H,
+  I',I,J`): 82 registros. Cuatro clases por eje sobre PISO_1S..CUBIERTA
+  (BOUNDARY, DISTRIBUTED_VERTICAL, DISTRIBUTED_HORIZONTAL, LOCAL),
+  STARTER desde FUNDACION_SUP..PISO_1S y LAP por cada frontera de nivel
+  (PISO_1S-PISO_1 ... PISO_3-PISO_4) para preservar cambios por piso.
+  Incluye `CORTE A` como DETAIL_FROM_DRAWING_REQUIRED.
+- **Plano 301** (elevaciones 1'', 1A, 1C, 1b, 1AA, 1BB): 32 registros.
+  1'' es multi-piso con cambios de armadura a lo largo de la altura
+  (tramos por nivel + LAP). `1A` y `1BB` son de geometria
+  inclinada/variable: `geometry_special=True`, classification
+  SPECIAL_GEOMETRY, JAMAS se copia armadura de un muro vertical. `1b`
+  es el muro longitudinal del nivel inferior (marcador 1°S). Las
+  anotaciones legibles V.F. 15/225, V. 15/125, V. 15/VAR, V. 20/80 se
+  conservan como transcripcion literal sin asignacion de ubicacion.
+- **Plano 302** (elevacion completa, familia independiente): 6 registros
+  (BOUNDARY, DIST_VERT, DIST_HORIZ, LOCAL, STARTER, LAP); sin ejes/niveles
+  legibles en el PDF.
+- **Plano 303** (elevacion larga, mismos ejes que 300): 45 registros
+  (5 clases por eje); niveles no legibles -> tramos por confirmar.
+
+Los valores (cantidad/diametro/espaciamiento/longitud/anclaje) NO son
+texto en los PDFs (son trazos de dibujo): por regla del proyecto quedan
+`None` con `status=NEEDS_DRAWING_VALUE_CONFIRMATION` y
+`geometry_pending=True`. **No se inventa ningun valor, no se inventan
+recubrimientos ni configuraciones transversales** (no hay barras 3D de
+muro). La correspondencia eje->elementTag FE del modelo no es inequivoca
+(la elevacion se desarrolla en E'..J; el modelo LT1 modela 6 muros
+PISO_1-PISO_2), por lo que `element_tags` quedan VACIOS.
+La lista `armadura_lt1_necesita_confirmacion.csv` enumera los 165
+registros con lo que falta confirmar en pliego.
 
 ### Vigas reales (planos 400/401/402)
 - La armadura por beam_id se transcribe en `lt1_beam_data.py` con
@@ -198,8 +246,14 @@ python -c "import sys; sys.path.insert(0,'COMBINADO/src'); from reinforcement.va
 2. Las firmas **"viga/eje 1"** y **"viga/eje 3"** del plano 204 se
    clasifican como STIRRUP / NEEDS_NOTATION_CONFIRMATION (parecen
    estribos, no malla); se conserva la lectura literal.
-3. **Muro**: se registra UNA familia tipica (todos los muros LT1 con el
-   mismo patron del plano). No hay distribucion barra a barra por muro.
+3. **Muro**: correccion final - se abandona la familia tipica unica
+   (`SUPERSEDED_BY_EXACT_WALL_ELEVATIONS`, conservada como referencia
+   historica en el bucket `superseded`, sin geometria) y se registra la
+   armadura ESPECIFICA por elevacion/eje/nivel de los planos 300-303
+   (`lt1_wall_data.py`, 165 registros). Los valores de barra no legibles
+   quedan `None`/NEEDS_DRAWING_VALUE_CONFIRMATION; los muros inclinados
+   (1A, 1BB) se marcan `geometry_special`; no se inventan recubrimientos,
+   configuraciones ni correspondencias eje->tag FE.
 4. **Vigas (serie 400)**: la transcripcion inicial REPRESENTATIVE queda
    marcada `SUPERSEDED_BY_EXACT_BEAM_DRAWINGS`; la armadura exacta por
    beam_id se registra en `lt1_beam_data.py` a partir de los planos

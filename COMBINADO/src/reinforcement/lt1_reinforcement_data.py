@@ -20,6 +20,9 @@ CONVENCIONES DE LA TRANSCRIPCION:
   levantar la armadura EXACTA por viga de los planos 400/401/402
   (lt1_beam_data). Sus BeamRule aqui son SOLO referencia historica.
 - Escaleras (serie 500): metadata con DETAIL_FROM_DRAWING_REQUIRED.
+- Muros (serie 300): el patron tipico inicial queda
+  SUPERSEDED_BY_EXACT_WALL_ELEVATIONS; los registros especificos por
+  elevacion/eje/nivel de 300-303 viven en `lt1_wall_data`.
 
 Este modulo NO depende de OpenSeesPy ni del modelo combinado.
 """
@@ -74,7 +77,7 @@ DRAWING_TITLES: Dict[str, str] = {
     "203": "LOSA CIELO 2° PISO",
     "204": "LOSA CIELO 3° PISO",
     "205": "LOSA CIELO 4° PISO",
-    "300": "MUROS (patron tipico todos los pisos)",
+    "300": "MUROS (patron tipico reemplazado por elevaciones 300-303)",
     "400": "VIGAS (familia representativa)",
     "500": "ESCALERAS",
 }
@@ -544,9 +547,14 @@ def _muros() -> List[WallRule]:
             id=RuleId("LT1", "2017_67-300-Model", "300", s.next("300")),
             zone=Zone(kind=ZoneKind.GENERAL, text="todos los muros LT1 (tipicos)"),
             notation="E + 6T B10@10 ; M.H.A e=20 ; D.M.V B10@12 ; D.M.V B10@20",
-            status=Status.TYPICAL,
-            note="nomenclatura literal del plano; los seis muros del modelo "
-                 "usan la misma familia tipica.",
+            status=Status.SUPERSEDED_BY_EXACT_WALL_ELEVATIONS,
+            note="Nomenclatura literal del plano levantada en la transcripcion "
+                 "inicial como patron tipico unico para todos los muros LT1. "
+                 "SUSPENDIDA como fuente activa de asignacion: NO todos los "
+                 "muros tienen la misma armadura. Reemplazada por los "
+                 "registros especificos por elevacion/eje/nivel de las "
+                 "elevaciones 300-303 (`lt1_wall_data`). Conservada SOLO "
+                 "como referencia historica/trazabilidad; no genera geometria.",
         )
     ]
 

@@ -122,9 +122,9 @@ def test_vigas_supersedidas(dataset):
         assert r.status == Status.SUPERSEDED_BY_EXACT_BEAM_DRAWINGS
 
 
-def test_muros_tipicos(dataset):
+def test_muros_tipicos_supersedidos(dataset):
     assert len(dataset["walls"]) == 1
-    assert dataset["walls"][0].status == Status.TYPICAL
+    assert dataset["walls"][0].status == Status.SUPERSEDED_BY_EXACT_WALL_ELEVATIONS
 
 
 def test_escaleras_requieren_detalle(dataset):
@@ -167,11 +167,26 @@ def test_losas_plano_no_mapeadas(assigner):
     assert losas
 
 
-def test_muros_resueltos_con_tags(assigner, geo):
-    assert len(assigner.resolved["walls"]) == 1
-    w = assigner.resolved["walls"][0]
-    assert w.resolution == Resolution.RESOLVED
-    assert str(geo.wall_tags()[0]) in w.zone.note
+def test_muros_supersedidos_sin_geometria(assigner, geo):
+    assert len(assigner.superseded["walls"]) == 1
+    w = assigner.superseded["walls"][0]
+    assert w.resolution == Resolution.RESOLVED_METADATA
+    # la regla historica NO debe asociarse a tags ni quedar "aplicable"
+    assert "tags muros LT1" not in w.zone.note
+    assert w.status == Status.SUPERSEDED_BY_EXACT_WALL_ELEVATIONS
+
+
+def test_muros_especificos_por_elevacion(assigner):
+    # la armadura activa de muros son registros por elevacion/eje/nivel
+    walls = assigner.resolved["walls"]
+    assert len(walls) >= 160
+    for r in walls:
+        assert r.resolution == Resolution.RESOLVED_METADATA
+        assert r.element_tags == []  # NO se inventan correspondencias FE
+    sheets = {w.id.sheet for w in walls}
+    assert sheets >= {"300", "301", "302", "303"}
+    # el viejo patron tipico no aparece como regla activa (no hay TYPICAL)
+    assert not any(w.status == Status.TYPICAL for w in walls)
 
 
 def test_vigas_metadata_no_obligatoria(assigner):

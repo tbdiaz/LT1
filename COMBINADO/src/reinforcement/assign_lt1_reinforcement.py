@@ -10,7 +10,13 @@ REGLAS SOBRE EL MAPEO:
   NO se aplica a geometria: queda PARTIAL/UNRESOLVED con su razon.
 - Las franjas sobre un eje ("Eje I") se resuelven a la linea del eje pero
   el ANCHO de la franja no se infiere: queda PARTIAL (ancho del plano).
-- Los muros: asociacion por family al los 6 muros LT1 (tags 400001-400006).
+- Los muros: la regla tipica historica queda SUSPENDIDA (ver su nota) y se
+  reporta en el bucket `superseded` SOLO por trazabilidad, SIN asociarle
+  tags ni geometria. La armadura activa de muros son los registros
+  especificos por elevacion/eje/nivel de 300-303 (`lt1_wall_data`),
+  asociados como RESOLVED_METADATA: la correspondencia eje->muro FE del
+  modelo no es inequivoca (la elevacion usa ejes E'..J; el modelo LT1
+  modela 6 muros PISO_1-PISO_2), por lo que NO se llenan element_tags.
 - Columnas: dato confirmado 16 B22 LONGITUDINAL para TODAS las columnas
   LT1; la asociacion a los 90 tags es inequivoca (seccion unica P.70x70)
   y queda RESOLVED con geometry_pending=True.
@@ -32,6 +38,7 @@ from .lt1_reinforcement_data import (
     FLOOR_TO_LEVEL_UNCONFIRMED,
     load_lt1_reinforcement,
 )
+from .lt1_wall_data import load_lt1_wall_data
 from .reinforcement_types import (
     BeamRule,
     ColumnReinforcementRule,
@@ -40,9 +47,11 @@ from .reinforcement_types import (
     Resolution,
     RuleId,
     StairRule,
+    Status,
     WallRule,
     Zone,
     ZoneKind,
+    WallReinforcementRecord,
 )
 
 
@@ -222,6 +231,9 @@ class Lt1ReinforcementAssigner:
         self.partial: Dict[str, List] = {"mesh": [], "local": [], "walls": [],
                                          "columns": [], "beams": [],
                                          "stairs": []}
+        self.superseded: Dict[str, List] = {"mesh": [], "local": [], "walls": [],
+                                            "columns": [], "beams": [],
+                                            "stairs": []}
 
     # ------------------------------------------------------------------
     def run(self) -> "Lt1ReinforcementAssigner":
@@ -254,13 +266,28 @@ class Lt1ReinforcementAssigner:
             self._bucket(rule, "local")
 
     def _assign_walls(self) -> None:
-        # familia tipica: se asocia a los 6 muros del modelo (tags nativos)
+        # (1) regla tipica historica: SUPERSEDED por la lectura especifica
+        # de elevaciones. NO se le asocian tags ni geometria; queda en el
+        # bucket superseded SOLO para trazabilidad.
         for rule in self.data["walls"]:
-            rule.zone = Zone(kind=ZoneKind.GENERAL,
-                             text=rule.zone.text,
-                             note=f"tags muros LT1: {self.geo.wall_tags()}")
-            rule.resolution = Resolution.RESOLVED
-            self.resolved["walls"].append(rule)
+            rule.zone = Zone(
+                kind=ZoneKind.GENERAL,
+                text=rule.zone.text,
+                note="regla SUSPENDIDA (SUPERSEDED_BY_EXACT_WALL_ELEVATIONS): "
+                     "NO se aplica a geometria; conservada solo como "
+                     "referencia historica. La armadura activa de muros son "
+                     "los registros por elevacion/eje/nivel de 300-303.",
+            )
+            rule.resolution = Resolution.RESOLVED_METADATA
+            self.superseded["walls"].append(rule)
+
+        # (2) registros especificos por elevacion/eje/nivel: un registro
+        # por eje/clase/tramo. RESOLVED_METADATA: la asociacion eje->muro
+        # FE no es inequivoca (elevacion en ejes E'..J; el modelo LT1
+        # modela 6 muros PISO_1-PISO_2) -> element_tags quedan VACIOS,
+        # sin inventar correspondencias.
+        for rec in load_lt1_wall_data()["records"]:
+            self.resolved["walls"].append(rec)
 
     def _assign_columns(self) -> None:
         # 16 B22 LONGITUDINAL confirmado para todas las columnas LT1
@@ -342,13 +369,16 @@ class Lt1ReinforcementAssigner:
                 "resolved": len(self.resolved[key]),
                 "partial": len(self.partial[key]),
                 "unresolved": len(self.unresolved[key]),
+                "superseded": len(self.superseded[key]),
             }
         return out
 
     def to_rows(self) -> List[Dict]:
         rows: List[Dict] = []
         for key in ("mesh", "local", "walls", "columns", "beams", "stairs"):
-            for rule in (self.resolved[key] + self.partial[key] + self.unresolved[key]):
+            bucket = (self.resolved[key] + self.partial[key] + self.unresolved[key]
+                      + self.superseded[key])
+            for rule in bucket:
                 d = rule.to_dict()
                 d["category"] = key
                 rows.append(d)

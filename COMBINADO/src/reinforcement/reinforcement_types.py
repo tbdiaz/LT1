@@ -39,6 +39,7 @@ class Status(str, Enum):
     TYPICAL = "TYPICAL"
     REPRESENTATIVE = "REPRESENTATIVE"
     SUPERSEDED_BY_EXACT_BEAM_DRAWINGS = "SUPERSEDED_BY_EXACT_BEAM_DRAWINGS"
+    SUPERSEDED_BY_EXACT_WALL_ELEVATIONS = "SUPERSEDED_BY_EXACT_WALL_ELEVATIONS"
     NEEDS_EXACT_ZONE_MAPPING = "NEEDS_EXACT_ZONE_MAPPING"
     NEEDS_NOTATION_CONFIRMATION = "NEEDS_NOTATION_CONFIRMATION"
     NEEDS_DRAWING_VALUE_CONFIRMATION = "NEEDS_DRAWING_VALUE_CONFIRMATION"
@@ -148,13 +149,24 @@ class WallReinforcementClass(str, Enum):
     """Clasificacion de la armadura dentro del registro de muro.
 
     - BOUNDARY: grupos de barras longitudinales concentradas en los bordes.
-    - DISTRIBUTED: armadura distribuida (alma / enmallados).
+    - DISTRIBUTED: armadura distribuida (alma / enmallados), LT2.
+    - DISTRIBUTED_VERTICAL: armadura distribuida vertical (alma).
+    - DISTRIBUTED_HORIZONTAL: armadura distribuida horizontal (alma).
     - LOCAL: refuerzo local (encuentros, arranques, anclajes).
+    - STARTER: refuerzo de arranque desde la fundacion.
+    - LAP: empalme de barra por nivel.
+    - SPECIAL_GEOMETRY: muro con geometria variable/inclinada (NO se
+      aproxima a un muro rectangular tipico).
     """
 
     BOUNDARY = "BOUNDARY"
     DISTRIBUTED = "DISTRIBUTED"
+    DISTRIBUTED_VERTICAL = "DISTRIBUTED_VERTICAL"
+    DISTRIBUTED_HORIZONTAL = "DISTRIBUTED_HORIZONTAL"
     LOCAL = "LOCAL"
+    STARTER = "STARTER"
+    LAP = "LAP"
+    SPECIAL_GEOMETRY = "SPECIAL_GEOMETRY"
 
 
 class StairPart(str, Enum):
@@ -616,24 +628,33 @@ class BeamRecord:
 # ---------------------------------------------------------------------------
 @dataclass
 class WallReinforcementRecord:
-    """Registro de armadura de muro LT2 asociado a una elevacion/eje.
+    """Registro de armadura de muro asociado a una elevacion/eje (LT1/LT2).
 
     Un registro describe el refuerzo de un muro (o grupo inequivoco de
     muros) para un tramo vertical ``level_start``-``level_end``. Los
     detalles se desglosan en ``boundary_groups`` (grupos de borde),
     ``distributed`` (alma) y ``local`` (refuerzos puntuales).
 
+    Para LT1 los registros provienen de las elevaciones 300-303:
+    cada registro lleva ``drawing``, ``axis``/``elevation``, tramo de
+    niveles, clasificacion y -- cuando se lee el plano -- cantidad,
+    diametro, espaciamiento, longitud y anclaje. Si algun valor no se
+    puede leer con certeza queda ``None`` y el ``status`` documenta esa
+    limitacion (nunca se infiere).
+
     Reglas del proyecto:
     - NO se aplica como regla universal a "todas las paredes" del modelo.
     - NO se infiere continuidad entre pisos solo por alineacion grafica.
-    - ``wall_parents`` solo se llenan cuando la correspondencia eje->muro
-      del modelo es inequivoca (ej. eje 1 -> M002, eje 3 -> M004).
+    - ``physical_wall_id`` / ``element_tags`` solo se llenan cuando la
+      correspondencia eje->muro del modelo es inequivoca.
+    - ``geometry_special=True`` para muros inclinados/geometria variable
+      (ej. EJE 1A / 1BB del plano 301): no se aproximan a muro tipico.
     """
 
     id: RuleId
-    axis: str                          # eje/elevacion del plano (ej. "1'", "A'", "3")
-    level_start: str                   # nivel inferior del tramo (ej. "B1")
-    level_end: str                     # nivel superior del tramo (ej. "L1")
+    axis: str                          # eje/elevacion del plano (ej. "1'", "E'", "1''")
+    level_start: str                   # nivel inferior del tramo (ej. "PISO_1S")
+    level_end: str                     # nivel superior del tramo (ej. "CUBIERTA")
     orientation: WallOrientation = WallOrientation.VERTICAL
     classification: WallReinforcementClass = WallReinforcementClass.BOUNDARY
     bar_count: Optional[int] = None    # None si la cifra no es legible
@@ -641,8 +662,13 @@ class WallReinforcementRecord:
     spacing_cm: Optional[int] = None
     length_cm: Optional[int] = None
     lap_anchorage: str = ""            # empalme/anclaje segun plano (texto)
+    anchorage: str = ""                # anclaje/desarrollo segun plano (texto)
     face_edge: str = ""                # cara/borde, ej. "cara interior", "borde izq"
+    edge: str = ""                     # borde del muro segun elevacion
     wall_parents: List[str] = field(default_factory=list)   # ids muros LT2 (M001...)
+    physical_wall_id: str = ""         # identificacion fisica del muro LT1 (si inequivoca)
+    element_tags: List[int] = field(default_factory=list)   # elementTags FE asociados
+    geometry_special: bool = False     # geometria variable/inclinada (1A/1BB)
     status: Status = Status.EXACT
     source: str = "EXACT_DRAWING"
     note: str = ""
@@ -665,8 +691,13 @@ class WallReinforcementRecord:
             "spacing_cm": self.spacing_cm,
             "length_cm": self.length_cm,
             "lap_anchorage": self.lap_anchorage,
+            "anchorage": self.anchorage,
             "face_edge": self.face_edge,
+            "edge": self.edge,
             "wall_parents": ";".join(self.wall_parents),
+            "physical_wall_id": self.physical_wall_id,
+            "element_tags": ";".join(str(t) for t in self.element_tags),
+            "geometry_special": self.geometry_special,
             "status": self.status.value,
             "source": self.source,
             "geometry_pending": self.geometry_pending,

@@ -29,6 +29,7 @@ from .assign_lt1_reinforcement import Lt1ReinforcementAssigner
 from .lt1_beam_data import load_lt1_beam_data
 from .lt1_geometry import Lt1Geometry
 from .lt1_reinforcement_data import load_lt1_reinforcement
+from .lt1_wall_data import PLAN_300_303_AXES, load_lt1_wall_data
 from .reinforcement_geometry import ReinforcementGeometryBuilder
 from .reinforcement_types import (
     BeamBarLayer,
@@ -41,6 +42,8 @@ from .reinforcement_types import (
     MeshRule,
     Resolution,
     Status,
+    WallReinforcementClass,
+    WallReinforcementRecord,
 )
 
 # Baseline estructural del modelo combinado (sin armadura). Valores
@@ -96,12 +99,37 @@ def validate_dataset() -> Dict[str, object]:
                         "sin recubrimiento confirmado"
                     )
 
+    # ---- registros especificos de muros LT1 (elevaciones 300-303) ----
+    wall_records = load_lt1_wall_data()["records"]
+    from collections import Counter
+    wall_by_sheet = Counter(r.id.sheet for r in wall_records)
+    for r in wall_records:
+        if r.status.value not in VALID_STATUS:
+            errors.append(f"{r.id}: status invalido {r.status}")
+        if r.resolution.value not in VALID_RESOLUTION:
+            errors.append(f"{r.id}: resolution invalido {r.resolution}")
+        if r.classification not in WallReinforcementClass:
+            errors.append(f"{r.id}: classification invalido {r.classification}")
+        for name, value in (("bar_count", r.bar_count), ("diameter_mm", r.diameter_mm),
+                            ("spacing_cm", r.spacing_cm), ("length_cm", r.length_cm)):
+            if value is not None:
+                if value <= 0:
+                    errors.append(f"{r.id}: {name} <= 0 ({value})")
+                if r.status != Status.EXACT:
+                    warnings.append(f"{r.id}: {name}={value} con status "
+                                    f"{r.status.value} (no EXACT)")
+        if r.status == Status.EXACT and (r.bar_count is None or r.diameter_mm is None):
+            errors.append(f"{r.id}: status EXACT sin valores (bar_count/"
+                          f"diameter_mm = None)")
+        if r.element_tags:
+            errors.append(f"{r.id}: element_tags no vacios sin correspondencia "
+                          "eje->muro FE inequivoca (se prohibe inventar tags).")
+
     assigner = Lt1ReinforcementAssigner().run()
     summary = assigner.summary()
     rows = assigner.to_rows()
 
     # conteos por status
-    from collections import Counter
     status_counts = Counter(r["status"] for r in rows)
     resolution_counts = Counter(r["resolution"] for r in rows)
 
@@ -112,6 +140,8 @@ def validate_dataset() -> Dict[str, object]:
         "resolution_counts": dict(resolution_counts),
         "summary": summary,
         "n_reglas": len(rows),
+        "wall_by_sheet": dict(wall_by_sheet),
+        "n_wall_records": len(wall_records),
     }
 
 
@@ -378,6 +408,40 @@ def write_beam_outputs(out_dir: Path) -> Dict[str, Path]:
     }
 
 
+def wall_rows() -> List[Dict]:
+    """Una fila por registro especifico de muro LT1 (elevaciones 300-303)."""
+    return [r.to_dict() for r in load_lt1_wall_data()["records"]]
+
+
+def wall_confirmation_rows() -> List[Dict]:
+    """Registros de muro que requieren confirmacion de valores en pliego."""
+    rows: List[Dict] = []
+    for r in load_lt1_wall_data()["records"]:
+        if r.status.value in (
+            Status.NEEDS_DRAWING_VALUE_CONFIRMATION.value,
+            Status.DETAIL_FROM_DRAWING_REQUIRED.value,
+        ):
+            rows.append({
+                "code": str(r.id),
+                "sheet": r.id.sheet,
+                "drawing": r.id.drawing,
+                "elevation": r.id.sheet,
+                "axis": r.axis,
+                "level_start": r.level_start,
+                "level_end": r.level_end,
+                "classification": r.classification.value,
+                "bar_count": r.bar_count,
+                "diameter_mm": r.diameter_mm,
+                "spacing_cm": r.spacing_cm,
+                "length_cm": r.length_cm,
+                "status": r.status.value,
+                "resolution": r.resolution.value,
+                "geometry_pending": r.geometry_pending,
+                "note": r.note,
+            })
+    return rows
+
+
 def write_outputs(out_dir: Path) -> Dict[str, Path]:
     """Persiste CSV del dataset y CSV de barras 3D."""
     import csv
@@ -411,7 +475,13 @@ def write_outputs(out_dir: Path) -> Dict[str, Path]:
     csv_cols = out_dir / "armadura_lt1_columnas.csv"
     _write_csv(csv_cols, column_rows())
 
-    out = {"rules": csv_rules, "bars": csv_bars, "columns": csv_cols}
+    csv_walls = out_dir / "armadura_lt1_muros.csv"
+    _write_csv(csv_walls, wall_rows())
+    csv_wall_needs = out_dir / "armadura_lt1_necesita_confirmacion.csv"
+    _write_csv(csv_wall_needs, wall_confirmation_rows())
+
+    out = {"rules": csv_rules, "bars": csv_bars, "columns": csv_cols,
+           "walls": csv_walls, "walls_confirmation": csv_wall_needs}
     out.update(write_beam_outputs(out_dir))
     return out
 
