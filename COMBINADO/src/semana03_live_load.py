@@ -9,11 +9,24 @@ Fuentes reutilizadas (se leen, NO se modifican):
          results/gravity_loads_applied_LT2.csv         (posiciones xloc)
   - LT1: outputs/unity/modelo_lt1.json                 (area_tributaria_m2)
 
+CRITERIO DE q_Q (CIERRE DEFINITIVO DE PARTE A):
+  - NCh1537.Of2009, Tabla 4, edificacion EDUCACIONAL:
+      salas de clases : 3.0 kPa ;  pasillos : 4.0 kPa.
+  - Los planos estructurales disponibles de LT1 y LT2 no permiten identificar
+    ni separar con certeza las salas de clases y los pasillos (no existen
+    planos arquitectonicos con la zonificacion de usos).
+  - Por ello se adopta para esta entrega q_Q = 4.0 kPa = 4.0 kN/m2 UNIFORME en
+    las superficies transitables de LT1 y LT2 (unico valor que la Tabla 4
+    asigna a un espacio de circulacion en edificacion educacional).
+  - 4.0 kPa es una HIPOTESIS CONSERVADORA DE MODELACION por la ausencia de
+    planos arquitectonicos que permitan zonificar los usos. NO se afirma que
+    NCh1537 exija 4.0 kPa para TODAS las superficies de un edificio
+    educacional.
+  - Se REEMPLAZA el q_Q provisional anterior (2.0 kPa). Las SC zonales del
+    plano LT1 NO se integran al modelo de Semana 3 (propuesta descartada).
+
 q_Q es una INTENSIDAD DE ENTRADA configurable (constante Q_Q en este modulo o
-variable de entorno LT1_Q_Q_KPA). NO se inventa ningun valor del repositorio:
-la sobrecarga de uso no esta definida en slabs_LT2.csv (SC vacio) ni en los
-enunciados, por lo que el valor por defecto es PROVISIONAL y queda marcado
-INPUT_REQUIRED hasta que el profesor confirme la intensidad.
+variable de entorno LT1_Q_Q_KPA); el modelo (geometria tributaria) no cambia.
 
 Verificaciones incluidas (idem Semana 2 pero para Q):
   1) conservacion por nivel y por origen (LT1/LT2) y global:
@@ -50,9 +63,14 @@ TRIB_LT2 = ROOT / "LT2" / "data" / "loads" / "tributary_areas_LT2.csv"
 
 Q_G_LT2 = 6.22935  # qG de losa (kN/m2) L1-L4, dato de LT2 (se verifica)
 
-# Intensidad de carga viva. PROVISIONAL (INPUT_REQUIRED): no existe en el
-# repositorio; valor de prueba 200 kg/m2 = 2.0 kPa. Configurable por env.
-Q_Q = float(os.environ.get("LT1_Q_Q_KPA", "2.0"))
+# Intensidad de carga viva q_Q (CIERRE DEFINITIVO DE PARTE A):
+#   NCh1537.Of2009 Tabla 4 (edificacion educacional): salas de clases
+#   3.0 kPa, pasillos 4.0 kPa. Sin planos arquitectonicos para zonificar
+#   los usos, se adopta q_Q = 4.0 kPa UNIFORME como HIPOTESIS CONSERVADORA
+#   de modelacion sobre las superficies transitables de LT1 y LT2 (NCh1537
+#   NO exige 4.0 kPa en todas las superficies de un edificio educacional).
+#   Configurable por env (LT1_Q_Q_KPA).
+Q_Q = float(os.environ.get("LT1_Q_Q_KPA", "4.0"))
 
 TOL_REL = 1e-6        # tolerancia relativa de conservacion
 NI_VEL = {            # LT1 -> nivel combinado
@@ -255,8 +273,28 @@ def write_resumen(cons, lt2, lt1, eq):
     fa = cons[cons["nivel"] == "TOTAL"].set_index("origen")
     lin = ["# SEMANA 3 - PARTE A: caso de carga viva Q",
            "",
-           f"- q_Q = **{Q_Q} kPa** (PROVISIONAL / INPUT_REQUIRED; sin valor "
-           "en slabs_LT2.csv ni en enunciados).",
+           f"- q_Q = **{Q_Q} kPa = {Q_Q} kN/m2** (CIERRE DEFINITIVO DE "
+           "PARTE A).",
+           "",
+           "## Criterio de q_Q (NCh1537.Of2009, Tabla 4)",
+           "",
+           "- Edificacion **EDUCACIONAL** segun NCh1537.Of2009 Tabla 4: "
+           "salas de clases = 3.0 kPa; pasillos = 4.0 kPa.",
+           "- Los planos estructurales disponibles de LT1 y LT2 no permiten "
+           "identificar ni separar con certeza salas de clases y pasillos "
+           "(no existen planos arquitectonicos que zonifiquen los usos).",
+           f"- Se adopta para esta entrega **q_Q = {Q_Q} kPa = {Q_Q} "
+           "kN/m2** UNIFORME en las superficies transitables de LT1 y LT2.",
+           f"- **{Q_Q} kPa es una HIPOTESIS CONSERVADORA DE MODELACION** "
+           "por la ausencia de planos arquitectonicos que permitan "
+           "zonificar los usos. NO se afirma que NCh1537 exija 4.0 kPa "
+           "para TODAS las superficies de un edificio educacional.",
+           "- Se REEMPLAZA el q_Q provisional anterior (2.0 kPa); las SC "
+           "zonales del plano LT1 NO se integran al modelo (propuesta "
+           "descartada).",
+           "- La geometria tributaria de la Semana 2 se mantiene EXACTA: no "
+           "se recalcularon poligonos ni areas tributarias; cada franja de "
+           "carga cierra a area_franja * q_Q.",
            "",
            "## Conservacion  sum(Q_transferida) = q_Q * area_tributaria",
            "",
@@ -280,14 +318,33 @@ def write_resumen(cons, lt2, lt1, eq):
     lin.append(f"- sum |Rx| = {abs(eq['sum_Rx_kN']):.3e} kN; "
                f"sum |Ry| = {abs(eq['sum_Ry_kN']):.3e} kN.")
     lin.append("")
-    (OUT_S3 / "resumen_semana03.md").write_text("\n".join(lin),
-                                                encoding="utf-8")
+    # Conserva (sin recalcular) la seccion de Parte B ya existente en el
+    # resumen: esta cierre de Parte A NO recalcula B, pero no debe borrarla.
+    prev = OUT_S3 / "resumen_semana03.md"
+    prev_text = prev.read_text(encoding="utf-8").rstrip() \
+        if prev.exists() else ""
+    marker = "## SEMANA 3 - PARTE B"
+    if marker in prev_text:
+        lines_prev = prev_text.splitlines()
+        idx = next(i for i, ln in enumerate(lines_prev)
+                   if ln.startswith(marker))
+        b_lines = lines_prev[idx:]
+        note = ("**NOTA (seccion PREVIA):** la Parte B que sigue fue "
+                "calculada con el q_Q ANTERIOR = 2.0 kPa. NO se recalculo "
+                "en este cierre de Parte A; queda PENDIENTE de actualizar "
+                f"con q_Q = {Q_Q} kPa cuando lo indique el usuario.")
+        b_section = ("\n" + b_lines[0] + "\n\n" + note + "\n\n"
+                     + "\n".join(b_lines[1:]).rstrip() + "\n")
+    else:
+        b_section = ""
+    (OUT_S3 / "resumen_semana03.md").write_text(
+        "\n".join(lin).rstrip() + b_section, encoding="utf-8")
 
 
 def main():
     print("=" * 72)
     print(f"SEMANA 3 - PARTE A | CARGA VIVA Q | q_Q = {Q_Q} kPa "
-          "(PROVISIONAL / INPUT_REQUIRED)")
+          "(NCh1537.Of2009 Tabla 4 - educacional; hipotesis conservadora)")
     print("=" * 72)
 
     b = CombinedBuilder()
