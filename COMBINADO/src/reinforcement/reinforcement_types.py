@@ -133,6 +133,47 @@ class ZoneKind(str, Enum):
     FREE_TEXT = "FREE_TEXT"
 
 
+class WallOrientation(str, Enum):
+    """Orientacion de las barras dentro de un muro.
+
+    - VERTICAL: barras longitudinales verticales (altura del muro).
+    - HORIZONTAL: barras horizontales del muro.
+    """
+
+    VERTICAL = "VERTICAL"
+    HORIZONTAL = "HORIZONTAL"
+
+
+class WallReinforcementClass(str, Enum):
+    """Clasificacion de la armadura dentro del registro de muro.
+
+    - BOUNDARY: grupos de barras longitudinales concentradas en los bordes.
+    - DISTRIBUTED: armadura distribuida (alma / enmallados).
+    - LOCAL: refuerzo local (encuentros, arranques, anclajes).
+    """
+
+    BOUNDARY = "BOUNDARY"
+    DISTRIBUTED = "DISTRIBUTED"
+    LOCAL = "LOCAL"
+
+
+class StairPart(str, Enum):
+    """Parte de escalera donde se ubica la armadura.
+
+    - FLIGHT_RAMP: tramo o rampa inclinada.
+    - LANDING: descanso.
+    - SUPPORT_LOCAL: conexion/apoyo local (rampa-descanso, arranques).
+    - EDGE: borde del tramo.
+    - DETAIL: detalle (PL1/PL2/PL3) referenciado en el plano.
+    """
+
+    FLIGHT_RAMP = "FLIGHT_RAMP"
+    LANDING = "LANDING"
+    SUPPORT_LOCAL = "SUPPORT_LOCAL"
+    EDGE = "EDGE"
+    DETAIL = "DETAIL"
+
+
 @dataclass
 class RuleId:
     """Identificador trazable de una regla."""
@@ -541,6 +582,7 @@ class BeamRecord:
     sheet: str                       # ej. "400", "401 (2)", "402 (1)"
     section: str                     # ej. "V.60/80", "V.S.I. 20/150", "V.20/VAR"
     kind: BeamKind
+    building: str = "LT1"            # edificio de procedencia (LT1 / LT2)
     axes_text: str = ""              # ej. "Conjunto 3-2-1", "1b-8"
     group: str = ""                  # ej. "conjunto V100-V101"
     longitudinal: str = ""           # resumen F/F'/+/+F'
@@ -553,7 +595,7 @@ class BeamRecord:
     def to_dict(self) -> Dict[str, object]:
         return {
             "beam_id": self.beam_id,
-            "building": "LT1",
+            "building": self.building,
             "drawing": self.drawing,
             "sheet": self.sheet,
             "axes_text": self.axes_text,
@@ -564,6 +606,235 @@ class BeamRecord:
             "stirrups": self.stirrups,
             "detail_reference": self.detail_reference,
             "confidence": self.confidence.value,
+            "resolution": self.resolution.value,
+            "note": self.note,
+        }
+
+
+# ---------------------------------------------------------------------------
+# Armadura de muros LT2 (elevaciones 300-305): registros por elevacion/eje
+# ---------------------------------------------------------------------------
+@dataclass
+class WallReinforcementRecord:
+    """Registro de armadura de muro LT2 asociado a una elevacion/eje.
+
+    Un registro describe el refuerzo de un muro (o grupo inequivoco de
+    muros) para un tramo vertical ``level_start``-``level_end``. Los
+    detalles se desglosan en ``boundary_groups`` (grupos de borde),
+    ``distributed`` (alma) y ``local`` (refuerzos puntuales).
+
+    Reglas del proyecto:
+    - NO se aplica como regla universal a "todas las paredes" del modelo.
+    - NO se infiere continuidad entre pisos solo por alineacion grafica.
+    - ``wall_parents`` solo se llenan cuando la correspondencia eje->muro
+      del modelo es inequivoca (ej. eje 1 -> M002, eje 3 -> M004).
+    """
+
+    id: RuleId
+    axis: str                          # eje/elevacion del plano (ej. "1'", "A'", "3")
+    level_start: str                   # nivel inferior del tramo (ej. "B1")
+    level_end: str                     # nivel superior del tramo (ej. "L1")
+    orientation: WallOrientation = WallOrientation.VERTICAL
+    classification: WallReinforcementClass = WallReinforcementClass.BOUNDARY
+    bar_count: Optional[int] = None    # None si la cifra no es legible
+    diameter_mm: Optional[int] = None  # None si la cifra no es legible
+    spacing_cm: Optional[int] = None
+    length_cm: Optional[int] = None
+    lap_anchorage: str = ""            # empalme/anclaje segun plano (texto)
+    face_edge: str = ""                # cara/borde, ej. "cara interior", "borde izq"
+    wall_parents: List[str] = field(default_factory=list)   # ids muros LT2 (M001...)
+    status: Status = Status.EXACT
+    source: str = "EXACT_DRAWING"
+    note: str = ""
+    geometry_pending: bool = True      # sin espesor efectivo/recubrimiento/capas
+    resolution: Resolution = Resolution.RESOLVED_METADATA
+
+    def to_dict(self) -> Dict[str, object]:
+        return {
+            "code": str(self.id),
+            "building": self.id.building,
+            "drawing": self.id.drawing,
+            "sheet": self.id.sheet,
+            "axis": self.axis,
+            "level_start": self.level_start,
+            "level_end": self.level_end,
+            "orientation": self.orientation.value,
+            "classification": self.classification.value,
+            "bar_count": self.bar_count,
+            "diameter_mm": self.diameter_mm,
+            "spacing_cm": self.spacing_cm,
+            "length_cm": self.length_cm,
+            "lap_anchorage": self.lap_anchorage,
+            "face_edge": self.face_edge,
+            "wall_parents": ";".join(self.wall_parents),
+            "status": self.status.value,
+            "source": self.source,
+            "geometry_pending": self.geometry_pending,
+            "resolution": self.resolution.value,
+            "note": self.note,
+        }
+
+
+@dataclass
+class WallBoundaryBarGroup:
+    """Grupo de barras longitudinales de borde de un muro (columna).
+
+    Campos identicos a WallReinforcementRecord pero clasificacion fija
+    BOUNDARY. Permite registrar cambios por nivel (ej. mayor diametro en
+    sectores inferiores, grupos B22 en sectores superiores).
+    """
+
+    id: RuleId
+    axis: str
+    level_start: str
+    level_end: str
+    bar_count: Optional[int] = None
+    diameter_mm: Optional[int] = None
+    face_edge: str = ""
+    lap_anchorage: str = ""
+    wall_parents: List[str] = field(default_factory=list)
+    status: Status = Status.EXACT
+    source: str = "EXACT_DRAWING"
+    note: str = ""
+    geometry_pending: bool = True
+    resolution: Resolution = Resolution.RESOLVED_METADATA
+
+    def to_dict(self) -> Dict[str, object]:
+        d = WallReinforcementRecord(
+            id=self.id, axis=self.axis,
+            level_start=self.level_start, level_end=self.level_end,
+            classification=WallReinforcementClass.BOUNDARY,
+            bar_count=self.bar_count, diameter_mm=self.diameter_mm,
+            face_edge=self.face_edge, lap_anchorage=self.lap_anchorage,
+            wall_parents=self.wall_parents, status=self.status,
+            source=self.source, note=self.note,
+            geometry_pending=self.geometry_pending,
+            resolution=self.resolution,
+        ).to_dict()
+        d["record_type"] = "BOUNDARY"
+        return d
+
+
+@dataclass
+class WallDistributedReinforcement:
+    """Armadura distribuida (alma) de un muro (enmallados vertical/horizontal)."""
+
+    id: RuleId
+    axis: str
+    level_start: str
+    level_end: str
+    orientation: WallOrientation = WallOrientation.HORIZONTAL
+    diameter_mm: Optional[int] = None
+    spacing_cm: Optional[int] = None
+    face_edge: str = ""
+    wall_parents: List[str] = field(default_factory=list)
+    status: Status = Status.EXACT
+    source: str = "EXACT_DRAWING"
+    note: str = ""
+    geometry_pending: bool = True
+    resolution: Resolution = Resolution.RESOLVED_METADATA
+
+    def to_dict(self) -> Dict[str, object]:
+        d = WallReinforcementRecord(
+            id=self.id, axis=self.axis,
+            level_start=self.level_start, level_end=self.level_end,
+            orientation=self.orientation,
+            classification=WallReinforcementClass.DISTRIBUTED,
+            diameter_mm=self.diameter_mm, spacing_cm=self.spacing_cm,
+            face_edge=self.face_edge, wall_parents=self.wall_parents,
+            status=self.status, source=self.source, note=self.note,
+            geometry_pending=self.geometry_pending,
+            resolution=self.resolution,
+        ).to_dict()
+        d["record_type"] = "DISTRIBUTED"
+        return d
+
+
+@dataclass
+class WallLocalReinforcement:
+    """Refuerzo local de muro (encuentros viga/losa, arranques, anclajes)."""
+
+    id: RuleId
+    axis: str
+    level_start: str
+    level_end: str
+    face_edge: str = ""
+    bar_count: Optional[int] = None
+    diameter_mm: Optional[int] = None
+    spacing_cm: Optional[int] = None
+    length_cm: Optional[int] = None
+    lap_anchorage: str = ""
+    wall_parents: List[str] = field(default_factory=list)
+    status: Status = Status.EXACT
+    source: str = "EXACT_DRAWING"
+    note: str = ""
+    geometry_pending: bool = True
+    resolution: Resolution = Resolution.RESOLVED_METADATA
+
+    def to_dict(self) -> Dict[str, object]:
+        d = WallReinforcementRecord(
+            id=self.id, axis=self.axis,
+            level_start=self.level_start, level_end=self.level_end,
+            classification=WallReinforcementClass.LOCAL,
+            bar_count=self.bar_count, diameter_mm=self.diameter_mm,
+            spacing_cm=self.spacing_cm, length_cm=self.length_cm,
+            lap_anchorage=self.lap_anchorage, face_edge=self.face_edge,
+            wall_parents=self.wall_parents, status=self.status,
+            source=self.source, note=self.note,
+            geometry_pending=self.geometry_pending,
+            resolution=self.resolution,
+        ).to_dict()
+        d["record_type"] = "LOCAL"
+        return d
+
+
+# ---------------------------------------------------------------------------
+# Armadura de escaleras LT2 (plano 500): registros por corte/detalle
+# ---------------------------------------------------------------------------
+@dataclass
+class StairReinforcementRecord:
+    """Registro de armadura de escalera LT2 (corte o detalle del plano 500).
+
+    La nomenclatura del plano usa F/F' (inferior/superior) y longitudes
+    dibujadas (L). Cada registro se asocia a una parte (FLIGHT_RAMP,
+    LANDING, SUPPORT_LOCAL, EDGE, DETAIL). NO se copian longitudes entre
+    cortes distintos (A/B/C): cada valor proviene del corte al que
+    pertenece.
+
+    No existen elementos de escalera en el modelo combinado: por eso el
+    registro queda como metadata (sin elementTags inventados).
+    """
+
+    id: RuleId
+    part: StairPart
+    notation: str                      # nomenclatura literal del plano (ej. "F' B8@20 TIP")
+    bar_count: Optional[int] = None
+    diameter_mm: Optional[int] = None
+    spacing_cm: Optional[int] = None
+    length_cm: Optional[int] = None
+    detail_reference: str = ""         # ej. "PL1", "PL2", "PL3", "CORTE C"
+    levels: str = ""                   # recorrido de la escalera (ej. "1_SUB-1_PISO")
+    status: Status = Status.EXACT
+    source: str = "EXACT_DRAWING"
+    note: str = ""
+    resolution: Resolution = Resolution.RESOLVED_METADATA
+
+    def to_dict(self) -> Dict[str, object]:
+        return {
+            "code": str(self.id),
+            "building": self.id.building,
+            "drawing": self.id.drawing,
+            "sheet": self.id.sheet,
+            "part": self.part.value,
+            "notation": self.notation,
+            "bar_count": self.bar_count,
+            "diameter_mm": self.diameter_mm,
+            "spacing_cm": self.spacing_cm,
+            "length_cm": self.length_cm,
+            "detail_reference": self.detail_reference,
+            "levels": self.levels,
+            "status": self.status.value,
+            "source": self.source,
             "resolution": self.resolution.value,
             "note": self.note,
         }
