@@ -35,6 +35,9 @@
 - sum |Rx| = 3.703e-10 kN; sum |Ry| = 9.585e-11 kN.
 ## SEMANA 3 - PARTE B: sismo pseudoestatico (EX y EY)
 
+**NOTA (seccion PREVIA):** la Parte B que sigue fue calculada con el q_Q ANTERIOR = 2.0 kPa. NO se recalculo en este cierre de Parte A; queda PENDIENTE de actualizar con q_Q = 4.0 kPa cuando lo indique el usuario.
+
+
 - seismic_coefficient = **0.20** (PROVISIONAL / INPUT_REQUIRED; solo el EJEMPLO del enunciado '20% de g' NCh433; lo definira el profesor).
 - live_load_mass_fraction = **0.50** (enunciado; configurable).
 - patron lateral = **uniforme**  (F_i = coef * W_i).
@@ -103,3 +106,16 @@
 | ROOF | 1005 | -7.752533e-05 | 8.706510e-03 | -1.402859e-04 |
 
 Nota: EX y EY son casos independientes (cada uno con su propio modelo y patron: 5 = EX, 6 = EY); no se aplicaron G, Q ni superposicion. Los patrones 1/2 (G) y 3/4 (Q) de la Parte A no se modificaron.
+## SEMANA 3 - PARTE C: combinacion R = 1.0G + 1.0Q + 1.0EX + 0.0EY
+
+- Superposicion lineal de los casos existentes G (patrones 1/2), Q (3/4), EX (5) y EY (6), con coeficientes {G:1.0, Q:1.0, EX:1.0, EY:0.0}.
+- Corrida explicita equivalente: un solo modelo con G + Q + EX aplicados simultaneamente; EY (coef 0.0) NO se aplica.
+- Verificacion MINIMA: desplazamiento del master 1005 (ROOF), reaccion del apoyo 1, fuerza interna de la columna 3001.
+
+| cantidad | err_abs | err_rel | PASS |
+|---|---|---|---|
+| Desplazamiento master 1005 (ROOF, 6 GDL) | 0.000e+00 | 2.12e-14 | PASS |
+| Reaccion apoyo 1 (6 GDL) | 0.000e+00 | 6.10e-15 | PASS |
+| Fuerza interna columna 3001 (12 GDL) | 0.000e+00 | 2.15e-15 | PASS |
+
+Vectores completos por item: `superposition_results.csv` (superposicion vs corrida explicita) y `superposition_cases.csv` (respuesta de cada caso corrido).
