@@ -1,0 +1,46 @@
+kind,code,beam_ids,drawing,confidence,note
+BAR,LT1:400:35,V104,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,F' 2B22 tramo 3-2; L no transcrita.
+BAR,LT1:400:36,V105,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,F' 2B22 tramo 3-2; L no transcrita.
+BAR,LT1:400:37,V104;V105,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,+F' 2B22 sobre apoyo eje 2; L no transcrita.
+BAR,LT1:400:38,V104;V105,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,+F' 4B22 sobre apoyo eje 2; L no transcrita.
+BAR,LT1:400:39,V104,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,F 2B22 por tramo; L no transcrita.
+BAR,LT1:400:40,V105,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,F 2B22 por tramo; L no transcrita.
+BAR,LT1:400:42,V106,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,llamadas de V106 ilegibles; confirmar en plano.
+BAR,LT1:400:44,V107,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,adicionales segun detalle; valores a confirmar.
+RECORD,V104,V104,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,valores por tramo no transcritos (leer plano 400).
+RECORD,V105,V105,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,valores por tramo no transcritos (leer plano 400).
+RECORD,V106,V106,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,viga corta/especial: NO B22 por defecto.
+RECORD,V112,V112,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,encuentro especial en 3-2; no homogenizar con otras vigas.
+RECORD,V113,V113,2017_67-400-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,encuentro especial en 3-2; no homogenizar con otras vigas.
+RECORD,V200,V200,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V201,V201,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V202,V202,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V203,V203,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V204,V204,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V205,V205,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V206,V206,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V210,V210,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V211,V211,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V300,V300,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V301,V301,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V302,V302,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V303,V303,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V304,V304,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V305,V305,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 401; longitudes por dibujo.
+RECORD,V207,V207,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,viga especial/vanos individuales entre G-H/F; no extrapolar a B22.
+RECORD,V208,V208,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,viga especial/vanos individuales entre G-H/F; no extrapolar a B22.
+RECORD,V209,V209,2017_67-401 (2)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,viga especial/vanos individuales entre G-H/F; no extrapolar a B22.
+RECORD,V306,V306,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 402; longitudes por dibujo.
+RECORD,V307,V307,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 402; longitudes por dibujo.
+RECORD,V308,V308,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 402; longitudes por dibujo.
+RECORD,V400,V400,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 402; longitudes por dibujo.
+RECORD,V401,V401,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 402; longitudes por dibujo.
+RECORD,V402,V402,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 402; longitudes por dibujo.
+RECORD,V403,V403,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 402; longitudes por dibujo.
+RECORD,V404,V404,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 402; longitudes por dibujo.
+RECORD,V405,V405,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,leer cada linea del plano 402; longitudes por dibujo.
+RECORD,V309,V309,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,viga especial/vanos individuales; no extrapolar a B22.
+RECORD,V406,V406,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,viga especial/vanos individuales; no extrapolar a B22.
+RECORD,VF1,VF1,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,NO reducir a '2 B22'; no mezclar con V100-V406.
+RECORD,VF2,VF2,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,NO reducir a '2 B22'; no mezclar con V100-V406.
+RECORD,VF3,VF3,2017_67-402 (1)-Model,NEEDS_DRAWING_VALUE_CONFIRMATION,NO reducir a '2 B22'; no mezclar con V100-V406.

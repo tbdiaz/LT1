@@ -1,0 +1,62 @@
+kind,code,beam_ids,drawing,confidence,note
+BAR,LT1:400:01,0101,2017_67-400-Model,EXACT,L~1150 cm segun trans. plan.
+BAR,LT1:400:02,0101,2017_67-400-Model,EXACT,+F' extremo derecho L~800 cm.
+BAR,LT1:400:03,0101,2017_67-400-Model,EXACT,+F zona central L~600 cm.
+BAR,LT1:400:04,0101,2017_67-400-Model,EXACT,F base L~1150 cm.
+BAR,LT1:400:05,0102,2017_67-400-Model,EXACT,F' extremo izquierdo L~460 cm.
+BAR,LT1:400:06,0102,2017_67-400-Model,EXACT,2B18 continuo/intermedio L~1200 cm.
+BAR,LT1:400:07,0102,2017_67-400-Model,EXACT,F' extremo derecho L~800 cm.
+BAR,LT1:400:08,0102,2017_67-400-Model,EXACT,F inferior L~800 cm.
+BAR,LT1:400:09,0102,2017_67-400-Model,EXACT,F inferior continuo L~1200 cm.
+BAR,LT1:400:10,0102,2017_67-400-Model,EXACT,F inferior extremo derecho L~800 cm.
+BAR,LT1:400:11,V100,2017_67-400-Model,EXACT,F' base tramo 3-2 (V100) L~1200 cm.
+BAR,LT1:400:12,V101,2017_67-400-Model,EXACT,F' base tramo 2-1 (V101) L~700 cm.
+BAR,LT1:400:13,V100,2017_67-400-Model,EXACT,+F' apoyo/extremo izquierdo L~700 cm.
+BAR,LT1:400:14,V100;V101,2017_67-400-Model,EXACT,+F' apoyo intermedio eje 2 L~1100 cm (continua).
+BAR,LT1:400:15,V100;V101,2017_67-400-Model,EXACT,+F' 4B22 apoyo intermedio L~400 cm (continua).
+BAR,LT1:400:16,V101,2017_67-400-Model,EXACT,+F' der 2B22 L~400-450 cm (rango).
+BAR,LT1:400:17,V101,2017_67-400-Model,EXACT,+F' der 4B22 L~800 cm.
+BAR,LT1:400:18,V101,2017_67-400-Model,EXACT,+F' der 2B22 L~800 cm.
+BAR,LT1:400:19,V100,2017_67-400-Model,EXACT,F tramo 3-2 (V100) 2B22 L~700 cm.
+BAR,LT1:400:20,V101,2017_67-400-Model,EXACT,F tramo 2-1 (V101) 2B22 L~1200 cm.
+BAR,LT1:400:23,V102,2017_67-400-Model,EXACT,F' base 3-2 (V102) L~1200 cm.
+BAR,LT1:400:24,V103,2017_67-400-Model,EXACT,F' base 2-1 (V103) L~700 cm.
+BAR,LT1:400:25,V102,2017_67-400-Model,EXACT,+F' 2B22 L~700 cm.
+BAR,LT1:400:26,V102;V103,2017_67-400-Model,EXACT,+F' 2B22 L~1100 cm apoyo eje 2.
+BAR,LT1:400:27,V102;V103,2017_67-400-Model,EXACT,+F' 4B22 L~400 cm apoyo eje 2.
+BAR,LT1:400:28,V103,2017_67-400-Model,EXACT,+F' 2B22 L~400 cm.
+BAR,LT1:400:29,V103,2017_67-400-Model,EXACT,+F' 4B22 L~800 cm.
+BAR,LT1:400:30,V103,2017_67-400-Model,EXACT,+F' 2B22 L~800 cm.
+BAR,LT1:400:31,V102,2017_67-400-Model,EXACT,F 2B22 L~700 cm izq.
+BAR,LT1:400:32,V103,2017_67-400-Model,EXACT,F 2B22 L~1200 cm der.
+BAR,LT1:400:41,V106,2017_67-400-Model,EXACT,F 2B16 L~300 cm (dato transcrito).
+BAR,LT1:400:43,V107,2017_67-400-Model,EXACT,F base 4B22 L~745 cm (vano unico).
+BAR,LT1:400:45,V108,2017_67-400-Model,EXACT,V108 barras principales L~700 cm.
+BAR,LT1:400:46,V109,2017_67-400-Model,EXACT,V109 barras principales L~700 cm.
+BAR,LT1:400:47,V111,2017_67-400-Model,EXACT,2B16 L~400 cm.
+BAR,LT1:400:48,V111,2017_67-400-Model,EXACT,4B16 L~400 cm.
+BAR,LT1:400:49,V114,2017_67-400-Model,EXACT,B16 principal L~400 cm; nº de barras no legible.
+BAR,LT1:402 (1):01,,2017_67-402 (1)-Model,EXACT,seccion especial 402: 2B18 L~400.
+BAR,LT1:402 (1):02,,2017_67-402 (1)-Model,EXACT,seccion especial 402: 4B16 L~335 (1a).
+BAR,LT1:402 (1):03,,2017_67-402 (1)-Model,EXACT,seccion especial 402: 4B16 L~335 (2a).
+BAR,LT1:402 (1):04,,2017_67-402 (1)-Model,EXACT,seccion especial 402: adicional longitudinal 2B10 (L no transcrita).
+BAR,LT1:402 (1):05,,2017_67-402 (1)-Model,EXACT,seccion especial 402: adicional longitudinal 1B10 (L no transcrita).
+STIRRUP,LT1:400:21,V100;V101,2017_67-400-Model,EXACT,zona TP.4; distribucion segun plano 002 (no inventada).
+STIRRUP,LT1:400:22,V100;V101,2017_67-400-Model,EXACT,zona TP.1; distribucion segun plano 002 (no inventada).
+STIRRUP,LT1:400:33,V102;V103,2017_67-400-Model,EXACT,distribucion segun plano 002 (no inventada).
+STIRRUP,LT1:400:34,V102;V103,2017_67-400-Model,EXACT,distribucion segun plano 002 (no inventada).
+STIRRUP,LT1:402 (1):06,,2017_67-402 (1)-Model,EXACT,seccion especial 402: E B10@10 L~220.
+STIRRUP,LT1:402 (1):07,,2017_67-402 (1)-Model,EXACT,seccion especial 402: E B10@10 L~200.
+STIRRUP,LT1:402 (1):08,,2017_67-402 (1)-Model,EXACT,seccion especial 402: traba T B10@10 L~55.
+RECORD,0101,0101,2017_67-400-Model,EXACT,variacion de la dimension 'VAR' no se inventa; detalle TP4_PLAN_002.
+RECORD,0102,0102,2017_67-400-Model,EXACT,viga profunda especial (20/150); NO es V60/80 ni 2B22.
+RECORD,V100,V100,2017_67-400-Model,EXACT,barras que cruzan el apoyo eje 2 conservan continuidad fisica (NO se cortan en el elementTag).
+RECORD,V101,V101,2017_67-400-Model,EXACT,tramo 2-1 del conjunto; continuidad con V100 sobre eje 2.
+RECORD,V102,V102,2017_67-400-Model,EXACT,detalle propio; NO es alias de V100-V101.
+RECORD,V103,V103,2017_67-400-Model,EXACT,tramo 2-1 del conjunto V102-V103.
+RECORD,V107,V107,2017_67-400-Model,EXACT,no extrapolar 4B22 a otras vigas.
+RECORD,V108,V108,2017_67-400-Model,EXACT,V108 registrada por separado (corta H'-I).
+RECORD,V109,V109,2017_67-400-Model,EXACT,V109 registrada por separado (corta H'-I).
+RECORD,V111,V111,2017_67-400-Model,EXACT,viga corta/especial: NO es familia 2B22.
+RECORD,V114,V114,2017_67-400-Model,EXACT,SMALL_SPECIAL_BEAM: no reemplazar por B22.
+RECORD,SECC_402,SECC_402,2017_67-402 (1)-Model,EXACT,asociar SOLO al elemento/detalle correspondiente del plano 402; NO aplicado a V60/80 ni a todo LT1.

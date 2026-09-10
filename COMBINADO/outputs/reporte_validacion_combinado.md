@@ -80,8 +80,8 @@
 ### Analisis
 - analyze() rc = **0** (OK, convergio)
 - ΣRz = 31902.275078 kN
-- |ΣRz - P_total| = 1.571243e-08 kN (rel 4.925e-13)
-- Σ|Rx| = 5.919529e-10 kN, Σ|Ry| = 1.473542e-11 kN (equilibrio horizontal)
+- |ΣRz - P_total| = 1.701119e-08 kN (rel 5.332e-13)
+- Σ|Rx| = 5.787810e-10 kN, Σ|Ry| = 1.090803e-10 kN (equilibrio horizontal)
 - Max |U| = 0.016773958 m en nodo 178
 - Max |Uz| = 0.016768894 m en nodo 178
 
@@ -181,19 +181,19 @@ Se documenta la existencia, NO se modela (requiere plano/dato explícito si se d
 - 7. Nodos saliente sin ruta a apoyos: **OK** (0: [])
 - 8. LT2 intacto: **237 vigas** (tags nativos, sin cambios)
 - 9. Eje I' en combinado = 45.0+31.25 = 76.25 m: **OK** (18 nodos I')
-- 10. Error de equilibrio |ΣRz-P_total|/P_total: **OK** (4.925e-13)
+- 10. Error de equilibrio |ΣRz-P_total|/P_total: **OK** (5.332e-13)
 - Resumen nodos: 0 sin conectividad, {'L1': [1001], 'L2': [1002, 600100, 600101, 600102, 600103, 600104, 600105], 'L3': [1003, 600200, 600201, 600202, 600203, 600204, 600205], 'L4': [1004], 'ROOF': [1005]} flotantes preexistentes, P_lt1=20360.984 kN, P_total=31902.275 kN.
 
 ## Archivos generados
-- `outputs/interfaz_traceabilidad.csv`
-- `outputs/auditoria_elementos_interfaz.csv`
-- `outputs/vista_3d_combinado.png`
-- `outputs/reporte_validacion_combinado.md`
-- `outputs/verticales_cajas_pilastra.csv`
-- `outputs/conectores_v40_muro.csv`
-- `outputs/tributarias_lt1/tributarias_piso_1.png`
-- `outputs/tributarias_lt1/tributarias_piso_2.png`
-- `outputs/tributarias_lt1/tributarias_piso_3.png`
-- `outputs/tributarias_lt1/tributarias_piso_4.png`
-- `outputs/vista_3d_interactiva.html` (generado por `scripts/figura_interactiva.py`)
+- `outputs\interfaz_traceabilidad.csv`
+- `outputs\auditoria_elementos_interfaz.csv`
+- `outputs\vista_3d_combinado.png`
+- `outputs\reporte_validacion_combinado.md`
+- `outputs\verticales_cajas_pilastra.csv`
+- `outputs\conectores_v40_muro.csv`
+- `outputs\tributarias_lt1\tributarias_piso_1.png`
+- `outputs\tributarias_lt1\tributarias_piso_2.png`
+- `outputs\tributarias_lt1\tributarias_piso_3.png`
+- `outputs\tributarias_lt1\tributarias_piso_4.png`
+- `outputs\vista_3d_interactiva.html` (generado por `scripts/figura_interactiva.py`)
 
