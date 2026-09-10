@@ -2039,8 +2039,8 @@ class CombinedBuilder:
             add(f"- `{p.relative_to(COMB)}`")
         add(f"- `{(OUT / 'conectores_v40_muro.csv').relative_to(COMB)}`")
         for i in range(1, 5):
-            add(f"- `{(OUT / 'tributarias_lt1' / f'tributarias_piso_{i}.png'
-                   ).relative_to(COMB)}`")
+            p_ = OUT / "tributarias_lt1" / f"tributarias_piso_{i}.png"
+            add(f"- `{p_.relative_to(COMB)}`")
         add(f"- `{(OUT / 'vista_3d_interactiva.html').relative_to(COMB)}` "
             "(generado por `scripts/figura_interactiva.py`)")
         add("")
