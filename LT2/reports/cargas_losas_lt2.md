@@ -26,14 +26,15 @@ B1 = -7.97 · L1 = -4.01 · L2 = -0.05 · L3 = 3.91 · L4 = 7.87 · ROOF = 11.83
 
 ## Datos confirmados implementados
 
-Densidad = 2500 kg/m³ · `PP_LOSA = e×2500` · `q_G = PP + PM_ADIC` · `qG_kN = qG_kg×9.81/1000`.
+Densidad confirmada = 2400 kg/m³ (usuario) · `PP_LOSA = e×2400` · `q_G = PP + PM_ADIC` · `qG_kN = qG_kg×9.81/1000`.
+(Anterior: densidad 2500 kg/m³ · PP = 375 · q_G = 635 · 6.22935 kN/m².)
 
 | nivel | e (m) | PP kg/m² | PM_ADIC kg/m² | q_G kg/m² | q_G kN/m² | estado | fuente |
 |---|---|---|---|---|---|---|---|
-| L1 | 0.15 | 375 | 260 | 635 | 6.22935 | CONFIRMADO_e15 | 101 (LOSA e=15) + 700 |
-| L2 | 0.15 | 375 | 260 | 635 | 6.22935 | CONFIRMADO_e15 | 101 + 700 |
-| L3 | 0.15 | 375 | 260 | 635 | 6.22935 | CONFIRMADO_e15 | 101 + 700 |
-| L4 | 0.15 | 375 | 260 | 635 | 6.22935 | CONFIRMADO_e15 | 101 + 700 |
+| L1 | 0.15 | 360 | 260 | 620 | 6.0822 | CONFIRMADO_e15 | 101 (LOSA e=15) + 700 |
+| L2 | 0.15 | 360 | 260 | 620 | 6.0822 | CONFIRMADO_e15 | 101 + 700 |
+| L3 | 0.15 | 360 | 260 | 620 | 6.0822 | CONFIRMADO_e15 | 101 + 700 |
+| L4 | 0.15 | 360 | 260 | 620 | 6.0822 | CONFIRMADO_e15 | 101 + 700 |
 | ROOF | pendiente | — | 200 (sup.) | — | — | PENDING_VISUAL_CONFIRMATION | 102 + 700 |
 | B1/fund | — | — | — | — | — | fuera de diafragmas | 200 |
 

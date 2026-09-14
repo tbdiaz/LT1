@@ -15,28 +15,25 @@
 
 | origen | area (m2) | Q_teorica (kN) | Q_transferida (kN) | err_abs (kN) | err_rel | PASS |
 |---|---|---|---|---|---|---|
-| LT2 L1 | 463.182016 | 1852.728064 | 1852.728064 | -4.27e-08 | 2.30e-11 | PASS |
-| LT2 L2 | 463.182016 | 1852.728064 | 1852.728064 | -4.27e-08 | 2.30e-11 | PASS |
-| LT2 L3 | 463.182016 | 1852.728064 | 1852.728064 | -4.27e-08 | 2.30e-11 | PASS |
-| LT2 L4 | 463.182016 | 1852.728064 | 1852.728064 | -4.27e-08 | 2.30e-11 | PASS |
+| LT2 L1 | 463.182016 | 1852.728064 | 1852.728064 | 4.45e-08 | 2.40e-11 | PASS |
+| LT2 L2 | 463.182016 | 1852.728064 | 1852.728064 | 4.45e-08 | 2.40e-11 | PASS |
+| LT2 L3 | 463.182016 | 1852.728064 | 1852.728064 | 4.45e-08 | 2.40e-11 | PASS |
+| LT2 L4 | 463.182016 | 1852.728064 | 1852.728064 | 4.45e-08 | 2.40e-11 | PASS |
 | LT1 PISO_1 | 686.375000 | 2745.500000 | 2745.500000 | 0.00e+00 | 0.00e+00 | PASS |
 | LT1 PISO_2 | 686.375000 | 2745.500000 | 2745.500000 | 0.00e+00 | 0.00e+00 | PASS |
 | LT1 PISO_3 | 686.375000 | 2745.500000 | 2745.500000 | 0.00e+00 | 0.00e+00 | PASS |
 | LT1 PISO_4 | 686.375000 | 2745.500000 | 2745.500000 | -0.00e+00 | 1.66e-16 | PASS |
-| LT2 TOTAL | 1852.728064 | 7410.912256 | 7410.912256 | -1.71e-07 | 2.30e-11 | PASS |
+| LT2 TOTAL | 1852.728064 | 7410.912256 | 7410.912256 | 1.78e-07 | 2.40e-11 | PASS |
 | LT1 TOTAL | 2745.500000 | 10982.000000 | 10982.000000 | 0.00e+00 | 0.00e+00 | PASS |
-| COMBINADO TOTAL | 4598.228064 | 18392.912256 | 18392.912256 | -1.71e-07 | 9.28e-12 | PASS |
+| COMBINADO TOTAL | 4598.228064 | 18392.912256 | 18392.912256 | 1.78e-07 | 9.68e-12 | PASS |
 
 ## Analisis OpenSees (patrones 3 = LT2-Q, 4 = LT1-Q)
 
 - analyze rc = **0** (converge).
 - Q_total aplicado = 18392.912256 kN
-- sum Rz = 18392.912256 kN; |sum Rz - Q_total| = 1.091e-08 kN (rel 5.932e-13).
-- sum |Rx| = 3.703e-10 kN; sum |Ry| = 9.585e-11 kN.
+- sum Rz = 18392.912256 kN; |sum Rz - Q_total| = 3.962e-09 kN (rel 2.154e-13).
+- sum |Rx| = 1.762e-10 kN; sum |Ry| = 4.033e-10 kN.
 ## SEMANA 3 - PARTE B: sismo pseudoestatico (EX y EY)
-
-**NOTA (seccion PREVIA):** la Parte B que sigue fue calculada con el q_Q ANTERIOR = 2.0 kPa. NO se recalculo en este cierre de Parte A; queda PENDIENTE de actualizar con q_Q = 4.0 kPa cuando lo indique el usuario.
-
 
 - seismic_coefficient = **0.20** (PROVISIONAL / INPUT_REQUIRED; solo el EJEMPLO del enunciado '20% de g' NCh433; lo definira el profesor).
 - live_load_mass_fraction = **0.50** (enunciado; configurable).
@@ -50,60 +47,60 @@
 
 | piso | master | G_i (kN) | Q_i (kN) | 0.5*Q_i (kN) | W_sismico (kN) |
 |---|---|---|---|---|---|
-| L1 | 1001 | 8000.912831 | 4598.228064 | 2299.114032 | 10300.026863 |
-| L2 | 1002 | 7915.594976 | 4598.228064 | 2299.114032 | 10214.709008 |
-| L3 | 1003 | 7810.859954 | 4598.228064 | 2299.114032 | 10109.973986 |
-| L4 | 1004 | 7996.548871 | 4598.228064 | 2299.114032 | 10295.662903 |
+| L1 | 1001 | 7798.134809 | 4598.228064 | 2299.114032 | 10097.248841 |
+| L2 | 1002 | 7712.816954 | 4598.228064 | 2299.114032 | 10011.930986 |
+| L3 | 1003 | 7608.081932 | 4598.228064 | 2299.114032 | 9907.195964 |
+| L4 | 1004 | 7793.770850 | 4598.228064 | 2299.114032 | 10092.884882 |
 | ROOF | 1005 | 0.000000 | 0.000000 | 0.000000 | 0.000000 |
-| **sum** | | **31723.916631** | **18392.912256** | **9196.456128** | **40920.372759** |
+| **sum** | | **30912.804545** | **18392.912256** | **9196.456128** | **40109.260673** |
 
 - sum(Q_i) = 18392.912256 kN  vs  Q_total Parte A = 18392.912256 kN
   -> OK
-- sum(G_i) = 31723.916631 kN (peso usado para formar la masa sismica; componentes: PP losa + terminaciones).
+- sum(G_i) = 30912.804545 kN (peso usado para formar la masa sismica; componentes: PP losa + terminaciones).
 
 ### Fuerzas laterales  (F_i = coef * W_i, patron 'uniforme')
 
 | piso | master | W_i (kN) | F_i (kN) |
 |---|---|---|---|
-| L1 | 1001 | 10300.026863 | 2060.005373 |
-| L2 | 1002 | 10214.709008 | 2042.941802 |
-| L3 | 1003 | 10109.973986 | 2021.994797 |
-| L4 | 1004 | 10295.662903 | 2059.132581 |
-| **F_total** | | | **8184.074552** |
+| L1 | 1001 | 10097.248841 | 2019.449768 |
+| L2 | 1002 | 10011.930986 | 2002.386197 |
+| L3 | 1003 | 9907.195964 | 1981.439193 |
+| L4 | 1004 | 10092.884882 | 2018.576976 |
+| **F_total** | | | **8021.852135** |
 
 ### Corte basal y convergencia (ver seismic_equilibrium.csv)
 
 | caso | F_total (kN) | corte_basal (kN) | err_abs (kN) | err_rel | PASS | analyze rc |
 |---|---|---|---|---|---|---|
-| EX | 8184.074552 | 8184.074552 | 1.884e-08 | 2.30e-12 | PASS | 0 |
-| EY | 8184.074552 | 8184.074552 | 2.385e-09 | 2.91e-13 | PASS | 0 |
+| EX | 8021.852135 | 8021.852135 | 1.461e-08 | 1.82e-12 | PASS | 0 |
+| EY | 8021.852135 | 8021.852135 | 7.734e-08 | 9.64e-12 | PASS | 0 |
 
 ### Desplazamientos de master nodes (signo de la deformada)
 
 
 #### EX (fuerzas en +X)
 - Sentido de la deformada: **+X coherente**.
-- Torsion por piso: **TORSION APRECIABLE** (max |RZ| = 1.205e-05 rad).
+- Torsion por piso: **TORSION APRECIABLE** (max |RZ| = 1.038e-05 rad).
 
 | piso | master | UX (m) | UY (m) | RZ (rad) |
 |---|---|---|---|---|
-| L1 | 1001 | 4.080164e-03 | 7.145412e-07 | -6.254626e-06 |
-| L2 | 1002 | 9.150421e-03 | -7.662278e-06 | -1.204532e-05 |
-| L3 | 1003 | 1.020360e-02 | -3.521133e-05 | -1.008082e-05 |
-| L4 | 1004 | 1.109905e-02 | -6.476274e-05 | -9.129564e-06 |
-| ROOF | 1005 | 1.160229e-02 | -9.220282e-05 | -8.076673e-06 |
+| L1 | 1001 | 3.424682e-03 | -1.907318e-07 | -5.374274e-06 |
+| L2 | 1002 | 7.701425e-03 | -7.887364e-06 | -1.037952e-05 |
+| L3 | 1003 | 8.625807e-03 | -3.059297e-05 | -8.728552e-06 |
+| L4 | 1004 | 9.402580e-03 | -5.526567e-05 | -7.909266e-06 |
+| ROOF | 1005 | 9.841419e-03 | -7.832806e-05 | -6.994553e-06 |
 
 #### EY (fuerzas en +Y)
 - Sentido de la deformada: **+Y coherente**.
-- Torsion por piso: **TORSION APRECIABLE** (max |RZ| = 1.403e-04 rad).
+- Torsion por piso: **TORSION APRECIABLE** (max |RZ| = 1.152e-04 rad).
 
 | piso | master | UX (m) | UY (m) | RZ (rad) |
 |---|---|---|---|---|
-| L1 | 1001 | -7.674708e-06 | 1.665559e-03 | -9.203566e-06 |
-| L2 | 1002 | -1.960155e-05 | 4.506881e-03 | -4.267427e-05 |
-| L3 | 1003 | -2.754436e-05 | 6.586995e-03 | -9.515114e-05 |
-| L4 | 1004 | -5.205323e-05 | 7.966014e-03 | -1.256267e-04 |
-| ROOF | 1005 | -7.752533e-05 | 8.706510e-03 | -1.402859e-04 |
+| L1 | 1001 | -7.287682e-06 | 1.387503e-03 | -7.060535e-06 |
+| L2 | 1002 | -1.792032e-05 | 3.761058e-03 | -3.413987e-05 |
+| L3 | 1003 | -2.412269e-05 | 5.510854e-03 | -7.757399e-05 |
+| L4 | 1004 | -4.456441e-05 | 6.671731e-03 | -1.029242e-04 |
+| ROOF | 1005 | -6.619560e-05 | 7.296848e-03 | -1.151689e-04 |
 
 Nota: EX y EY son casos independientes (cada uno con su propio modelo y patron: 5 = EX, 6 = EY); no se aplicaron G, Q ni superposicion. Los patrones 1/2 (G) y 3/4 (Q) de la Parte A no se modificaron.
 ## SEMANA 3 - PARTE C: combinacion R = 1.0G + 1.0Q + 1.0EX + 0.0EY
@@ -114,8 +111,8 @@ Nota: EX y EY son casos independientes (cada uno con su propio modelo y patron: 
 
 | cantidad | err_abs | err_rel | PASS |
 |---|---|---|---|
-| Desplazamiento master 1005 (ROOF, 6 GDL) | 0.000e+00 | 2.12e-14 | PASS |
-| Reaccion apoyo 1 (6 GDL) | 0.000e+00 | 6.10e-15 | PASS |
-| Fuerza interna columna 3001 (12 GDL) | 0.000e+00 | 2.15e-15 | PASS |
+| Desplazamiento master 1005 (ROOF, 6 GDL) | 0.000e+00 | 5.89e-15 | PASS |
+| Reaccion apoyo 1 (6 GDL) | 0.000e+00 | 3.06e-15 | PASS |
+| Fuerza interna columna 3001 (12 GDL) | 0.000e+00 | 3.66e-16 | PASS |
 
 Vectores completos por item: `superposition_results.csv` (superposicion vs corrida explicita) y `superposition_cases.csv` (respuesta de cada caso corrido).

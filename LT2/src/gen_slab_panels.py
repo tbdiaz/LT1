@@ -168,7 +168,7 @@ def build_rows():
                 "holes": hole_rects_str(holes),
                 "hole_status": hole_status,
                 "thickness_m": 0.15,
-                "qG_kN_m2": round(635 * G / 1000, 6),
+                "qG_kN_m2": round(620 * G / 1000, 6),
                 "status": status,
                 "template": "TYP",
                 "notes": notes,

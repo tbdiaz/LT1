@@ -14,7 +14,7 @@ GEOM = ROOT / "data" / "geometry"
 LOAD = ROOT / "data" / "loads"
 
 LEVELS = ["L1", "L2", "L3", "L4"]
-Q_G = 635 * 9.81 / 1000  # 6.22935 kN/m2
+Q_G = 620 * 9.81 / 1000  # 6.0822 kN/m2 (0.15m*2400+260)
 TAG_BEAM_BASE = 2001
 
 

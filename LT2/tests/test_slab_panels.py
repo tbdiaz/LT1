@@ -76,10 +76,10 @@ def test_qg_confirmado_L_y_pendiente_roof(df):
 
 
 def test_qg_conversion_L(df):
-    """qG kN/m2 = 635*9.81/1000 para L1-L4."""
+    """qG kN/m2 = 620*9.81/1000 = 6.0822 para L1-L4 (0.15m*2400+260)."""
     for lvl in TYP_LEVELS:
         vals = df[df["level"] == lvl]["qG_kN_m2"].unique()
-        assert all(v == pytest.approx(635 * 9.81 / 1000) for v in vals)
+        assert all(v == pytest.approx(620 * 9.81 / 1000) for v in vals)
 
 
 def test_sin_duplicados_ni_poligonos_nulos(df):

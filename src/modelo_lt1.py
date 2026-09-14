@@ -3369,6 +3369,106 @@ def escribir_control_preparacion_opensees(ruta):
     return ruta
 
 
+# ============================================================================
+# P1L4 · POSTPROCESO PARA UNITY
+# (SOLO lectura sobre el modelo ya analizado; no modifica el análisis)
+# ============================================================================
+
+def _nodos_de_elemento(elem):
+    """Nodos i/j de un registro de elemento (vigas usan nodo_i/nodo_j;
+    columnas y muros usan nodo_inferior/nodo_superior)."""
+    if "nodo_i" in elem and "nodo_j" in elem:
+        return elem["nodo_i"], elem["nodo_j"]
+    return elem.get("nodo_inferior"), elem.get("nodo_superior")
+
+
+def colectar_fuerzas_locales_elementos():
+    """Fuerzas locales de cada elasticBeamColumn (SOLO lectura).
+
+    opsi.eleResponse(tag, 'localForce') devuelve el vector de 12 componentes
+    en el sistema LOCAL del elemento con orden [N, Vy, Vz, T, My, Mz] en el
+    extremo i y el mismo en el extremo j. Unidades: N/V (kN), T/M (kN·m).
+    NOTA: ops.eleForce() devuelve fuerzas GLOBALES en los nodos, no locales;
+    por eso se usa 'localForce'.
+    """
+    out = []
+    for elem in elementos_opensees:
+        tag = elem["element_tag"]
+        ni, nj = _nodos_de_elemento(elem)
+        f = None
+        try:
+            f = tuple(float(x) for x in ops.eleResponse(tag, "localForce"))
+        except Exception as exc:  # pragma: no cover - defensivo
+            f = None
+        if f is None or len(f) != 12:
+            out.append({"elementTag": tag, "node_i": ni, "node_j": nj,
+                        "estado": "SIN_FUERZAS",
+                        "error": "ops.eleResponse 'localForce' no disponible"})
+            continue
+        out.append({
+            "elementTag": tag, "node_i": ni, "node_j": nj,
+            "F_i": [round(x, 9) for x in f[0:6]],
+            "F_j": [round(x, 9) for x in f[6:12]],
+        })
+    return out
+
+
+def _candidatas_curva_pm_columna_111000():
+    """Rutas candidatas al CSV de la curva P-M de la columna P.70x70 tag
+    111000 (Parte D Semana 3, COMBINADO). La curva usa SUPUESTOS de
+    modelación: f'c=30 MPa, fy=420 MPa, 16 Φ22, 4 cm cara→eje (los planos no
+    documentan f'c/fy ni recubrimiento; la E.T.O.G. está pendiente). Por esa
+    razón esta curva NO se exporta al JSON del visor: NO es capacidad real.
+    Se conserva la funcion solo como referencia/lectura de la Parte D."""
+    base = os.path.join("COMBINADO", "outputs", "semana03", "capacity")
+    return [os.path.join("..", base, "pm_interaction.csv"),
+            os.path.join(base, "pm_interaction.csv")]
+
+
+def leer_curva_pm_columna_111000():
+    """Devuelve (ruta, puntos) de la curva P-M de la Parte D, o (None, []) si
+    no se encuentra. Los puntos NO son datos reales de planos (ver docstring
+    de _candidatas_curva_pm_columna_111000); esta funcion NO se usa en la
+    exportacion del visor para no presentar SUPUESTOS como capacidad."""
+    import csv as _csv
+    for ruta in _candidatas_curva_pm_columna_111000():
+        if os.path.isfile(ruta):
+            puntos = []
+            with open(ruta, newline="", encoding="utf-8") as fh:
+                for fila in _csv.DictReader(fh):
+                    try:
+                        puntos.append({
+                            "punto": fila.get("punto", "").strip(),
+                            "tipo": fila.get("tipo", "").strip(),
+                            "P_kN": round(float(fila["P_kN"]), 4),
+                            "M_kN_m": round(float(fila["M_kN_m"]), 4),
+                        })
+                    except (ValueError, KeyError):
+                        continue
+            return ruta, puntos
+    return None, []
+
+
+def _demanda_extrema(tag, fuerzas, n_nodes):
+    """Demanda (N, M_resultante, extremo) desde las fuerzas locales de un
+    elemento. N con traccion POSITIVA (convencion igual a la curva P-M:
+    compresion < 0). M_resultante = max(hypot(My, Mz)) entre extremos."""
+    import math
+    for e in fuerzas:
+        if e["elementTag"] == tag and "F_i" in e:
+            extremos = [("i", e["F_i"], -e["F_i"][0]),
+                        ("j", e["F_j"], e["F_j"][0])]
+            mejor = None
+            for ext, f, n_int in extremos:
+                M = math.hypot(f[4], f[5])
+                if mejor is None or M > mejor[2]:
+                    mejor = (ext, n_int, M)
+            ext, N, M = mejor
+            return {"caso": "G_gravedad", "extremo": ext,
+                    "N_kN": round(N, 4), "M_kN_m": round(M, 4)}
+    return None
+
+
 def exportar_modelo_unity(ruta_json):
     """Exporta el modelo LT1 completo a JSON para el viewer Unity.
     NO modifica el modelo; solo lee datos existentes."""
@@ -3512,7 +3612,9 @@ def exportar_modelo_unity(ruta_json):
             })
 
     analysis_out = {}
+    fuerzas_elementos = []
     if res_post.get("estado") == "OK":
+        fuerzas_elementos = colectar_fuerzas_locales_elementos()
         analysis_out = {
             "estado": res_anal.get("estado"),
             "P_aplicada_kN": res_post["P_aplicada_kN"],
@@ -3527,6 +3629,20 @@ def exportar_modelo_unity(ruta_json):
             "diafragmas_compatibles": res_post["diafragmas_ok"],
             "reacciones": {str(k): list(v) for k, v in res_post.get("reacciones", {}).items()},
             "desplazamientos": {},
+            # P1L4: caso/combinación activa y fuerzas locales por elemento
+            "caso": "G_gravedad",
+            "caso_descripcion": "Cargas muertas q_G aplicadas via eleLoad a las "
+            "108 vigas (patron Plain 1 / timeSeries Linear 1). Unico caso con "
+            "resultados por elemento VERIFICADOS disponibles en este export "
+            "(P1L2/P1L3). No se inventan resultados de otros casos.",
+            "escenarios": ["G"],
+            "convencion_fuerzas": "Fuerzas locales elasticBeamColumn via "
+            "ops.eleResponse('localForce') (12 comp por elemento, orden "
+            "[N, Vy, Vz, T, My, Mz] en extremo i y j; unidades kN y kN·m; "
+            "sistema local del elemento). F_i[0] = -N_interno y "
+            "F_j[0] = +N_interno, con N_interno traccion positiva "
+            "(compresion < 0); misma convencion usada en la curva P-M.",
+            "fuerzas_elementos": fuerzas_elementos,
         }
         tags_nodes = sorted(set(ops.getNodeTags()))
         for t in tags_nodes:
@@ -3593,6 +3709,102 @@ def exportar_modelo_unity(ruta_json):
          "tipo": "cargas", "estado": "PENDIENTE"},
     ]
 
+    # --- P1L4: demanda-capacidad P-M (SOLO con datos sustentados) ----------
+    # REGLA: NO se exporta ninguna curva de capacidad P-M cuyo origen sean
+    # SUPUESTOS de modelacion. La Parte D (Semana 3, COMBINADO) genero una
+    # curva P-M para la columna 111000 con f'c=30 MPa, fy=420 MPa, 4 cm
+    # cara->eje y distribucion de 16 barras TODOS SUPUESTOS (los planos LT1
+    # 2017_67-* no documentan f'c/fy y el plano general 2017_67-000 remite los
+    # recubrimientos a la E.T.O.G., documento NO disponible en el proyecto).
+    # Esa curva NO es capacidad real del proyecto y por eso NO se incorpora:
+    # columna y muro quedan estado=NO_DISPONIBLE con sus faltantes.
+    #
+    # Datos REALES verificados usados aqui:
+    #  - Columna 111000: seccion "P. 70x70" (modelo_lt1.json) y armadura
+    #    16 Φ22 (COMBINADO/outputs/reinforcement/armadura_lt1_columnas.csv,
+    #    elementoTag=111000 -> bar_count=16, diameter_mm=22, status EXACT,
+    #    source USER_CONFIRMED_DRAWING_DATA).
+    #  - Muro 400001 (clave NSUP_01): M.H.A. e=20 cm, L=3.65 m (plan 102,
+    #    GEOMETRIA_CERRADA_CONFIRMADO_POR_INSPECCION_VISUAL_USUARIO).
+    #  - Demanda: caso G_gravedad del modelo raiz LT1 (P1L2/P1L3; P=ΣRz=
+    #    20182.625 kN) vía ops.eleResponse('localForce').
+    demandas = {}
+    for tag in sorted({aux["elementTag"] for aux in fuerzas_elementos}):
+        demandas[tag] = _demanda_extrema(tag, fuerzas_elementos, nodos)
+
+    d_col = demandas.get(111000)
+    col_pm = {
+        "elemento_tipo": "columna",
+        "elementTag": 111000,
+        "seccion": "P. 70x70",
+        "armadura": {"barras": 16, "diametro_m": 0.022,
+                     "fuente": "COMBINADO/outputs/reinforcement/"
+                               "armadura_lt1_columnas.csv (elementoTag=111000, "
+                               "bar_count=16, diameter_mm=22, status EXACT, "
+                               "source USER_CONFIRMED_DRAWING_DATA)"},
+        "materiales_fuente": "NO DOCUMENTADOS en el proyecto: los planos LT1 "
+                             "(2017_67-*) no indican f'c ni fy; el plano "
+                             "general 2017_67-000 remite los recubrimientos a "
+                             "la E.T.O.G., documento NO disponible.",
+        "estado": "NO_DISPONIBLE",
+        "observacion": "La seccion 70x70 y la armadura 16 Φ22 son datos reales, "
+                       "pero NO hay curva P-M sustentada: falta f'c, fy, Es, "
+                       "recubrimiento libre y la distribucion transversal de "
+                       "las 16 barras. La Parte D (Semana 3) resolvio la "
+                       "seccion con f'c/fy/distancia/distribucion SUPUESTOS de "
+                       "modelacion y esa curva NO se incorpora como capacidad.",
+        "fuente_curva": None,
+        "curva_pm": [],
+        "demanda": d_col,   # demanda real del modelo (G_gravedad), informativa
+        "faltantes": [
+            "f'c real de proyecto (E.T.O.G./memoria; los planos no lo indican)",
+            "fy real de proyecto (E.T.O.G./memoria)",
+            "Es / modelo constitutivo del acero (sin datos)",
+            "recubrimiento libre documentado (hoy solo distancia cara->eje "
+            "SUPUESTA de 4 cm)",
+            "distribucion transversal de las 16 barras en la seccion "
+            "(no definida en planos)",
+        ],
+    }
+
+    # Muro: NO hay curva P-M disponible (no se inventa). Solo infraestructura.
+    d_muro = demandas.get(400001)
+    muro_modelo = next((m for m in muros_equivalentes
+                        if m["element_tag"] == 400001), None) or {}
+    muro_pm = {
+        "elemento_tipo": "muro",
+        "elementTag": 400001,
+        "clave": muro_modelo.get("clave", ""),
+        "seccion": muro_modelo.get("seccion", ""),
+        "espesor_m": muro_modelo.get("espesor_m"),
+        "longitud_planta_m": muro_modelo.get("longitud_planta_m"),
+        "estado": "NO_DISPONIBLE",
+        "observacion": "No existe curva P-M para el muro: (a) la armadura "
+                       "longitudinal de los muros LT1 NO es legible en los "
+                       "planos (armadura_lt1_muros.csv: bar_count/diametro/"
+                       "espaciamiento VACIOS, status "
+                       "NEEDS_DRAWING_VALUE_CONFIRMATION); (b) f'c/fy/"
+                       "recubrimiento no documentados (E.T.O.G. pendiente); "
+                       "(c) no existe analisis de seccion P-M del muro "
+                       "equivalente. No se inventa la curva.",
+        "fuente_curva": None,
+        "curva_pm": [],
+        "demanda": d_muro,   # demanda real del modelo (G_gravedad), informativa
+        "faltantes": [
+            "Armadura longitudinal de la seccion del muro: bar_count, "
+            "diameter_mm y spacing VACIOS en armadura_lt1_muros.csv "
+            "(NEEDS_DRAWING_VALUE_CONFIRMATION; PDFs 300-303 no legibles en "
+            "esos valores)",
+            "f'c real de proyecto (E.T.O.G./memoria)",
+            "fy real de proyecto (E.T.O.G./memoria)",
+            "recubrimiento documentado",
+            "Analisis de seccion (fiber section) P-M del muro equivalente "
+            "no realizado en el proyecto",
+        ],
+    }
+
+    capacidades_out = [col_pm, muro_pm]
+
     modelo = {
         "metadata": {
             "unidades": {"longitud": "m", "fuerza": "kN", "tension": "kPa"},
@@ -3629,6 +3841,19 @@ def exportar_modelo_unity(ruta_json):
                 "max_desplazamiento_m": res_post.get("max_desplazamiento_m"),
             },
             "pendientes": PENDIENTES_GEOMETRIA,
+            "limitaciones": [
+                "Solo geometria clase A modelada; 8 items de geometria "
+                "pendiente (ver metadata.pendientes)",
+                "Perfiles metalicos y P.M. 300x300x20 pendientes (segunda etapa)",
+                "Material H°A°: E/nu/G INFORMACION_ACADEMICA_PROPORCIONADA_"
+                "POR_USUARIO (no proviene de planos)",
+                "Modelo lineal elasticBeamColumn (sin plasticidad); NO hay "
+                "curva P-M exportada: f'c/fy/recubrimiento no documentados "
+                "(E.T.O.G. pendiente). La curva P-M de la Parte D (Semana 3) "
+                "usa SUPUESTOS de modelacion y no se incorpora como capacidad",
+                "Resultados por elemento disponibles solo para el caso "
+                "G_gravedad (caso unico verificada en este export)",
+            ],
         },
         "nodes": nodes_out,
         "beams": beams_out,
@@ -3638,6 +3863,7 @@ def exportar_modelo_unity(ruta_json):
         "walls": walls_out,
         "constraint_links": constraint_links_out,
         "analysis": analysis_out,
+        "capacidades": capacidades_out,
         "tributary_areas": trib_out,
         "panos": paños_out,
         "pending_geometry": PENDIENTES_GEOMETRIA,
@@ -3655,6 +3881,26 @@ def exportar_modelo_unity(ruta_json):
     print(f"       muros equivalentes: {len(walls_out)} (núcleo PISO_2)")
     print(f"       rigidLink constraint de muros: {len(constraint_links_out)}")
     print(f"       analisis: {analysis_out.get('estado', 'NO_DISPONIBLE')}")
+    print(f"       caso activo: {analysis_out.get('caso', 'N/D')} | "
+          f"fuerzas por elemento: {len(fuerzas_elementos)} de 204")
+    print(f"       capacidades P-M: col tag {col_pm.get('elementTag')} "
+          f"({col_pm.get('estado')}) · muro tag "
+          f"{muro_pm.get('elementTag')} ({muro_pm.get('estado')})")
+
+    # Copia del mismo JSON (mismo formato, sin duplicar estructura) a la
+    # carpeta de datos de Unity: StreamingAssets de LT1Viewer.
+    destinos = [
+        os.path.join("unity", "LT1Viewer", "Assets", "StreamingAssets",
+                     "modelo_lt1.json"),
+    ]
+    for destino in destinos:
+        if os.path.isdir(os.path.dirname(destino)):
+            import shutil
+            shutil.copyfile(ruta_json, destino)
+            print(f"  [OK] copia JSON para Unity: {destino}")
+        else:
+            print(f"  [AVISO] no existe '{os.path.dirname(destino)}'; "
+                  f"el JSON solo quedo en {ruta_json}")
     return ruta_json
 
 

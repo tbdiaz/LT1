@@ -18,7 +18,7 @@ STEP = gravity_loads.STEP
 TAG_BEAM_BASE = gravity_loads.TAG_BEAM_BASE
 Q_G = gravity_loads.Q_G
 
-EXPECTED_TOTAL = 11541.2916  # kN (beam_gravity_loads_LT2, L1-L4, beams)
+EXPECTED_TOTAL = 11268.6627  # kN (beam_gravity_loads_LT2, L1-L4, beams)
 N_BEAMS = 184
 
 

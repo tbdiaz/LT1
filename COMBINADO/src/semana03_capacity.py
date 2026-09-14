@@ -12,15 +12,15 @@ remite los recubrimientos a la E.T.O.G., documento no disponible en el
 proyecto. Por lo tanto TODO lo siguiente son SUPUESTOS DE MODELACION
 explicitos y marcados como tales, NO datos reales del proyecto:
 
-  [SUPUESTO] f'c            = 30 MPa  = 30000 kPa
-  [SUPUESTO] fy             = 420 MPa = 420000 kPa   (Es = 200 GPa)
+  [CONFIRMADO usuario] f'c = 35 MPa = 35000 kPa
+  [CONFIRMADO usuario] fy = 420 MPa = 420000 kPa   (Es = 200 GPa)
   [SUPUESTO] distancia adoptada de 4 cm desde la CARA del hormigon al EJE
              de las barras (NO es recubrimiento libre a la superficie de la
              barra; no se modelan estribos).
   [SUPUESTO] distribucion   = 16 barras Φ22 simetricas alrededor del
              perimetro (4 esquinas + 3 por cara, simetria respecto de ambos
              ejes centroidales).
-  [SUPUESTO] hormigon no confinado Concrete01 (fpc=-30000 kPa, epsc0=-0.002,
+  [SUPUESTO] hormigon no confinado Concrete01 (fpc=-35000 kPa, epsc0=-0.002,
              fpcu=-6000 kPa, epsscu=-0.006). La seccion de hormigon se
              discretiza en fibras sobre el parche BRUTO 0.70x0.70 (no se
              descuenta el area de las barras; practica usual en fibras).
@@ -62,9 +62,9 @@ H_CM = 70.0                       # alto seccion       (0.70 m)
 # ---------------------------------------------------------------------------
 # SUPUESTOS DE MODELACION (los planos NO los documentan)
 # ---------------------------------------------------------------------------
-FC_MPA = 30.0        # [SUPUESTO] f'c  = 30 MPa
-FY_MPA = 420.0       # [SUPUESTO] fy   = 420 MPa
-ES_GPA = 200.0       # [SUPUESTO] modulo de elasticidad del acero
+FC_MPA = 35.0        # [CONFIRMADO usuario] f'c = 35 MPa
+FY_MPA = 420.0       # [CONFIRMADO usuario] fy   = 420 MPa
+ES_GPA = 200.0       # [CONFIRMADO usuario] modulo de elasticidad del acero = 200 GPa
 STRAIN_HARDEN_B = 0.01   # [SUPUESTO] pendiente de endurecimiento Steel01
 
 N_BARS = 16          # armadura REAL (planos): 16 barras longitudinales
@@ -243,7 +243,8 @@ def figure_section():
     ax.set_aspect("equal")
     ax.grid(False)
     ax.set_title("Columna LT1 tag 111000 - 70x70 cm | 16 Φ22\n"
-                 "(f'c, fy, dist. cara->eje y distribucion = SUPUESTOS)",
+                 "(f'c=35, fy=420 CONFIRMADOS | dist. cara->eje y distribucion "
+                 "= SUPUESTOS)",
                  fontsize=10)
     import matplotlib.patches as mpatches
     ax.legend(handles=[mpatches.Patch(facecolor="tab:orange",
@@ -292,7 +293,8 @@ def run_all():
     ax.set_xlabel("Curvatura  phi [rad/m]")
     ax.set_ylabel("Momento  M [kN·m]")
     ax.set_title("Momento-Curvatura - columna LT1 111000 (70x70 cm, 16 Φ22)\n"
-                 "f'c=30 MPa, fy=420 MPa (SUPUESTOS DE MODELACION)")
+                 "f'c=35 MPa, fy=420 MPa (f'c/fy/Es confirmados; dist. y "
+                 "distribucion SUPUESTOS)")
     ax.grid(True, alpha=0.3)
     ax.legend(fontsize=8)
     fig.tight_layout()
@@ -331,7 +333,8 @@ def run_all():
     ax.set_xlabel("Momento  M [kN·m]")
     ax.set_ylabel("Carga axial  P (compresion) [kN]")
     ax.set_title("Interaccion P-M - columna LT1 111000 (70x70 cm, 16 Φ22)\n"
-                 "f'c=30 MPa, fy=420 MPa (SUPUESTOS DE MODELACION)")
+                 "f'c=35 MPa, fy=420 MPa (f'c/fy/Es confirmados; dist. y "
+                 "distribucion SUPUESTOS)")
     ax.grid(True, alpha=0.3)
     ax.legend(fontsize=8)
     fig.tight_layout()
@@ -369,23 +372,26 @@ def write_resumen(df_mc, df_pm, fiber_png, mc_png, pm_png, p0, m_abs_max):
         "diameter_mm=22, status EXACT, "
         "source USER_CONFIRMED_DRAWING_DATA).",
         "",
-        "## SUPUESTOS DE MODELACION (los planos NO los documentan)",
+        "## Materiales (CONFIRMADOS por el usuario) y SUPUESTOS",
         "",
         "Los planos LT1 (2017_67-000/001, hojas de plantas y de columnas) no "
         "indican f'c, fy ni recubrimiento; el plano general 2017_67-000 "
         "remite los recubrimientos a la E.T.O.G., documento no disponible. "
-        "Por eso la Parte D se resuelve con los siguientes supuestos, que NO "
-        "son datos reales del proyecto:",
+        "Los valores de material f'c, fy y Es fueron CONFIRMADOS por el "
+        "usuario (fc=35 MPa, fy=420 MPa, Es=200 GPa); el resto de la "
+        "modelacion usa los siguientes supuestos, que NO son datos reales del "
+        "proyecto:",
         "",
         "| concepto | valor | caracter |",
         "|---|---|---|",
-        "| f'c (hormigon) | 30 MPa = 30000 kPa | **SUPUESTO** |",
-        "| fy (acero) | 420 MPa = 420000 kPa | **SUPUESTO** |",
-        "| Es / endurecimiento acero | 200 GPa, b = 0.01 | **SUPUESTO** |",
+        "| f'c (hormigon) | 35 MPa = 35000 kPa | **CONFIRMADO (usuario)** |",
+        "| fy (acero) | 420 MPa = 420000 kPa | **CONFIRMADO (usuario)** |",
+        "| Es acero | 200 GPa | **CONFIRMADO (usuario)** |",
+        "| endurecimiento acero b | 0.01 | **SUPUESTO** |",
         "| distancia adoptada de 4 cm desde la cara al EJE de las barras | 0.04 m | **SUPUESTO** (no es recubrimiento libre) |",
         "| distribucion de las 16 Φ22 | 4 esquinas + 3 por cara, simetrica "
         "en ambos ejes | **SUPUESTO** (los planos no la definen) |",
-        "| hormigon | Concrete01 no confinado (fpc=-30000, epsc0=-0.002, "
+        "| hormigon | Concrete01 no confinado (fpc=-35000, epsc0=-0.002, "
         "fpcu=-6000 kPa, epsscu=-0.006) | **SUPUESTO** (sin estribos "
         "documentados) |",
         "| discretizacion | parche bruto 0.70x0.70 m en fibras (32x32); no "
@@ -414,10 +420,11 @@ def write_resumen(df_mc, df_pm, fiber_png, mc_png, pm_png, p0, m_abs_max):
     lin += [
         f"- Maximo entre las ramas evaluadas: **M = {mc_top['M_kN_m']:.2f} "
         f"kN·m** a P = {mc_top['P_kN']:.0f} kN.",
-        "- Interpretacion breve: la capacidad en flexion sube con la "
-        "compresion axial hasta la zona balanceada (max ~ 1658 kN·m cerca de "
-        "P = -5000 kN) y baja a partir de ahi hacia la compresion pura; "
-        "curvas completas en `moment_curvature.csv`.",
+        f"- Interpretacion breve: la capacidad en flexion sube con la "
+        f"compresion axial hasta la zona balanceada (max ~ "
+        f"{mc_top['M_kN_m']:.0f} kN·m a P = {mc_top['P_kN']:.0f} kN) y baja "
+        f"a partir de ahi hacia la compresion pura; curvas completas en "
+        f"`moment_curvature.csv`.",
         "",
         "## P-M (primeros puntos)",
         "",
@@ -442,9 +449,10 @@ def write_resumen(df_mc, df_pm, fiber_png, mc_png, pm_png, p0, m_abs_max):
         "## Supuestos vs. datos reales",
         "",
         "- Datos REALES del proyecto: seccion 70x70 y 16 Φ22 (planos).",
-        "- SUPUESTOS: f'c = 30 MPa, fy = 420 MPa, distancia adoptada de 4 cm "
-        "desde la cara al eje de las barras y distribucion de las 16 barras. " 
-        "Si se confirman otros valores (E.T.O.G. o memoria de calculo), solo "
+        "- SUPUESTOS: f'c = 35 MPa, fy = 420 MPa CONFIRMADOS; distancia adoptada "
+        "de 4 cm desde la cara al eje de las barras y distribucion de las 16 "
+        "barras siguen siendo SUPUESTOS. Si se confirman otros valores "
+        "(E.T.O.G. o memoria de calculo), solo " 
         "cambian las constantes `FC_KPA`, `FY_KPA`, `COVER_M`/"
         "`bar_positions()` y se reejecuta este modulo.",
         "",
@@ -463,8 +471,8 @@ def main():
     print("=" * 76)
     print("SEMANA 3 - PARTE D | CAPACIDAD DE SECCION - columna LT1 "
           f"tag {COLUMN_TAG} (70x70 cm, 16 Φ22)")
-    print("f'c=30 MPa / fy=420 MPa / dist. adoptada 4 cm cara->eje / distribucion: "
-          "SUPUESTOS DE MODELACION")
+    print("f'c=35 MPa (CONFIRMADO) / fy=420 MPa (CONFIRMADO) / dist. adoptada "
+          "4 cm cara->eje / distribucion: SUPUESTOS")
     print("=" * 76)
     rc = run_all()
     print("\nSalidas:")

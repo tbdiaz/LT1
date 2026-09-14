@@ -1,76 +1,92 @@
-==============================================================================
-CONTROL ETAPA UNITY LT1 - VALIDACION ESTATICA DEL JSON
-==============================================================================
-JSON : outputs/unity/modelo_lt1.json (parseado OK)
+================================================================================
+CONTROL UNITY LT1 · VALIDACION JSON + P1L4 POSTPROCESO
+================================================================================
 
-RESULTADO: PASA TODAS LAS VERIFICACIONES ESTATICAS
+1. ENTORNO UNITY
+   Unity: NO instalado en esta maquina
+   Proyecto preparado en: unity/LT1Viewer/
+   El usuario debe abrir con Unity Hub (2022.3 LTS)
 
-  verificaciones: 33/33 OK
-  [OK ] 124 nodos totales  (total=124 (estructural=120, master=4))
-  [OK ] 120 estructurales / 4 masters  (estructurales=120, masters=4)
-  [OK ] 108 vigas  (108)
-  [OK ] 90 columnas  (90)
-  [OK ] 6 muros equivalentes  (6)
-  [OK ] 12 rigidLink (constraint)  (12)
-  [OK ] 18 apoyos  (18)
-  [OK ] 4 diafragmas  (4)
-  [OK ] 204 elasticBeamColumn  (beams+columns+walls = 108+90+6=204)
-  [OK ] rigidLink NO en elasticBeamColumn  (constraint_links es array independiente, sin campo elasticBeamColumn)
-  [OK ] tags unicos en nodes  (124 tags / 124 unicos)
-  [OK ] tags unicos en beams  (108 tags / 108 unicos)
-  [OK ] tags unicos en columns  (90 tags / 90 unicos)
-  [OK ] tags unicos en walls  (6 tags / 6 unicos)
-  [OK ] tags unicos en supports  (18 tags / 18 unicos)
-  [OK ] elementTags unicos globales  (204 / 204)
-  [OK ] coordenadas finitas (124 nodos)
-  [OK ] pending_geometry presente  (8 items)
-  [OK ] pendiente listado: nucleo_piso_4
-  [OK ] pendiente listado: muros_subterraneo_plan101
-  [OK ] pendiente listado: V.30/45
-  [OK ] pendiente listado: V.60/VAR
-  [OK ] pendiente listado: V.60-30/80-40
-  [OK ] pendiente listado: P.M.
-  [OK ] pendiente listado: V.M.
-  [OK ] pendiente listado: carga_salientes
-  [OK ] analisis OK_COMPLETADO  (OK_COMPLETADO)
-  [OK ] P_gravedad ~ 20182.625 kN  (P=20182.62506575)
-  [OK ] SumaRz ~ 20182.625 kN  (SumaRz=20182.625065750017)
-  [OK ] error relativo ~ 9.01e-16  (err_rel=9.01265022572653e-16)
-  [OK ] max_desplazamiento finito  (maxU=0.002728999686258711)
-  [OK ] reacciones 18 / desplazamientos 124  (reac=18, desp=124)
-  [OK ] estado MODELO_ANALIZABLE...  (MODELO_ANALIZABLE_CON_GEOMETRIA_RESPALDADA_ACTUAL)
-==============================================================================
-==============================================================================
-CONTROL ETAPA UNITY LT1 - PARTE UNITY-SIDE (registro de esta sesion)
-==============================================================================
-Fecha de registro : 2026-09-07 (sesion P1L2 UNITY)
-Estado Unity Editor: NO EJECUTABLE EN ESTE EQUIPO
-  - Unico editor instalado: 2022.3.76f1 (Extended LTS). Exige licencia
-    Unity Industry/Enterprise; el batchmode termina con EXIT=198.
-  - Proyecto apuntado a 2022.3.20f1 (LTS normal, compatible con licencia
-    Personal). Al abrirse en un editor con licencia valida Unity lo
-    actualizara a la revision instalada.
+2. JSON EXPORTADO
+   ruta: /Users/trinidaddiaz/Documents/PROYECTO_LT1_LT2/outputs/unity/modelo_lt1.json
+   tamano: 312246 bytes
 
-Compilacion C# (validada fuera de Unity)
-  - Metodo     : Roslyn (csc) del editor 2022.3.76f1 + NetCoreRuntime,
-                 referenciando UnityEngine.UnityModules + UnityEditor +
-                 NetStandard 2.1 ref. Se compilo todo Assets/Scripts + Assets/Editor.
-  - Resultado  : 0 errores CS (EXIT=0), ensamblado de 40960 bytes generado.
+3. VALIDACIONES
+   [OK] nodos estructurales: 120 OK
+   [OK] nodos master: 4 OK
+   [OK] nodos totales: 124 OK
+   [OK] vigas: 108 OK
+   [OK] columnas: 90 OK
+   [OK] apoyos: 18 OK
+   [OK] diafragmas: 4 OK
+   [OK] muros: 6 OK
+   [OK] constraint_links: 12 OK
+   [OK] total elementos: 204 (esperados 204)
+   [OK] elementTags duplicados: 0
+   [OK] nodeTags duplicados: 0
+   [OK] coordenadas no finitas encontradas
+   [OK] column tags en rango 100xxx OK
+   [OK] beam tags en rango 200xxx OK
+   [OK] tributary_areas ausente
+   [OK] metadata.unidades OK
+   [OK] metadata.material OK
+   [OK] metadata.limitaciones OK
+   [OK] analisis OK_COMPLETADO
+   [OK] P aplicada: 19644.141914249998 (esperado ~19644)
+   [OK] error equilibrio: 9.259704045542193e-16
+   [OK] NaN/Inf encontrado en resultados de analisis
+   [OK] diafragmas rigidos incompatibles
+   [OK] caso activo: G_gravedad OK
+   [OK] fuerzas_elementos: 204 OK
+   [OK] fuerzas_elementos: 6 comp por extremo y finitas OK
+   [OK] tags de fuerzas no coinciden con geometria (0 faltan)
+   [OK] fuerzas_elementos: nodo_i/j consistentes con beams/columns/walls OK
+   [OK] capacidades: 2 OK
+   [OK] capacidad columna tag 111000 OK
+   [OK] columna 111000: NO_DISPONIBLE (sin curva SUPUESTA) OK
+   [OK] columna 111000: curva_pm vacia (faltan f'c/fy/recubrimiento) OK
+   [OK] demanda columna 111000 (modelo, informativa): N=-506.0575 kN, M=120.3397 kN·m OK
+   [OK] demanda columna compresion < 0 OK
+   [OK] columna 111000: faltantes listados OK
+   [OK] capacidad muro: NO_DISPONIBLE con faltantes OK
+   [OK] muro 400001: curva_pm vacia (armadura no legible + sin f'c/fy) OK
+   [OK] NaN/Inf en curva P-M
 
-Escena LT1Viewer.unity
-  - Estado     : NO CREADA (requiere abrir el proyecto en Unity Editor).
-  - Generador  : Assets/Editor/LT1SceneBuilder.cs -> menu "LT1 > Build LT1Viewer Scene".
-                 Alternativa manual (60s): Scene root -> empty GO "LT1Viewer"
-                 + componentes (ModelLoader, StructuralViewer, SelectionController,
-                 VisibilityController, OrbitCamera, IdLabelController,
-                 LocalAxesController, TributaryAreaInspector) + Main Camera
-                 (OrbitCamera, tag MainCamera) + Directional Light.
+   total OK: 39 | problemas: 0 | avisos: 0
 
-Instrucciones manuales para el usuario
-  1. Abrir unity/LT1Viewer con un Unity Editor 2022.3 LTS con licencia valida.
-  2. Esperar import y compilacion (Console sin errores: los .cs compilan ya 0/0).
-  3. Menu "LT1 > Build LT1Viewer Scene" para crear Assets/Scenes/LT1Viewer.unity
-     (o crear la escena manualmente como se indica arriba).
-  4. Abrir la escena, presionar Play. Toggles 1-8, P = panel de pendientes.
-     Verificacion visual de nodos/vigas/columnas/muros/rigidLinks/diafragmas.
-==============================================================================
+4. P1L4 · RESULTADOS DISPONIBLES
+   caso activo: G_gravedad | escenarios: ['G']
+   fuerzas por elemento: 204 de 204
+   demandas exportadas: 2 capacidades
+   - columna tag 111000: estado=NO_DISPONIBLE | demanda N=-506.0575 kN, M=120.3397 kN·m (G_gravedad)
+   - muro tag 400001: estado=NO_DISPONIBLE | demanda N=-0.0 kN, M=120.1768 kN·m (G_gravedad)
+
+   convencion fuerzas: Fuerzas locales elasticBeamColumn via ops.eleResponse('localForce') (12 comp por elemento, orden [N, Vy, Vz, T, My, Mz] en extremo i y j; unidades kN y kN·m; sistema local del elemento). F_i[0] = -N_interno y F_j[0] = +N_interno, con N_interno traccion positiva (compresion < 0); misma convencion usada en la curva P-M.
+
+5. SCRIPTS C# (unity/LT1Viewer/Assets/Scripts)
+   DeformedShapeController.cs       8194 bytes
+   ForceDiagramController.cs        7910 bytes
+   IdLabelController.cs             5307 bytes
+   LocalAxesController.cs           4744 bytes
+   ModelData.cs                     6934 bytes
+   ModelLoader.cs                  17118 bytes
+   OrbitCamera.cs                   3845 bytes
+   SelectionController.cs           6276 bytes
+   StructuralResultsController.cs   5558 bytes
+   StructuralViewer.cs              6314 bytes
+   TributaryAreaInspector.cs        2378 bytes
+   VisibilityController.cs          6058 bytes
+
+   Responsabilidades P1L4:
+   - ModelData.cs: clases de resultados (fuerzas_elementos, capacidades)
+   - StructuralResultsController.cs: panel seleccion con N/V/T/M + P-M
+   - DeformedShapeController.cs: deformada (tecla D, escala +/-)
+   - ForceDiagramController.cs: diagramas momento/axial/corte (tecla M)
+
+6. PASOS MANUALES DEL USUARIO
+   a) Regenerar JSON: python3 src/modelo_lt1.py  (copia a StreamingAssets)
+   b) Abrir unity/LT1Viewer/ con Unity 2022.3 LTS
+   c) Menu LT1 > Build LT1Viewer Scene y Play
+   d) Click sobre viga/columna/muro ver resultados; D deformada; M diagramas
+
+================================================================================

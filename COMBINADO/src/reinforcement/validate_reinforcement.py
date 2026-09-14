@@ -50,7 +50,7 @@ from .reinforcement_types import (
 # reportados por `run_combined.main()` en la corrida de cierre.
 BASELINE_MODEL = {
     "rc": 0,
-    "P_total": 31902.275078,
+    "P_total": 31086.259667,
     "n_nodos_fisicos": 461,
     "n_apoyos": 47,
 }

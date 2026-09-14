@@ -14,7 +14,7 @@ public class StructuralViewer : MonoBehaviour
 
         if (!loader.LoadModel())
         {
-            loadError = "No se pudo cargar modelo_lt1.json";
+            loadError = "No se pudo cargar modelo_combinado.json";
             Debug.LogError($"[LT1Viewer] {loadError}");
             return;
         }
@@ -57,27 +57,34 @@ public class StructuralViewer : MonoBehaviour
         int totalElements = loader.modelData.beams.Length + loader.modelData.columns.Length
                             + loader.modelData.walls.Length;
 
-        string summary = $"LT1 Viewer - {loader.modelData.nodes.Length} nodes, " +
-                         $"{totalElements} elements (90+108+6), " +
+        string summary = $"COMBINADO Viewer - {loader.modelData.nodes.Length} nodes, " +
+                         $"{totalElements} elements, " +
                          $"{loader.modelData.constraint_links.Length} constraintLinks, " +
                          $"{loader.modelData.supports.Length} supports, " +
                          $"{loader.modelData.diaphragms.Length} diaphragms";
+
+        if (loader.combinedRoot != null && loader.combinedRoot.metadata != null)
+        {
+            var md = loader.combinedRoot.metadata;
+            summary += $"\nFuente: {md.modelo} | {md.etapa} | {md.origen_fuente}";
+            if (md.unidades != null)
+                summary += $"\nUnits: {md.unidades.longitud}"
+                           + $"/{md.unidades.fuerza}/{md.unidades.presion}";
+            if (md.casos != null)
+                summary += $"\nCasos: G, Q, EX, EY, COMBO_R";
+        }
 
         if (loader.modelData.metadata != null)
         {
             var m = loader.modelData.metadata;
             if (m.material != null)
                 summary += $"\nMaterial: E={m.material.E_kPa} kPa, nu={m.material.nu}, G={m.material.G_kPa} kPa";
-            if (m.unidades != null)
-                summary += $"\nUnits: {m.unidades.longitud}/{m.unidades.fuerza}/{m.unidades.tension}";
-            if (!string.IsNullOrEmpty(m.estado_modelo))
-                summary += $"\nEstado: {m.estado_modelo}";
         }
 
         if (loader.modelData.analysis != null)
         {
             var a = loader.modelData.analysis;
-            summary += $"\nAnalisis: {a.estado}, P={a.P_aplicada_kN} kN";
+            summary += $"\nAnalisis: {a.estado}, P={a.P_aplicada_kN} kN (caso {a.caso})";
             if (a.reacciones != null)
                 summary += $", R_sum={a.suma_Rz_kN} kN";
         }
@@ -93,12 +100,12 @@ public class StructuralViewer : MonoBehaviour
 
     void DrawInfoPanel()
     {
-        float pw = 320f;
-        float ph = modelLoaded ? 170f : 60f;
-        float x = 230f;
-        float y = 10f;
+        float pw = 340f;
+        float ph = modelLoaded ? 210f : 60f;
+        float x = 10f;
+        float y = 260f;
 
-        GUI.Box(new Rect(x, y, pw, ph), "LT1 Viewer");
+        GUI.Box(new Rect(x, y, pw, ph), "COMBINADO Viewer");
 
         GUILayout.BeginArea(new Rect(x + 10, y + 25, pw - 20, ph - 30));
 
@@ -120,9 +127,9 @@ public class StructuralViewer : MonoBehaviour
                            $"Elementos: {totalElements}  |  " +
                            $"Apoyos: {loader.modelData.supports.Length}  |  " +
                            $"Diafragmas: {loader.modelData.diaphragms.Length}");
-            GUILayout.Label($"Muros equiv: {loader.modelData.walls.Length}  |  " +
-                           $"RigidLinks: {loader.modelData.constraint_links.Length}  |  " +
-                           $"Pendientes: {(loader.modelData.pending_geometry != null ? loader.modelData.pending_geometry.Length : 0)}");
+            GUILayout.Label($"Reacciones: {loader.modelData.constraint_links.Length} rigid  |  " +
+                           $"Masters: {(loader.combinedRoot != null && loader.combinedRoot.masters != null ? loader.combinedRoot.masters.Length : 0)}  |  " +
+                           $"Notas: {(loader.combinedRoot != null && loader.combinedRoot.metadata != null && loader.combinedRoot.metadata.notas_modelo != null ? loader.combinedRoot.metadata.notas_modelo.Length : 0)}");
 
             if (loader.modelData.metadata != null && loader.modelData.metadata.material != null)
             {
@@ -133,7 +140,22 @@ public class StructuralViewer : MonoBehaviour
             if (loader.modelData.analysis != null)
             {
                 var a = loader.modelData.analysis;
-                GUILayout.Label($"Analisis: {a.estado}  |  P={a.P_aplicada_kN:F1} kN  |  err={a.err_rel:F4}");
+                GUILayout.Label($"Analisis: {a.estado}  |  P={a.P_aplicada_kN:F1} kN  |  err={a.err_rel:E2}");
+                if (!string.IsNullOrEmpty(a.caso))
+                    GUILayout.Label($"Caso: {a.caso}  |  fuerzas: "
+                        + (a.fuerzas_elementos != null ? a.fuerzas_elementos.Length : 0)
+                        + " elementos");
+            }
+
+            if (loader.combinedRoot != null && loader.combinedRoot.metadata != null
+                && loader.combinedRoot.metadata.notas_modelo != null
+                && loader.combinedRoot.metadata.notas_modelo.Length > 0)
+            {
+                GUIStyle tiny = new GUIStyle(GUI.skin.label) { fontSize = 9 };
+                // solo la primera nota para no invadir; el resto en tecla 8
+                string n0 = loader.combinedRoot.metadata.notas_modelo[0];
+                if (n0.Length > 90) n0 = n0.Substring(0, 90) + "...";
+                GUILayout.Label($"Nota: {n0}", tiny);
             }
         }
 
@@ -150,7 +172,7 @@ public class StructuralViewer : MonoBehaviour
             fontSize = 12
         };
         GUI.Label(new Rect(0, Screen.height - h, Screen.width, h),
-                  "LMB orbit | Scroll zoom | MMB pan | R reset | 1-8 toggles | N/E IDs | A axes | P pendientes",
+                  "LMB orbit | Scroll zoom | MMB pan | R reset | 1-8 toggles | N/E IDs | A axes | P notas | D deformada (+/- escala) | M diagramas | C caso | L cargas",
                   centered);
     }
 

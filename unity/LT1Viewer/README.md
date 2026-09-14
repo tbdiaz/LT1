@@ -46,6 +46,58 @@ Visor 3D del modelo estructural LT1 (OpenSeesPy).
 | E | IDs de elementos (vigas, columnas y muros) |
 | A | Ejes locales (vigas, columnas y muros) |
 
+## Resultados estructurales (P1L4)
+| Tecla | Acción |
+|-------|--------|
+| D | Deformada ON/OFF (escala ajustable con **+** / **-**) |
+| M | Diagramas de esfuerzos del elemento seleccionado (ON/OFF) |
+
+- Al seleccionar una viga/columna/muro se muestra (esquina inferior derecha)
+  el **panel de resultados locales** con N, Vy, Vz, T, My, Mz en los extremos
+  i y j, nodos asociados y el **elementTag de OpenSeesPy ↔ objeto Unity**.
+- Convención: N interno con compresión < 0 y tracción > 0; en el JSON
+  `F_i[0] = -N` y `F_j[0] = +N` (ver `convencion_fuerzas`).
+- **Deformada (D):** usa `analysis.desplazamientos` del JSON (m). Los nodos,
+  vigas, columnas, muros y constraintLinks se mueven/se reorientan;
+  los diafragmas permanecen en su plano (rigidez de plano) — limitación.
+- **Diagramas (M):** perfiles 3D sobre el elemento seleccionado
+  (magenta = M resultante hypot(My,Mz); verde = N interno; naranja =
+  V resultante hypot(Vy,Vz)). El perfil es **lineal entre extremos**
+  (valores reales de `analysis.fuerzas_elementos`): exacto para columnas y
+  muros sin carga en el claro, y aproximado para vigas con q_G (la viga real
+  tiene diagrama parabólico).
+
+## Demanda-Capacidad P-M (P1L4) — requisito PENDIENTE POR DATOS
+> **Estado: NO CUMPLIDO POR DATOS FALTANTES.** El enunciado exige curva P-M,
+> punto de demanda y caso activo para al menos una columna y un muro. Se
+> implementó la infraestructura (JSON `capacidades` + panel), pero **no existe
+> curva de capacidad sustentada** para ninguna pieza. NO se exporta ninguna
+> curva basada en supuestos.
+
+- Al seleccionar la **columna 111000** o el **muro 400001**, el panel
+  superior derecho muestra la **demanda real del modelo** (caso `G_gravedad`):
+  columna N = -519.6 kN / M = 123.6 kN·m (extremo i); muro N ≈ 0 / M = 123.6
+  kN·m. Es el resultado verificado de `src/modelo_lt1.py`
+  (`ops.eleResponse('localForce')`, P = ΣRz = 20182.625 kN).
+- **Ambas piezas están `NO_DISPONIBLE`** y el panel lista sus **datos
+  faltantes** en lugar de dibujar una curva inventada.
+- La curva P-M de la **Parte D (Semana 3)** para la columna 111000 usó
+  `f'c = 30 MPa`, `fy = 420 MPa`, `4 cm cara→eje` y una distribución de las
+  16 Φ22 **TODOS SUPUESTOS de modelación** (los planos LT1 no documentan
+  f'c/fy y remiten el recubrimiento a la E.T.O.G., no disponible). Esa curva
+  **no se incorpora al JSON como capacidad** del proyecto.
+- Datos reales disponibles (proveniencia): sección `P. 70x70` (JSON) y
+  armadura 16 Φ22 (`COMBINADO/outputs/reinforcement/armadura_lt1_columnas.csv`,
+  `elementTag=111000`, EXACT). Muro: geometría NSUP_01 e=20 cm, L=3.65 m
+  (plan 102, confirmada por usuaria); **armadura longitudinal NO legible**
+  (`armadura_lt1_muros.csv`: bar_count/diámetro/espaciado vacíos,
+  NEEDS_DRAWING_VALUE_CONFIRMATION).
+- Trazabilidad: `elementTag` JSON ↔ objeto Unity ↔ `fuerzas_elementos` ↔
+  `capacidades` (todo proviene del mismo `src/modelo_lt1.py`).
+- **Para completar el requisito falta** (en planos/E.T.O.G./memoria): f'c,
+  fy, recubrimiento y distribución transversal de la columna; y para el muro
+  además la armadura longitudinal legible y su análisis de sección P-M.
+
 ## Selección e inspección
 - **Click izquierdo** en una viga, columna o muro para seleccionarlo
 - Panel de viga/columna: tipo, tag, nodos i/j, sección, longitud, nivel
@@ -75,7 +127,10 @@ No se inventa geometría para representarlos; permanecen como pendientes explíc
 
 ## Fuente de datos
 - `Assets/StreamingAssets/modelo_lt1.json`
-- Exportado desde Python (`src/modelo_lt1.py` → `exportar_modelo_unity()`)
+- Exportado desde Python (`src/modelo_lt1.py` → `exportar_modelo_unity()`),
+  que copia automáticamente el JSON generado a `StreamingAssets`.
+- Para regenerar: `python3 src/modelo_lt1.py` (raíz del repo) y revisar
+  `outputs/unity/modelo_lt1.json`.
 - NO es la fuente de verdad geométrica (eso es OpenSeesPy)
 
 ## Estado del modelo (etapa P1L2)
@@ -91,6 +146,15 @@ No se inventa geometría para representarlos; permanecen como pendientes explíc
 - Perfiles metálicos pendientes (segunda etapa)
 - Material H°A°: E=25,000,000 kPa, ν=0.20, G=10,416,667 kPa
   (INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO)
+- Resultados de fuerza incluidos solo del caso **G_gravedad** (único caso con
+  fuerzas por elemento verificadas en este export); sismo/viento/combinaciones
+  de semana 3 pertenecen al modelo COMBINADO (LT1+LT2) y no están aquí.
+- Diagramas M/N/V con perfil lineal extremo a extremo (aprox. para vigas con q_G).
+- Deformada: diafragmas permanecen en su plano (rigidez de plano) al activarse.
+- **No hay curva P-M exportada** (columna y muro NO_DISPONIBLE): f'c/fy/
+  recubrimiento no documentados (E.T.O.G. pendiente) y armadura de muros no
+  legible en los planos. El requisito P1L4 de demanda-capacidad queda
+  **pendiente por datos faltantes** (ver sección Demanda-Capacidad).
 
 ## Mapeo de coordenadas
 | OpenSeesPy | Unity |

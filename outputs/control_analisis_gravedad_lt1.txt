@@ -2,9 +2,9 @@
 CONTROL ANALISIS DE GRAVEDAD LT1 (clase A) · OpenSeesPy
 ==========================================================================================
 MATERIAL (INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO)
-     E = 25000000 kPa · nu = 0.2 · G = 10416667 kPa
-     verificación: G = E/[2(1+nu)] = 25e6/[2(1.20)] = 10 416 666.67 kPa (registrado 10 416 667 por redondeo documentado)
-     1 kN/m² = 1 kPa · G25 es la CLASE/resistencia del hormigón; NO es el módulo de corte G (coincidencia de notación).
+     E = 27800000 kPa · nu = 0.2 · G = 11583333 kPa
+     verificación: G = E/[2(1+nu)] = 27.8e6/[2(1.20)] = 11 583 333.33 kPa (valor exacto 27.8e6/2.4 a 2 decimales)
+     1 kN/m² = 1 kPa; 1 MPa = 1000 kPa · None
 
 MODELO
      nodos: 120 estructurales + 4 maestros = 124 en el dominio OpenSees
@@ -18,7 +18,7 @@ MODELO
 
 CARGAS DE GRAVEDAD (108 vigas, tributación cerrada)
      q_G aplicado vía eleLoad beamUniform(Wy=0, Wz=-w) por viga, pattern Plain(1) · timeSeries Linear(1)
-     Σ P transferida a vigas (P_losas -> P_transferida): 20182.625 kN en 108 vigas
+     Σ P transferida a vigas (P_losas -> P_transferida): 19644.142 kN en 108 vigas
      NOTA: matriz 40 paños no modificada; SC/puntuales/especiales quedan separadas de q_G.
 
 SOLVER / PIPELINE
@@ -28,35 +28,35 @@ SOLVER / PIPELINE
      analyze(1) retornó: 0 (EXITO)
 
 VERIFICACIONES POST-ANALISIS
-     carga gravitacional total aplicada: 20182.6251 kN
-     Σ reacciones verticales (18 apoyos, Rz): 20182.6251 kN
+     carga gravitacional total aplicada: 19644.1419 kN
+     Σ reacciones verticales (18 apoyos, Rz): 19644.1419 kN
      |Σ Rz - Σ P| = 1.818989e-11 kN
-     error relativo de equilibrio: 9.013e-16 (tolerancia documentada: rel <= 1e-06)
-     Σ Rx = 9.7766e-13 kN · Σ Ry = -1.6587e-13 kN
-     desplazamiento máximo: 2.729000e-03 m (nodo 50303)
-     max|Uz|: 2.700438e-03 m (nodo 50303)
+     error relativo de equilibrio: 9.260e-16 (tolerancia documentada: rel <= 1e-06)
+     Σ Rx = 3.6704e-13 kN · Σ Ry = -1.5321e-13 kN
+     desplazamiento máximo: 2.390261e-03 m (nodo 50303)
+     max|Uz|: 2.365298e-03 m (nodo 50303)
      NaN/Inf: ninguno
      compatibilidad diafragmas rígidos: OK
-        PISO_1: master 600001 · 18 slaves · ok=True · max_error=0.000e+00 m
+        PISO_1: master 600001 · 18 slaves · ok=True · max_error=1.694e-21 m
         PISO_2: master 600002 · 18 slaves · ok=True · max_error=0.000e+00 m
-        PISO_3: master 600003 · 18 slaves · ok=True · max_error=0.000e+00 m
+        PISO_3: master 600003 · 18 slaves · ok=True · max_error=6.776e-21 m
         PISO_4: master 600004 · 18 slaves · ok=True · max_error=0.000e+00 m
-     apoyo 1: Rx= 7.37878e+00 · Ry=-5.24174e+00 · Rz= 6.83427e+02
-     apoyo 3: Rx= 1.31332e+01 · Ry= 2.22620e+00 · Rz= 1.18848e+03
-     apoyo 5: Rx= 6.97584e+00 · Ry= 3.11863e+00 · Rz= 5.54339e+02
-     apoyo 301: Rx= 1.00731e-01 · Ry=-1.01227e+01 · Rz= 1.36136e+03
-     apoyo 303: Rx=-5.35959e-02 · Ry= 4.18383e+00 · Rz= 2.37588e+03
-     apoyo 305: Rx= 2.76968e-02 · Ry= 5.96337e+00 · Rz= 1.11224e+03
-     apoyo 401: Rx= 2.71119e-01 · Ry=-1.02568e+01 · Rz= 1.34022e+03
-     apoyo 403: Rx= 3.03837e-01 · Ry= 4.20953e+00 · Rz= 2.33383e+03
-     apoyo 405: Rx= 3.04075e-01 · Ry= 6.03127e+00 · Rz= 1.08756e+03
-     apoyo 601: Rx= 3.33649e-01 · Ry=-1.01767e+01 · Rz= 1.32279e+03
-     apoyo 603: Rx= 4.08025e-01 · Ry= 4.15639e+00 · Rz= 2.29873e+03
-     apoyo 605: Rx= 3.80102e-01 · Ry= 5.99367e+00 · Rz= 1.07056e+03
-     apoyo 901: Rx=-6.22864e+00 · Ry=-6.94193e+00 · Rz= 6.78187e+02
-     apoyo 903: Rx=-1.13014e+01 · Ry= 2.66885e+00 · Rz= 1.19637e+03
-     apoyo 905: Rx=-5.62194e+00 · Ry= 4.10177e+00 · Rz= 5.63198e+02
-     apoyo 1001: Rx=-1.83488e+00 · Ry=-2.88437e+00 · Rz= 2.78124e+02
-     apoyo 1003: Rx=-3.12065e+00 · Ry= 1.05513e+00 · Rz= 5.13167e+02
-     apoyo 1005: Rx=-1.45591e+00 · Ry= 1.91554e+00 · Rz= 2.24153e+02
+     apoyo 1: Rx= 7.18312e+00 · Ry=-5.10334e+00 · Rz= 6.65598e+02
+     apoyo 3: Rx= 1.27864e+01 · Ry= 2.16679e+00 · Rz= 1.15737e+03
+     apoyo 5: Rx= 6.79183e+00 · Ry= 3.03661e+00 · Rz= 5.39745e+02
+     apoyo 301: Rx= 9.72748e-02 · Ry=-9.85505e+00 · Rz= 1.32589e+03
+     apoyo 303: Rx=-5.34873e-02 · Ry= 4.07280e+00 · Rz= 2.31371e+03
+     apoyo 305: Rx= 2.58595e-02 · Ry= 5.80708e+00 · Rz= 1.08297e+03
+     apoyo 401: Rx= 2.63269e-01 · Ry=-9.98564e+00 · Rz= 1.30477e+03
+     apoyo 403: Rx= 2.95993e-01 · Ry= 4.09756e+00 · Rz= 2.27170e+03
+     apoyo 405: Rx= 2.96535e-01 · Ry= 5.87332e+00 · Rz= 1.05837e+03
+     apoyo 601: Rx= 3.23664e-01 · Ry=-9.90781e+00 · Rz= 1.28725e+03
+     apoyo 603: Rx= 3.96103e-01 · Ry= 4.04564e+00 · Rz= 2.23645e+03
+     apoyo 605: Rx= 3.69473e-01 · Ry= 5.83673e+00 · Rz= 1.04125e+03
+     apoyo 901: Rx=-6.06421e+00 · Ry=-6.75915e+00 · Rz= 6.59715e+02
+     apoyo 903: Rx=-1.10022e+01 · Ry= 2.59784e+00 · Rz= 1.16385e+03
+     apoyo 905: Rx=-5.47290e+00 · Ry= 3.99371e+00 · Rz= 5.47931e+02
+     apoyo 1001: Rx=-1.78591e+00 · Ry=-2.80865e+00 · Rz= 2.70355e+02
+     apoyo 1003: Rx=-3.03550e+00 · Ry= 1.02709e+00 · Rz= 4.99072e+02
+     apoyo 1005: Rx=-1.41533e+00 · Ry= 1.86447e+00 · Rz= 2.18132e+02
 ==========================================================================================

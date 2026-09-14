@@ -40,6 +40,12 @@ public static class LT1SceneBuilder
         viewer.AddComponent<TributaryAreaInspector>();
         viewer.AddComponent<IdLabelController>();
         viewer.AddComponent<LocalAxesController>();
+        viewer.AddComponent<StructuralResultsController>();
+        viewer.AddComponent<DeformedShapeController>();
+        viewer.AddComponent<ForceDiagramController>();
+        viewer.AddComponent<CaseSelector>();
+        viewer.AddComponent<LoadInspector>();
+        viewer.AddComponent<PmPanelController>();
 
         // --- Registrar escena en Build Settings ---
         var buildSettings = EditorBuildSettings.scenes;

@@ -73,7 +73,9 @@ secciones_por_plano = {
 
 # ---------------------------------------------------------------------------
 # Materiales del modelo lineal elástico.
-# ESTADO: H°A° DEFINIDO por INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO.
+# ESTADO: H°A° DEFINIDO por INFORMACION ACADEMICA CONFIRMADA POR USUARIO
+# (fc=35 MPa, E=27800 MPa, nu=0.20, densidad=2400 kg/m3) y ACERO (fy=420 MPa,
+# E=200000 MPa, densidad=7850 kg/m3).
 # Revisión documental (docs/):
 #   - docs/P1L2.txt          : NO fija f'c/E/G/nu; solo enumera 'materiales'
 #                              como dato del modelo.
@@ -85,79 +87,84 @@ secciones_por_plano = {
 #   - AGENTS.md              : prohíbe inventar datos de material.
 # Planos: 000 y 001 son raster sin valores (ref. E.T.O.G. y plano 001; lámina
 # 001 = armado/confinamiento de muros). No se atribuye ningún valor a planos.
-# Los valores elásticos del hormigón (E, nu, G) provienen EXCLUSIVAMENTE del
-# usuario como INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO.
+# Los valores elásticos del hormigón (E, nu, G) y del acero provienen
+# EXCLUSIVAMENTE del usuario (valor confirmado que sustituye al académico
+# previo G25/E=25e6).
 # ---------------------------------------------------------------------------
 MATERIAL_ACADEMICO_STATUS = "MATERIAL_PENDIENTE_DE_CONVENCION_ACADEMICA"
 
 # ---------------------------------------------------------------------------
-# INFORMACIÓN ACADÉMICA PROPORCIONADA POR EL USUARIO (NO proviene de planos).
-#   - Hormigón: clase G25 -> clase/resistencia del hormigón.
-#       IMPORTANTE: "G25" es la CLASE (resistencia) del hormigón; NO es el
+# INFORMACIÓN PROPORCIONADA POR EL USUARIO (CONFIRMADA, no inventada).
+#   - Hormigón: clase G35 -> fc = 35 MPa, E = 27 800 MPa (27 800 000 kPa),
+#       nu = 0.20, densidad = 2400 kg/m³.
+#   - Acero de refuerzo/estructural: fy = 420 MPa, E = 200 000 MPa
+#       (200 000 000 kPa), densidad = 7850 kg/m³.
+#   - IMPORTANTE: "G35" es la CLASE (resistencia) del hormigón; NO es el
 #       módulo de corte G. Es una coincidencia de notación.
-#   - Coeficiente de Poisson nu = 0.20.
-#   - E = 25 000 000 kN/m² (= 25 000 000 kPa, ya que 1 kN/m² = 1 kPa).
-#   - G = 10 416 667 kN/m² (= kPa), VERIFICACIÓN: G = E/[2(1+nu)]
-#       = 25 000 000 / [2·(1+0.20)] = 10 416 666.67 kN/m².
-#       El valor registrado 10 416 667 corresponde al redondeo documentado.
-# Estado documental: G25, nu=0.20, E y G NO aparecen en docs/Enunciado
-# general.txt, docs/P1L2.txt, AGENTS.md ni en la capa de texto de los planos
-# PDF (000/001/100-103/300-303/700). Se registran EXCLUSIVAMENTE como dato
-# académico proporcionado por el usuario; NO se atribuyen a planos/documentos.
+#   - G = E/[2(1+nu)] = 27 800 000 / [2·(1+0.20)] = 11 583 333.33 kPa.
+#       El valor registrado 11 583 333 corresponde al redondeo documentado.
 # ---------------------------------------------------------------------------
 INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO = {
-    "hormigon_clase": "G25",          # clase/resistencia del hormigón
-    "nota_G25": ("G25 es la CLASE/resistencia del hormigón; NO es el módulo "
+    "hormigon_clase": "G35",          # clase/resistencia del hormigón
+    "nota_G35": ("G35 es la CLASE/resistencia del hormigón; NO es el módulo "
                  "de corte G (coincidencia de notación)."),
     "nu": 0.20,
-    "E_kPa": 25_000_000.0,
-    "G_kPa": 10_416_667.0,
-    "G_formula": "G = E/[2(1+nu)] = 25e6/[2(1.20)] = 10 416 666.67 kPa "
-                 "(registrado 10 416 667 por redondeo documentado)",
-    "nota_unidades": "1 kN/m² = 1 kPa",
-    "estado_documental": ("PROPORCIONADA_POR_USUARIO (no encontrada en planos "
-                          "ni en docs del curso)"),
+    "E_kPa": 27_800_000.0,
+    "G_kPa": 11_583_333.33,
+    "G_formula": "G = E/[2(1+nu)] = 27.8e6/[2(1.20)] = 11 583 333.33 kPa "
+                 "(valor exacto 27.8e6/2.4 a 2 decimales)",
+    "densidad_hormigon_kg_m3": 2400.0,
+    "densidad_acero_kg_m3": 7850.0,
+    "nota_unidades": "1 kN/m² = 1 kPa; 1 MPa = 1000 kPa",
+    "estado_documental": "PROPORCIONADA_POR_USUARIO (confirmada; sustituye al "
+                         "valor academico previo G25 E=25e6)",
     "E_expression_en_documentos": "NO encontrada (docs P1L2/Enunciado y planos)",
 }
 materiales = {
     "hormigon": {
         "nombre": "H°A°",
         "estado": "LISTO",
-        "f_c_kPa": None,        # PENDIENTE (G25 es clase/resistencia; sin f'c numérico)
-        "E_kPa": 25_000_000.0,  # INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO
-        "fy_kPa": None,         # PENDIENTE (aceros de refuerzo)
-        "nu": 0.20,             # INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO
-        "G_kPa": 10_416_667.0,  # redondeo documentado de E/[2(1+nu)] = 10 416 666.67
-        "fuente": ("E=25000000 kPa, nu=0.20 y G=10416667 kPa: "
-                   "INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO (G25 = "
-                   "clase/resistencia del hormigón, NO módulo de corte G). "
+        "f_c_kPa": 35_000.0, # CONFIRMADO: fc = 35 MPa (clase G35)
+        "E_kPa": 27_800_000.0,
+        "fy_kPa": None,      # PENDIENTE (aceros de refuerzo)
+        "nu": 0.20,
+        "G_kPa": 11_583_333.33,  # 27.8e6/[2(1.20)] = 11 583 333.33 kPa
+        "densidad_kg_m3": 2400.0,
+        "fuente": ("E=27800000 kPa, fc=35000 kPa, nu=0.20 y G=11583333 kPa: "
+                   "PROPORCIONADA_POR_USUARIO (clase G35 / fc=35 MPa, "
+                   "E=27800 MPa, densidad 2400 kg/m3). "
                    "NO atribuir a planos ni a documentos del proyecto."),
     },
     "acero_estructural": {
         "nombre": "perfiles",
-        "estado": MATERIAL_ACADEMICO_STATUS,
-        "fy_kPa": None,     # PENDIENTE
-        "E_kPa": None,      # PENDIENTE
-        "G_kPa": None,      # PENDIENTE
-        "nu": None,         # PENDIENTE
-        "fuente": "PENDIENTE (perfiles metálicos / segunda etapa)",
+        "estado": "LISTO",
+        "fy_kPa": 420_000.0,    # CONFIRMADO: fy = 420 MPa
+        "E_kPa": 200_000_000.0, # CONFIRMADO: Es = 200 000 MPa
+        "G_kPa": None,          # PENDIENTE (requiere nu del acero)
+        "nu": None,             # PENDIENTE
+        "densidad_kg_m3": 7850.0,
+        "fuente": "PROPORCIONADA_POR_USUARIO (fy=420 MPa, E=200000 MPa, "
+                  "densidad 7850 kg/m3; nu/G sin confirmar). Perfiles "
+                  "metálicos siguen pendientes de modelarse.",
     },
 }
 
 # ---------------------------------------------------------------------------
 # MATERIAL H°A° PARAMETRIZADO PARA EL MODELO OPENSEES (fuente única).
-# DEFINIDO por INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO:
-#   E = 25 000 000 kPa · nu = 0.20 · G = 10 416 667 kPa (G = E/[2(1+nu)],
-#   redondeo documentado; 1 kN/m² = 1 kPa).
+# DEFINIDO por INFORMACION ACADEMICA CONFIRMADA POR USUARIO:
+#   E = 27 800 000 kPa · nu = 0.20 · G = 11 583 333.33 kPa (G = E/[2(1+nu)] =
+#   valor exacto 27.8e6/2.4; 1 kN/m² = 1 kPa).
 # Con E y G definidos, el run crea los 198 elasticBeamColumn y ejecuta el
-# análisis de gravedad. El acero estructural sigue PENDIENTE (perfiles,
-# segunda etapa).
+# análisis de gravedad. El acero estructural queda definido (fy=420 MPa,
+# E=200000 MPa, densidad 7850 kg/m3); los perfiles metálicos siguen
+# pendientes de modelarse (segunda etapa).
 # ---------------------------------------------------------------------------
 MATERIAL_HA = {
-    "estado": "LISTO",                             # definido (académico/usuário)
-    "E_kPa": materiales["hormigon"]["E_kPa"],      # 25 000 000
+    "estado": "LISTO",                             # definido (confirmado/usuario)
+    "E_kPa": materiales["hormigon"]["E_kPa"],      # 27 800 000
     "nu": materiales["hormigon"]["nu"],            # 0.20
-    "G_kPa": materiales["hormigon"]["G_kPa"],      # 10 416 667 (redondeado)
+    "G_kPa": materiales["hormigon"]["G_kPa"],      # 11 583 333.33 (27.8e6/2.4)
+    "densidad_kg_m3": materiales["hormigon"]["densidad_kg_m3"],  # 2400
     "fuente": materiales["hormigon"]["fuente"],
 }
 

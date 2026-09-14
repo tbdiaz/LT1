@@ -61,7 +61,7 @@ OUT_S3 = COMB / "outputs" / "semana03"
 
 TRIB_LT2 = ROOT / "LT2" / "data" / "loads" / "tributary_areas_LT2.csv"
 
-Q_G_LT2 = 6.22935  # qG de losa (kN/m2) L1-L4, dato de LT2 (se verifica)
+Q_G_LT2 = 6.0822  # qG de losa (kN/m2) L1-L4, dato de LT2 (se verifica)
 
 # Intensidad de carga viva q_Q (CIERRE DEFINITIVO DE PARTE A):
 #   NCh1537.Of2009 Tabla 4 (edificacion educacional): salas de clases

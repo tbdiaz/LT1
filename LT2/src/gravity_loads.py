@@ -51,7 +51,7 @@ BEAM_LOAD_CSV = LOADS / "beam_gravity_loads_LT2.csv"
 OUT_POINTS = RES / "gravity_loads_applied_LT2.csv"
 OUT_BEAMS = RES / "gravity_loads_beam_summary_LT2.csv"
 
-Q_G = 6.22935  # kN/m2, planta tipo L1-L4
+Q_G = 6.0822  # kN/m2, planta tipo L1-L4 (CSV slabs_LT2; 620 kgf/m2)
 STEP = 0.05    # tamano de celda del muestreo 2B
 LEVELS = ["L1", "L2", "L3", "L4"]
 TAG_BEAM_BASE = 2001

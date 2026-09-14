@@ -73,8 +73,8 @@ SHIFT_X = 31.250
 TOL = 1e-6
 NODE_OFFSET_LT1 = 100000
 
-E_LT1 = 25_000_000.0
-G_LT1 = 10_416_667.0
+E_LT1 = 27_800_000.0
+G_LT1 = 11_583_333.33
 
 EXPECTED_INT_ORDER = ["B1", "L1", "L2", "L3", "L4", "ROOF"]
 EXPECTED_INT_TAGS = {
@@ -633,7 +633,7 @@ class CombinedBuilder:
         # Seccion de enlace (documentada en el reporte, seccion 10):
         #   100 x E_LT2 -> rigidez axial >= ~110x la del muro (e*L/2) y
         #   >= ~300x la de la viga V40; rigida sin superfluir al conjunto.
-        E = 2_350_000_000.0                # kPa = 100 * E_LT2 (2.35e7)
+        E = 2_780_000_000.0                # kPa = 100 * E_LT2 (2.78e7, confirmado)
         G = E / (2.0 * 1.20)               # nu = 0.20 (solo seccion de enlace)
         A, Iy, Iz, J = 1.00, 0.10, 0.10, 0.20   # m2 / m4 / m4 / m4
         chain_x, wall_x = 0.400, 0.100
@@ -1206,8 +1206,8 @@ class CombinedBuilder:
             if pair is not None:
                 self.duplicated = True
                 motivo = (f"Duplicado geometrico exacto con columna LT2 "
-                          f"nativa {pair} (P70x70, mismo tramo; difiere E: "
-                          "LT1 25e6 vs LT2 23.5e6 kPa). Se conserva LT2 "
+                          f"nativa {pair} (P70x70, mismo tramo, mismo E "
+                          "27.8e6 kPa confirmado). Se conserva LT2 "
                           "(regla 3).")
             else:
                 motivo = "Columna LT1 en interfaz SIN par LT2 (verificar)."
@@ -1671,7 +1671,7 @@ class CombinedBuilder:
         add(f"- Duplicados geometricos detectados: **{n_dup} columnas LT1** "
             "(P70x70, ejes 1/2/3, 5 tramos) coinciden exactamente con "
             "columnas LT2 nativas (misma seccion, longitud y orientacion; "
-            "difiere E: LT1 25e6 vs LT2 23.5e6 kPa).")
+            "mismo E 27.8e6 kPa confirmado).")
         add(f"- Decision (regla 3): conservar la **columna LT2 nativa** y "
             f"descartar las {n_dup} de LT1; la columna compartida queda con "
             "el E de LT2. No se pierde rigidez vertical (tramos iguales "
@@ -1722,11 +1722,11 @@ class CombinedBuilder:
         add("")
         add("## 7. Materiales (no unificados)")
         add("")
-        add(f"- LT1: E = {E_LT1:g} kPa, G = {G_LT1:g} kPa (dato academico "
-            "proporcionado).")
+        add(f"- LT1: E = {E_LT1:g} kPa, G = {G_LT1:g} kPa (dato confirmado usuario, "
+            "E=27800 MPa).")
         add(f"- LT2: E = {self.e_lt2:.6g} kPa, G = {self.g_lt2:.6g} kPa.")
-        add("- Cada modulo conserva su material; en las columnas compartidas "
-            "de la interfaz rige el E de LT2 (regla 3).")
+        add("- Cada modulo usa E=27800/27800 MPa (unificados); en las "
+            "columnas compartidas de la interfaz rige el E de LT2 (regla 3).")
         add("")
         add("## 8. Cargas de gravedad")
         add("")
@@ -1914,8 +1914,8 @@ class CombinedBuilder:
         add("- Nodos intermedios de cadena (y=4.265/8.9/11.885, sin apoyo "
             "fisico en muro) y vigas V30/VI cercanas: NO conectados.")
         add("- **Seccion de enlace (solo del COMBINADO, no altera LT1/LT2):** "
-            "E = 2.35e9 kPa (= 100 x E_LT2), nu = 0.20, A = 1.00 m², "
-            "Iy = Iz = 0.10 m⁴, J = 0.20 m⁴. Rigidez axial EA = 2.35e9 kN "
+            "E = 2.78e9 kPa (= 100 x E_LT2), nu = 0.20, A = 1.00 m², "
+            "Iy = Iz = 0.10 m⁴, J = 0.20 m⁴. Rigidez axial EA = 2.78e9 kN "
             "(>= ~110x la del muro media seccion y >= ~300x la de la V40); "
             "suficientemente rigida para transferir el corte/axial del "
             "enlace sin alterar las rigideces originales.")

@@ -13,6 +13,7 @@ public class ModelRoot
     public WallData[] walls;
     public ConstraintLinkData[] constraint_links;
     public AnalysisData analysis;
+    public CapacidadPmData[] capacidades;
     public TributaryAreaData[] tributary_areas;
     public PanosData[] panos;
     public PendingGeometryData[] pending_geometry;
@@ -209,6 +210,12 @@ public class AnalysisData
     public bool diafragmas_compatibles;
     [NonSerialized] public Dictionary<int, float[]> reacciones;
     [NonSerialized] public Dictionary<int, float[]> desplazamientos;
+
+    // P1L4: caso activo y fuerzas locales por elemento
+    public string caso;
+    public string caso_descripcion;
+    public string convencion_fuerzas;
+    public ElementInternalForceData[] fuerzas_elementos;
 }
 
 [Serializable]
@@ -238,4 +245,61 @@ public class PanosData
     public float Ly;
     public float area_m2;
     public float q_G_kPa;
+}
+
+// --- P1L4: resultados por elemento y demanda-capacidad P-M ----------------
+
+[Serializable]
+public class ElementInternalForceData
+{
+    public int elementTag;
+    public int node_i;
+    public int node_j;
+    public string estado;
+    public float[] F_i;   // [N, Vy, Vz, T, My, Mz] extremo i (kN, kN·m)
+    public float[] F_j;   // idem extremo j
+}
+
+[Serializable]
+public class CapacidadPmData
+{
+    public string elemento_tipo;
+    public int elementTag;
+    public string clave;
+    public string seccion;
+    public string estado;              // NO_DISPONIBLE (la curva bajo SUPUESTOS ya no se emite)
+    public string observacion;
+    public string materiales_fuente;
+    public string fuente_curva;
+    public ArmaduraData armadura;
+    public PmPointData[] curva_pm;
+    public DemandaPmData demanda;
+    public string[] faltantes;
+}
+
+[Serializable]
+public class ArmaduraData
+{
+    public int barras;
+    public float diametro_m;
+    public float distancia_cara_eje_m;
+    public string fuente;
+}
+
+[Serializable]
+public class PmPointData
+{
+    public string punto;
+    public string tipo;
+    public float P_kN;
+    public float M_kN_m;
+}
+
+[Serializable]
+public class DemandaPmData
+{
+    public string caso;
+    public string extremo;
+    public float N_kN;
+    public float M_kN_m;
 }

@@ -4,52 +4,52 @@ MATRIZ DE CARGAS PLANO 700 · LT1
 =========================================================================================================
 nivel      pano            bahía  Y_band area[m2] PP_L[kg/m²]  PM[kg/m²]  qG[kPa] SC[kg/m²] fuente                                   estado                   
 ---------------------------------------------------------------------------------------------------------
-PISO_1     PISO_1_P11        E-F     1-2    89.00         500        260   7.4531       500 tile t01 col1 fila unica                 OCR CONSISTENTE          
-PISO_1     PISO_1_P12        E-F     2-3    72.50         500        260   7.4531       500 tile t01 col1 (1 sola fila visible, misma para ambas direcciones Y) INFERIDO_POR_CONTINUIDAD_GRAFICA
-PISO_1     PISO_1_P21        F-G     1-2    89.00         500        260   7.4531       500 tile t01 col1 fila unica                 OCR CONSISTENTE          
-PISO_1     PISO_1_P22        F-G     2-3    72.50         500        260   7.4531       500 tile t01 col1 (1 sola fila visible, misma para ambas direcciones Y) INFERIDO_POR_CONTINUIDAD_GRAFICA
-PISO_1     PISO_1_P31        G-H     1-2    89.00         500        260   7.4531       300 tile t01 col2                            OCR CONSISTENTE          
-PISO_1     PISO_1_P32        G-H     2-3    72.50         500        260   7.4531       300 tile t01 col2                            INFERIDO_POR_CONTINUIDAD_GRAFICA
-PISO_1     PISO_1_P41        H-I     1-2    89.00         500        260   7.4531       300 tile t01 col2                            OCR CONSISTENTE          
-PISO_1     PISO_1_P42        H-I     2-3    72.50         500        260   7.4531       300 tile t01 col2                            INFERIDO_POR_CONTINUIDAD_GRAFICA
-PISO_1     PISO_1_P51       I-I'     1-2    22.25         500        260   7.4531       250 tile t01 col3                            OCR CONSISTENTE          
-PISO_1     PISO_1_P52       I-I'     2-3    18.12         500        260   7.4531       250 tile t01 col3                            INFERIDO_POR_CONTINUIDAD_GRAFICA
-PISO_2     PISO_2_P11        E-F     1-2    89.00         500        260   7.4531       500 tile t02 fila1 col1                      OCR CONSISTENTE          
-PISO_2     PISO_2_P12        E-F     2-3    72.50         500        260   7.4531       400 tile t02 fila2 col1                      OCR CONSISTENTE          
-PISO_2     PISO_2_P21        F-G     1-2    89.00         500        260   7.4531       500 tile t02 fila1 col1                      OCR CONSISTENTE          
-PISO_2     PISO_2_P22        F-G     2-3    72.50         500        260   7.4531       400 tile t02 fila2 col1                      OCR CONSISTENTE          
-PISO_2     PISO_2_P31        G-H     1-2    89.00         500        260   7.4531       300 tile t02 fila1 col2                      OCR CONSISTENTE          
-PISO_2     PISO_2_P32        G-H     2-3    72.50         500        200   6.8647       200 tile t02 fila2 col2                      OCR CONSISTENTE          
-PISO_2     PISO_2_P41        H-I     1-2    89.00         500        260   7.4531       300 tile t02 fila1 col2                      OCR CONSISTENTE          
-PISO_2     PISO_2_P42        H-I     2-3    72.50         500        200   6.8647       200 tile t02 fila2 col2                      OCR CONSISTENTE          
-PISO_2     PISO_2_P51       I-I'     1-2    22.25         500        260   7.4531       250 tile t02 fila1 col3                      OCR CONSISTENTE          
-PISO_2     PISO_2_P52       I-I'     2-3    18.12         500        260   7.4531       250 tile t02 fila2 col3 (celda OCULTA; sin OCR legible) NO_RESOLUBLE_PENDIENTE   
-PISO_3     PISO_3_P11        E-F     1-2    89.00         500        200   6.8647       200 tile t12 fila1 col1                      OCR CONSISTENTE          
-PISO_3     PISO_3_P12        E-F     2-3    72.50         500        260   7.4531       400 tile t11 fila2 col1                      OCR CONSISTENTE          
-PISO_3     PISO_3_P21        F-G     1-2    89.00         500        200   6.8647       200 tile t12 fila1 col1                      OCR CONSISTENTE          
-PISO_3     PISO_3_P22        F-G     2-3    72.50         500        260   7.4531       400 tile t11 fila2 col1                      OCR CONSISTENTE          
-PISO_3     PISO_3_P31        G-H     1-2    89.00         500        260   7.4531       300 tile t12 fila1 col2                      OCR CONSISTENTE          
-PISO_3     PISO_3_P32        G-H     2-3    72.50         500        200   6.8647       200 tile t11 fila2 col2                      OCR CONSISTENTE          
-PISO_3     PISO_3_P41        H-I     1-2    89.00         500        260   7.4531       300 tile t12 fila1 col2                      OCR CONSISTENTE          
-PISO_3     PISO_3_P42        H-I     2-3    72.50         500        200   6.8647       200 tile t11 fila2 col2                      OCR CONSISTENTE          
-PISO_3     PISO_3_P51       I-I'     1-2    22.25         500        260   7.4531       500 tile t12 fila1 col3                      OCR CONSISTENTE          
-PISO_3     PISO_3_P52       I-I'     2-3    18.12         500        260   7.4531       500 tile t11 fila2 col3 (OCR leyó '= 2800', continuidad col3 fila1→fila2 del mismo piso = 260) INFERIDO_POR_CONTINUIDAD_GRAFICA
-PISO_4     PISO_4_P11        E-F     1-2    89.00         500        350   8.3357       100 tile t10 fila1 col1 (dentro del plan, Y=1-2) OCR CONSISTENTE          
-PISO_4     PISO_4_P12        E-F     2-3    72.50         500        260   7.4531       500 tile t10 fila2 col1 (fuera del plan, Y=2-3) OCR CONSISTENTE          
-PISO_4     PISO_4_P21        F-G     1-2    89.00         500        350   8.3357       100 tile t10 fila1 col1 (dentro del plan, Y=1-2) OCR CONSISTENTE          
-PISO_4     PISO_4_P22        F-G     2-3    72.50         500        260   7.4531       500 tile t10 fila2 col1 (fuera del plan, Y=2-3) OCR CONSISTENTE          
-PISO_4     PISO_4_P31        G-H     1-2    89.00         500        200   6.8647       200 tile t10 fila1 col2                      OCR CONSISTENTE          
-PISO_4     PISO_4_P32        G-H     2-3    72.50         500        260   7.4531       300 tile t10 fila2 col2                      OCR CONSISTENTE          
-PISO_4     PISO_4_P41        H-I     1-2    89.00         500        200   6.8647       200 tile t10 fila1 col2                      OCR CONSISTENTE          
-PISO_4     PISO_4_P42        H-I     2-3    72.50         500        260   7.4531       300 tile t10 fila2 col2                      OCR CONSISTENTE          
-PISO_4     PISO_4_P51       I-I'     1-2    22.25         500          0   4.9033         0 tile t10 fila1 col3: OCR literal 'CARGA LINEAL', PM=7600 kgf/m, SC=800 kgf/m (NO es carga area) CONFIRMADO_VISUALMENTE_CARGA_LINEAL
-PISO_4     PISO_4_P52       I-I'     2-3    18.12         500        260   7.4531       250 tile t10 fila2 col3                      OCR CONSISTENTE          
+PISO_1     PISO_1_P11        E-F     1-2    89.00         480        260   7.2569       500 tile t01 col1 fila unica                 OCR CONSISTENTE          
+PISO_1     PISO_1_P12        E-F     2-3    72.50         480        260   7.2569       500 tile t01 col1 (1 sola fila visible, misma para ambas direcciones Y) INFERIDO_POR_CONTINUIDAD_GRAFICA
+PISO_1     PISO_1_P21        F-G     1-2    89.00         480        260   7.2569       500 tile t01 col1 fila unica                 OCR CONSISTENTE          
+PISO_1     PISO_1_P22        F-G     2-3    72.50         480        260   7.2569       500 tile t01 col1 (1 sola fila visible, misma para ambas direcciones Y) INFERIDO_POR_CONTINUIDAD_GRAFICA
+PISO_1     PISO_1_P31        G-H     1-2    89.00         480        260   7.2569       300 tile t01 col2                            OCR CONSISTENTE          
+PISO_1     PISO_1_P32        G-H     2-3    72.50         480        260   7.2569       300 tile t01 col2                            INFERIDO_POR_CONTINUIDAD_GRAFICA
+PISO_1     PISO_1_P41        H-I     1-2    89.00         480        260   7.2569       300 tile t01 col2                            OCR CONSISTENTE          
+PISO_1     PISO_1_P42        H-I     2-3    72.50         480        260   7.2569       300 tile t01 col2                            INFERIDO_POR_CONTINUIDAD_GRAFICA
+PISO_1     PISO_1_P51       I-I'     1-2    22.25         480        260   7.2569       250 tile t01 col3                            OCR CONSISTENTE          
+PISO_1     PISO_1_P52       I-I'     2-3    18.12         480        260   7.2569       250 tile t01 col3                            INFERIDO_POR_CONTINUIDAD_GRAFICA
+PISO_2     PISO_2_P11        E-F     1-2    89.00         480        260   7.2569       500 tile t02 fila1 col1                      OCR CONSISTENTE          
+PISO_2     PISO_2_P12        E-F     2-3    72.50         480        260   7.2569       400 tile t02 fila2 col1                      OCR CONSISTENTE          
+PISO_2     PISO_2_P21        F-G     1-2    89.00         480        260   7.2569       500 tile t02 fila1 col1                      OCR CONSISTENTE          
+PISO_2     PISO_2_P22        F-G     2-3    72.50         480        260   7.2569       400 tile t02 fila2 col1                      OCR CONSISTENTE          
+PISO_2     PISO_2_P31        G-H     1-2    89.00         480        260   7.2569       300 tile t02 fila1 col2                      OCR CONSISTENTE          
+PISO_2     PISO_2_P32        G-H     2-3    72.50         480        200   6.6685       200 tile t02 fila2 col2                      OCR CONSISTENTE          
+PISO_2     PISO_2_P41        H-I     1-2    89.00         480        260   7.2569       300 tile t02 fila1 col2                      OCR CONSISTENTE          
+PISO_2     PISO_2_P42        H-I     2-3    72.50         480        200   6.6685       200 tile t02 fila2 col2                      OCR CONSISTENTE          
+PISO_2     PISO_2_P51       I-I'     1-2    22.25         480        260   7.2569       250 tile t02 fila1 col3                      OCR CONSISTENTE          
+PISO_2     PISO_2_P52       I-I'     2-3    18.12         480        260   7.2569       250 tile t02 fila2 col3 (celda OCULTA; sin OCR legible) NO_RESOLUBLE_PENDIENTE   
+PISO_3     PISO_3_P11        E-F     1-2    89.00         480        200   6.6685       200 tile t12 fila1 col1                      OCR CONSISTENTE          
+PISO_3     PISO_3_P12        E-F     2-3    72.50         480        260   7.2569       400 tile t11 fila2 col1                      OCR CONSISTENTE          
+PISO_3     PISO_3_P21        F-G     1-2    89.00         480        200   6.6685       200 tile t12 fila1 col1                      OCR CONSISTENTE          
+PISO_3     PISO_3_P22        F-G     2-3    72.50         480        260   7.2569       400 tile t11 fila2 col1                      OCR CONSISTENTE          
+PISO_3     PISO_3_P31        G-H     1-2    89.00         480        260   7.2569       300 tile t12 fila1 col2                      OCR CONSISTENTE          
+PISO_3     PISO_3_P32        G-H     2-3    72.50         480        200   6.6685       200 tile t11 fila2 col2                      OCR CONSISTENTE          
+PISO_3     PISO_3_P41        H-I     1-2    89.00         480        260   7.2569       300 tile t12 fila1 col2                      OCR CONSISTENTE          
+PISO_3     PISO_3_P42        H-I     2-3    72.50         480        200   6.6685       200 tile t11 fila2 col2                      OCR CONSISTENTE          
+PISO_3     PISO_3_P51       I-I'     1-2    22.25         480        260   7.2569       500 tile t12 fila1 col3                      OCR CONSISTENTE          
+PISO_3     PISO_3_P52       I-I'     2-3    18.12         480        260   7.2569       500 tile t11 fila2 col3 (OCR leyó '= 2800', continuidad col3 fila1→fila2 del mismo piso = 260) INFERIDO_POR_CONTINUIDAD_GRAFICA
+PISO_4     PISO_4_P11        E-F     1-2    89.00         480        350   8.1395       100 tile t10 fila1 col1 (dentro del plan, Y=1-2) OCR CONSISTENTE          
+PISO_4     PISO_4_P12        E-F     2-3    72.50         480        260   7.2569       500 tile t10 fila2 col1 (fuera del plan, Y=2-3) OCR CONSISTENTE          
+PISO_4     PISO_4_P21        F-G     1-2    89.00         480        350   8.1395       100 tile t10 fila1 col1 (dentro del plan, Y=1-2) OCR CONSISTENTE          
+PISO_4     PISO_4_P22        F-G     2-3    72.50         480        260   7.2569       500 tile t10 fila2 col1 (fuera del plan, Y=2-3) OCR CONSISTENTE          
+PISO_4     PISO_4_P31        G-H     1-2    89.00         480        200   6.6685       200 tile t10 fila1 col2                      OCR CONSISTENTE          
+PISO_4     PISO_4_P32        G-H     2-3    72.50         480        260   7.2569       300 tile t10 fila2 col2                      OCR CONSISTENTE          
+PISO_4     PISO_4_P41        H-I     1-2    89.00         480        200   6.6685       200 tile t10 fila1 col2                      OCR CONSISTENTE          
+PISO_4     PISO_4_P42        H-I     2-3    72.50         480        260   7.2569       300 tile t10 fila2 col2                      OCR CONSISTENTE          
+PISO_4     PISO_4_P51       I-I'     1-2    22.25         480          0   4.7072         0 tile t10 fila1 col3: OCR literal 'CARGA LINEAL', PM=7600 kgf/m, SC=800 kgf/m (NO es carga area) CONFIRMADO_VISUALMENTE_CARGA_LINEAL
+PISO_4     PISO_4_P52       I-I'     2-3    18.12         480        260   7.2569       250 tile t10 fila2 col3                      OCR CONSISTENTE          
 ---------------------------------------------------------------------------------------------------------
 
 PENDIENTES / NOTAS:
   - PISO_2 zona (col3, row2): celda OCULTA sin OCR legible -> NO_RESOLUBLE_PENDIENTE. Se mantiene PM=260, SC=250 como hipótesis conservadora NO definitiva. NO usar como dato definitivo hasta confirmar en el plano 700.
   - PISO_3 zona (col3, row2): OCR leyó '= 2800 Kg/m'; INFERIDO_POR_CONTINUIDAD_GRAFICA a PM=260 por continuidad col3 fila1->fila2 del mismo piso. Requiere confirmación visual.
-  - PISO_4 zona (col3, row1): CONFIRMADO_VISUALMENTE como CARGA LINEAL (texto literal del plano: PM=7600 kgf/m, SC=800 kgf/m). No hay q_G de área en esa celda: solo PP.LOSA = 500 kgf/m². La carga lineal se registra aparte para vigas de la bahía I-I'.
+  - PISO_4 zona (col3, row1): CONFIRMADO_VISUALMENTE como CARGA LINEAL (texto literal del plano: PM=7600 kgf/m, SC=800 kgf/m). No hay q_G de área en esa celda: solo PP.LOSA = 500 kgf/m² (traza plano 700). El PP.LOSA de modelado pasa a 480 kgf/m² (densidad confirmada 2400; cascada). La carga lineal se registra aparte para vigas de la bahía I-I'.
   - PISO_1 fila2 (col1..3): el plano muestra 1 sola fila de celdas (abarcan ambas direcciones Y); fila2 INFERIDO_POR_CONTINUIDAD_GRAFICA = fila1.
 
 CARGAS PUNTUALES (NO incluidas en la matriz):

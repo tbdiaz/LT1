@@ -28,7 +28,7 @@ considerar conservación por nivel y agregación por viga. Salidas:
   data/loads/tributary_areas_LT2.csv
   data/loads/beam_gravity_loads_LT2.csv
 
-NOMBRES/banderas: q_G = 6.22935 kN/m² (L1-L4). No toca OpenSees/Unity. No ROOF.
+NOMBRES/banderas: q_G = 6.0822 kN/m² (L1-L4). No toca OpenSees/Unity. No ROOF.
 """
 
 from __future__ import annotations
@@ -52,7 +52,7 @@ LEVELS_CSV = GEOM / "levels.csv"
 OUT_TRIB = LOADS / "tributary_areas_LT2.csv"
 OUT_BEAM = LOADS / "beam_gravity_loads_LT2.csv"
 
-Q_G = 6.22935  # kN/m2, planta tipo L1-L4 (CSV slabs_LT2)
+Q_G = 6.0822  # kN/m2, planta tipo L1-L4 (CSV slabs_LT2; 0.15m*2400+260=620 kgf/m2)
 
 TAG_BEAM_BASE = 2001
 

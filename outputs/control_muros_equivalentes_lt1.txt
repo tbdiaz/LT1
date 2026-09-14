@@ -109,25 +109,25 @@ Unidades base: metros (m), kilonewtons (kN), kilopascales (kPa)
      pipeline: Transformacion/RCM/BandGeneral/NormDispIncr 1e-6/Linear/LoadControl
 
 11) SUMATORIA DE REACCIONES (gravedad)
-     P_gravitatoria aplicada (q_G sobre 108 vigas): 20182.6251 kN
-     Σ Rz (18 apoyos, 6 GDL): 20182.6251 kN
+     P_gravitatoria aplicada (q_G sobre 108 vigas): 19644.1419 kN
+     Σ Rz (18 apoyos, 6 GDL): 19644.1419 kN
      |Σ Rz - P| = 1.818989e-11 kN
 
 12) ERROR RELATIVO DE EQUILIBRIO
-     err_rel = 9.013e-16 (tolerancia documentada rel <= 1e-06)
-     Σ Rx = 9.7766e-13 kN · Σ Ry = -1.6587e-13 kN
-     max|U| = 2.729000e-03 m (nodo 50303) · max|Uz| = 2.700438e-03 m
+     err_rel = 9.260e-16 (tolerancia documentada rel <= 1e-06)
+     Σ Rx = 3.6704e-13 kN · Σ Ry = -1.5321e-13 kN
+     max|U| = 2.390261e-03 m (nodo 50303) · max|Uz| = 2.365298e-03 m
      Cargas conservadas: NO se agrego peso propio de muros (no esta
      en la convencion de carga del proyecto) y NO se invento carga de
      salientes.
 
 13) DIAFRAGMAS RIGIDOS COMPATIBLES + RIGIDLINK DE MUROS
-     PISO_1: master 600001 · 18 slaves · ok=True · max_error=0.000e+00 m
+     PISO_1: master 600001 · 18 slaves · ok=True · max_error=1.694e-21 m
      PISO_2: master 600002 · 18 slaves · ok=True · max_error=0.000e+00 m
-     PISO_3: master 600003 · 18 slaves · ok=True · max_error=0.000e+00 m
+     PISO_3: master 600003 · 18 slaves · ok=True · max_error=6.776e-21 m
      PISO_4: master 600004 · 18 slaves · ok=True · max_error=0.000e+00 m
      compatibilidad global del diafragma: True
-     rigidLink de muro (u_muro = u_master + th_master x r, 6 DOF): 12 links · ok=True · max_error=1.694e-21 m
+     rigidLink de muro (u_muro = u_master + th_master x r, 6 DOF): 12 links · ok=True · max_error=8.470e-22 m
 
 14) AVISOS / PENDIENTES
      - Nucleo PISO_4 (plan 103): extremos del nucleo sin cerrar -> el

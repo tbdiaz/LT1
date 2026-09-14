@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 LOADS = ROOT / "data" / "loads"
 
 G = 9.81
-DENSITY_DEFAULT = 2500.0
+DENSITY_DEFAULT = 2400.0
 
 
 def fnum(v):

@@ -21,10 +21,17 @@ def kgf_m2_a_kPa(kgf_m2):
 # Plan 100 "LOSA e=25" → hoja FUNDACIONES → e = 0.25 m (losa de fundación, -7.97 m).
 # Plan 700 PP.LOSA = 500 kgf/m² → e = 500/2500 = 0.20 m (losas de piso, PISO_1..4).
 # Son ELEMENTOS DISTINTOS. No hay contradicción.
+#
+# ACTUALIZACION MATERIALES (usuario): densidad hormigon confirmada = 2400 kg/m3.
+#   - PP.LOSA = e x 2400 = 0.20 x 2400 = 480 kgf/m2 (era 500 con gamma=2500).
+#   - gamma_losa_kgf_m3 = 2400.0 ; peso_especifico = 24.5166 -> 23.53596 kN/m3.
+# Se conserva la trazabilidad al plano 700 (PP.LOSA=500 con gamma=2500) en
+# info_plano_700, pero el valor de modelado pasa a usar la densidad confirmada.
+# ---------------------------------------------------------------------------
 e_losa_m = 0.20
-pp_losa_kgf_m2 = 500.0
-gamma_losa_kgf_m3 = 2500.0
-peso_especifico_ha_kN_m3 = gamma_losa_kgf_m3 * G_MS2 / 1000.0   # 24.5166
+pp_losa_kgf_m2 = 480.0
+gamma_losa_kgf_m3 = 2400.0
+peso_especifico_ha_kN_m3 = gamma_losa_kgf_m3 * G_MS2 / 1000.0   # 23.53596
 
 # ---------------------------------------------------------------------------
 # INFORMACIÓN GENERAL PLANO 700
@@ -32,16 +39,20 @@ peso_especifico_ha_kN_m3 = gamma_losa_kgf_m3 * G_MS2 / 1000.0   # 24.5166
 info_plano_700 = {
     "plano": "2017_67-700",
     "titulo": "PLANTAS DE CARGAS CIELO 1° SUBT. a 4° PISO",
-    "definicion_pp_losa": "PP. LOSA = e(m) x 2500 Kg/m3",
-    "gamma_losa_kgf_m3": gamma_losa_kgf_m3,
+    "definicion_pp_losa_plano": "PP. LOSA = e(m) x 2500 Kg/m3 (traza del plano)",
+    "gamma_losa_plano_kgf_m3": 2500.0,   # valor del plano 700 (trazabilidad)
+    "gamma_losa_confirmada_kgf_m3": gamma_losa_kgf_m3,  # 2400 (usuario)
     "e_losa_pisos_m": e_losa_m,
-    "pp_losa_kgf_m2": pp_losa_kgf_m2,
+    "pp_losa_plano_kgf_m2": 500.0,       # valor del plano 700 (trazabilidad)
+    "pp_losa_confirmado_kgf_m2": pp_losa_kgf_m2,  # 480 (densidad confirmada 2400)
     "fecha": "22/02/2018 · DESARROLLO PRELIMINAR PROPUESTA X CONSTRUCCION",
     "metodo_lectura": "OCR Vision (tools/ocr_file.py) sobre tiles Matrix(5,5)",
     "resolucion_e": (
-        "e=0.20 m corresponde a losas de piso (plan 700, PP.LOSA=500). "
-        "e=0.25 m (plan 100 'LOSA e=25') corresponde a la losa de FUNDACIONES "
-        "(hoja de fundaciones, nivel -7.97 m). Son elementos distintos."
+        "e=0.20 m corresponde a losas de piso (plan 700, PP.LOSA=500 con "
+        "gamma=2500). e=0.25 m (plan 100 'LOSA e=25') corresponde a la losa "
+        "de FUNDACIONES (hoja de fundaciones, nivel -7.97 m). Son elementos "
+        "distintos. PP.LOSA de modelado = e x 2400 = 480 kgf/m2 por la "
+        "densidad confirmada por el usuario; el plano 700 queda como traza."
     ),
 }
 
@@ -55,8 +66,11 @@ info_plano_700 = {
 # Row 1 = Y=1-2 (8.9 m)
 # Row 2 = Y=2-3 (7.25 m)
 #
-# Cada celda contiene: PP.LOSA (= e×2500), PM.ADIC (kgf/m²), SC (kgf/m²).
-# PP.LOSA es =500 en todas las celdas (e=0.20 m uniforme).
+# Cada celda contiene: PP.LOSA (= e×2400, densidad confirmada), PM.ADIC (kgf/m²), SC (kgf/m²).
+# PP.LOSA es =480 en todas las celdas (e=0.20 m uniforme, densidad hormigon
+# confirmada 2400 kg/m3). Traza del plano 700: PP.LOSA=500 con gamma=2500
+# (ver info_plano_700["pp_losa_plano_kgf_m2"]). El valor de modelado pasa a
+# 480 por la cascada de densidad confirmada por el usuario.
 # SC queda REGISTRADA APARTE, NO se suma a q_G.
 #
 # q_G por paño = PP.LOSA + PM.ADIC (ambos en kgf/m², convertidos a kPa).
@@ -65,7 +79,7 @@ info_plano_700 = {
 # "pm_kg": None si la celda es CARGA LINEAL (no hay carga area de terminaciones).
 MATRIZ_CARGAS_ZONAL = {
     "PISO_1": {
-        "e_m": 0.20, "pp_losa_kgf_m2": 500,
+        "e_m": 0.20, "pp_losa_kgf_m2": 480,
         "zonas": {
             (1, 1): {"pm_kg": 260, "sc_kg": 500,
                       "fuente": "tile t01 col1 fila unica",
@@ -88,7 +102,7 @@ MATRIZ_CARGAS_ZONAL = {
         },
     },
     "PISO_2": {
-        "e_m": 0.20, "pp_losa_kgf_m2": 500,
+        "e_m": 0.20, "pp_losa_kgf_m2": 480,
         "zonas": {
             (1, 1): {"pm_kg": 260, "sc_kg": 500,
                       "fuente": "tile t02 fila1 col1",
@@ -111,7 +125,7 @@ MATRIZ_CARGAS_ZONAL = {
         },
     },
     "PISO_3": {
-        "e_m": 0.20, "pp_losa_kgf_m2": 500,
+        "e_m": 0.20, "pp_losa_kgf_m2": 480,
         "zonas": {
             (1, 1): {"pm_kg": 200, "sc_kg": 200,
                       "fuente": "tile t12 fila1 col1",
@@ -134,7 +148,7 @@ MATRIZ_CARGAS_ZONAL = {
         },
     },
     "PISO_4": {
-        "e_m": 0.20, "pp_losa_kgf_m2": 500,
+        "e_m": 0.20, "pp_losa_kgf_m2": 480,
         "zonas": {
             (1, 1): {"pm_kg": 350, "sc_kg": 100,
                       "fuente": "tile t10 fila1 col1 (dentro del plan, Y=1-2)",
@@ -167,7 +181,8 @@ PENDIENTES_MATRIZ = [
     "a PM=260 por continuidad col3 fila1->fila2 del mismo piso. Requiere confirmación visual.",
     "PISO_4 zona (col3, row1): CONFIRMADO_VISUALMENTE como CARGA LINEAL "
     "(texto literal del plano: PM=7600 kgf/m, SC=800 kgf/m). "
-    "No hay q_G de área en esa celda: solo PP.LOSA = 500 kgf/m². "
+    "No hay q_G de área en esa celda: solo PP.LOSA = 500 kgf/m² (traza plano 700). "
+    "El PP.LOSA de modelado pasa a 480 kgf/m² (densidad confirmada 2400; cascada). "
     "La carga lineal se registra aparte para vigas de la bahía I-I'.",
     "PISO_1 fila2 (col1..3): el plano muestra 1 sola fila de celdas (abarcan ambas direcciones Y); "
     "fila2 INFERIDO_POR_CONTINUIDAD_GRAFICA = fila1.",

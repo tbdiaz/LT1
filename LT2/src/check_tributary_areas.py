@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 GEOM = ROOT / "data" / "geometry"
 LOAD = ROOT / "data" / "loads"
 
-Q_G = 6.22935
+Q_G = 6.0822
 
 TOL_AREA = 1e-6
 TOL_CONS = 1e-2  # m2/kN absoluto

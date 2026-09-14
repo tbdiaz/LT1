@@ -14,7 +14,7 @@
 
 ## 3. Elementos duplicados en la interfaz
 
-- Duplicados geometricos detectados: **15 columnas LT1** (P70x70, ejes 1/2/3, 5 tramos) coinciden exactamente con columnas LT2 nativas (misma seccion, longitud y orientacion; difiere E: LT1 25e6 vs LT2 23.5e6 kPa).
+- Duplicados geometricos detectados: **15 columnas LT1** (P70x70, ejes 1/2/3, 5 tramos) coinciden exactamente con columnas LT2 nativas (misma seccion, longitud y orientacion; mismo E 27.8e6 kPa confirmado).
 - Decision (regla 3): conservar la **columna LT2 nativa** y descartar las 15 de LT1; la columna compartida queda con el E de LT2. No se pierde rigidez vertical (tramos iguales nivel a nivel).
 - Vigas LT1 de borde en E (8) y muros LT2 en el borde: sin par, se conservan. Detalle: `auditoria_elementos_interfaz.csv`.
 
@@ -40,23 +40,23 @@
   A = e·L/2 ; muro en X: Iy = e·L^3/24, Iz = L·e^3/24 ; muro en Y: Iy = L·e^3/24, Iz = e·L^3/24 ;
   J = h·b^3/3·(1-0.63·(b/h)+0.052·(b/h)^5) / 2, b=min(e,L), h=max(e,L) (Saint-Venant).
 - Los TOTALES por tramo coinciden con el muro academico LT1 (A=e·L, Ix=e·L^3/12, etc.): misma rigidez axial y flexional, sin dejar nodos flotantes en las esquinas (concepto validado contra modelo_lt1.json).
-- Material del muro: LT2 (E=2.35e+07 kN/m², G=9.79e+06 kN/m²), su modulo propio.
+- Material del muro: LT2 (E=2.78e+07 kN/m², G=1.16e+07 kN/m²), su modulo propio.
 - Elementos creados: 80 (tags 4001+, dos por tramo: 4001/4002, 4003/4004, ...).
 
 ## 7. Materiales (no unificados)
 
-- LT1: E = 2.5e+07 kPa, G = 1.04167e+07 kPa (dato academico proporcionado).
-- LT2: E = 2.35e+07 kPa, G = 9.79167e+06 kPa.
-- Cada modulo conserva su material; en las columnas compartidas de la interfaz rige el E de LT2 (regla 3).
+- LT1: E = 2.78e+07 kPa, G = 1.15833e+07 kPa (dato confirmado usuario, E=27800 MPa).
+- LT2: E = 2.78e+07 kPa, G = 1.15833e+07 kPa.
+- Cada modulo usa E=27800/27800 MPa (unificados); en las columnas compartidas de la interfaz rige el E de LT2 (regla 3).
 
 ## 8. Cargas de gravedad
 
-- LT2 (patron 1): 27160 eleLoad -beamPoint sobre 184 vigas, P = 11541.291565 kN (sin cambios).
-- LT1 (patron 2): 122 eleLoad -beamUniform (QG), P = **20360.983513 kN**.
-  - P_lt1_referencia (JSON, I'=42.5 m) = **20182.625066 kN** (trazabilidad).
-  - La correccion I'->45.0 alarga las 12 vigas I-I' de 2.5 m a 5.0 m; al aplicar QG por metro lineal, esas vigas cargan el doble: +178.358 kN. Los qG_kN_m de referencia se conservan (no se inventan cargas).
+- LT2 (patron 1): 27160 eleLoad -beamPoint sobre 184 vigas, P = 11268.662631 kN (sin cambios).
+- LT1 (patron 2): 122 eleLoad -beamUniform (QG), P = **19817.597036 kN**.
+  - P_lt1_referencia (JSON, I'=42.5 m) = **19644.141914 kN** (trazabilidad).
+  - La correccion I'->45.0 alarga las 12 vigas I-I' de 2.5 m a 5.0 m; al aplicar QG por metro lineal, esas vigas cargan el doble: +173.455 kN. Los qG_kN_m de referencia se conservan (no se inventan cargas).
   - Las **11 vigas de fachada particionadas** por los salientes (tags 200033/060/063/011-14/084/87/90/93) ya NO reciben carga; su QG se redistribuye a los segmentos sustitutos (800201+) conservando la misma densidad qG (el total Σ qG·L se conserva exactamente: 0 perdidas, 0 warnings).
-- **P_total = 31902.275078 kN** (P_lt1_modelo + P_lt2).
+- **P_total = 31086.259667 kN** (P_lt1_modelo + P_lt2).
 - Zonas pendientes (ROOF LT2, WALL_EDGE_PENDING) NO se cargan (se preserva el criterio de cada modelo). Nota franja I': el pano P51/P52 (I-I') pasa de 2.5 m a 5.0 m, +40.375 m²/piso; de esa franja extra, las 12 vigas I-I' recogen su parte (+6.25 m²·q por piso) y el resto se conserva con los valores de referencia (no se redistribuye a las vigas Y del eje I/I' para no inventar una nueva reparticion).
 
 ## 8bis. Areas tributarias por piso (verificacion)
@@ -79,11 +79,11 @@
 
 ### Analisis
 - analyze() rc = **0** (OK, convergio)
-- ΣRz = 31902.275078 kN
-- |ΣRz - P_total| = 1.701119e-08 kN (rel 5.332e-13)
-- Σ|Rx| = 5.787810e-10 kN, Σ|Ry| = 1.090803e-10 kN (equilibrio horizontal)
-- Max |U| = 0.016773958 m en nodo 178
-- Max |Uz| = 0.016768894 m en nodo 178
+- ΣRz = 31086.259667 kN
+- |ΣRz - P_total| = 5.999027e-09 kN (rel 1.930e-13)
+- Σ|Rx| = 2.629086e-10 kN, Σ|Ry| = 5.611831e-10 kN (equilibrio horizontal)
+- Max |U| = 0.013847947 m en nodo 178
+- Max |Uz| = 0.013843565 m en nodo 178
 
 ## 10. Sistema vertical de cajas de escalera y pilastra (COMBINADO, B1->ROOF)
 
@@ -115,7 +115,7 @@
 
 - Los extremos de las cadenas V40x80 (x=0.400) terminan sobre la cara ESTE de los muros M001/M003 (x=0.100 + e/2 = 0.400, e=0.600). Se modela la excentricidad con UN elemento `elasticBeamColumn` horizontal en X por extremo (10 en total), entre el nodo de cadena y el nodo del EJE del muro al mismo Y y Z. No se mueven nodos de muro; no se usa equalDOF; los conectores son elementos (no restricciones cinematica) y sus nodos son esclavos normales del rigidDiaphragm de su nivel (no redundancia).
 - Nodos intermedios de cadena (y=4.265/8.9/11.885, sin apoyo fisico en muro) y vigas V30/VI cercanas: NO conectados.
-- **Seccion de enlace (solo del COMBINADO, no altera LT1/LT2):** E = 2.35e9 kPa (= 100 x E_LT2), nu = 0.20, A = 1.00 m², Iy = Iz = 0.10 m⁴, J = 0.20 m⁴. Rigidez axial EA = 2.35e9 kN (>= ~110x la del muro media seccion y >= ~300x la de la V40); suficientemente rigida para transferir el corte/axial del enlace sin alterar las rigideces originales.
+- **Seccion de enlace (solo del COMBINADO, no altera LT1/LT2):** E = 2.78e9 kPa (= 100 x E_LT2), nu = 0.20, A = 1.00 m², Iy = Iz = 0.10 m⁴, J = 0.20 m⁴. Rigidez axial EA = 2.78e9 kN (>= ~110x la del muro media seccion y >= ~300x la de la V40); suficientemente rigida para transferir el corte/axial del enlace sin alterar las rigideces originales.
 
 | NIVEL | NODO CADENA | XYZ CADENA | NODO MURO | XYZ MURO | LONGITUD | TAG CONECTOR |
 |---|---|---|---|---|---|---|
@@ -181,19 +181,19 @@ Se documenta la existencia, NO se modela (requiere plano/dato explícito si se d
 - 7. Nodos saliente sin ruta a apoyos: **OK** (0: [])
 - 8. LT2 intacto: **237 vigas** (tags nativos, sin cambios)
 - 9. Eje I' en combinado = 45.0+31.25 = 76.25 m: **OK** (18 nodos I')
-- 10. Error de equilibrio |ΣRz-P_total|/P_total: **OK** (5.332e-13)
-- Resumen nodos: 0 sin conectividad, {'L1': [1001], 'L2': [1002, 600100, 600101, 600102, 600103, 600104, 600105], 'L3': [1003, 600200, 600201, 600202, 600203, 600204, 600205], 'L4': [1004], 'ROOF': [1005]} flotantes preexistentes, P_lt1=20360.984 kN, P_total=31902.275 kN.
+- 10. Error de equilibrio |ΣRz-P_total|/P_total: **OK** (1.930e-13)
+- Resumen nodos: 0 sin conectividad, {'L1': [1001], 'L2': [1002, 600100, 600101, 600102, 600103, 600104, 600105], 'L3': [1003, 600200, 600201, 600202, 600203, 600204, 600205], 'L4': [1004], 'ROOF': [1005]} flotantes preexistentes, P_lt1=19817.597 kN, P_total=31086.260 kN.
 
 ## Archivos generados
-- `outputs\interfaz_traceabilidad.csv`
-- `outputs\auditoria_elementos_interfaz.csv`
-- `outputs\vista_3d_combinado.png`
-- `outputs\reporte_validacion_combinado.md`
-- `outputs\verticales_cajas_pilastra.csv`
-- `outputs\conectores_v40_muro.csv`
-- `outputs\tributarias_lt1\tributarias_piso_1.png`
-- `outputs\tributarias_lt1\tributarias_piso_2.png`
-- `outputs\tributarias_lt1\tributarias_piso_3.png`
-- `outputs\tributarias_lt1\tributarias_piso_4.png`
-- `outputs\vista_3d_interactiva.html` (generado por `scripts/figura_interactiva.py`)
+- `outputs/interfaz_traceabilidad.csv`
+- `outputs/auditoria_elementos_interfaz.csv`
+- `outputs/vista_3d_combinado.png`
+- `outputs/reporte_validacion_combinado.md`
+- `outputs/verticales_cajas_pilastra.csv`
+- `outputs/conectores_v40_muro.csv`
+- `outputs/tributarias_lt1/tributarias_piso_1.png`
+- `outputs/tributarias_lt1/tributarias_piso_2.png`
+- `outputs/tributarias_lt1/tributarias_piso_3.png`
+- `outputs/tributarias_lt1/tributarias_piso_4.png`
+- `outputs/vista_3d_interactiva.html` (generado por `scripts/figura_interactiva.py`)
 

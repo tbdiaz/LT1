@@ -85,21 +85,51 @@ public class LocalAxesController : MonoBehaviour
 
         float axisLength = Mathf.Max(0.2f * length, 0.5f);
         Vector3 center = (posI + posJ) * 0.5f;
-        Vector3 localX = elementDir / length;
 
-        Vector3 localZ;
-        if (localAxisXZ != null && localAxisXZ.Length >= 3)
+        // P1L4: prioridad a los EJES LOCALES exportados en el JSON combinado
+        // (ejes_locales.x/y/z), con fallback al vecxz de la geomTransf.
+        Vector3 localX, localY, localZ;
+        ElementRef r = null;
+        if (loader.elementRefs != null && loader.elementRefs.TryGetValue(tag, out r)
+            && r.ejes_locales != null
+            && r.ejes_locales.x != null && r.ejes_locales.x.Length >= 3
+            && r.ejes_locales.y != null && r.ejes_locales.y.Length >= 3
+            && r.ejes_locales.z != null && r.ejes_locales.z.Length >= 3)
         {
-            localZ = new Vector3(localAxisXZ[0], localAxisXZ[2], -localAxisXZ[1]).normalized;
-            if (Vector3.Dot(localZ, localX) > 0.99f)
-                localZ = GetFallbackPerpendicular(localX);
+            localX = ModelLoader.StructToUnity(
+                r.ejes_locales.x[0], r.ejes_locales.x[1], r.ejes_locales.x[2]).normalized;
+            localY = ModelLoader.StructToUnity(
+                r.ejes_locales.y[0], r.ejes_locales.y[1], r.ejes_locales.y[2]).normalized;
+            localZ = ModelLoader.StructToUnity(
+                r.ejes_locales.z[0], r.ejes_locales.z[1], r.ejes_locales.z[2]).normalized;
         }
         else
         {
-            localZ = GetFallbackPerpendicular(localX);
+            localX = elementDir / length;
+
+            if (localAxisXZ != null && localAxisXZ.Length >= 3)
+            {
+                localZ = new Vector3(localAxisXZ[0], localAxisXZ[2], -localAxisXZ[1]).normalized;
+                if (Vector3.Dot(localZ, localX) > 0.99f)
+                    localZ = GetFallbackPerpendicular(localX);
+            }
+            else
+            {
+                localZ = GetFallbackPerpendicular(localX);
+            }
+
+            localY = Vector3.Cross(localZ, localX).normalized;
         }
 
-        Vector3 localY = Vector3.Cross(localZ, localX).normalized;
+        // Alinear el eje X dibujado con la direccion del elemento: si los ejes
+        // exportados apuntan en sentido contrario (nodeJ->nodeI), se invierte
+        // para que la visualizacion coincida con el elemento fisico.
+        if (Vector3.Dot(localX, elementDir) < 0f)
+        {
+            localX = -localX;
+            localY = -localY;
+            localZ = -localZ;
+        }
 
         DrawAxisLine(parent, center, localX, axisLength, Color.red);
         DrawAxisLine(parent, center, localY, axisLength, Color.green);

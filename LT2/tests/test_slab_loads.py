@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 LOADS = ROOT / "data" / "loads"
 
 G = 9.81
-DENSITY_DEFAULT = 2500.0
+DENSITY_DEFAULT = 2400.0
 
 
 @pytest.fixture(scope="module")
@@ -38,18 +38,18 @@ def test_L1_confirmado(slabs):
     r = row(slabs, "S_L1_TYP")
     assert r["thickness_m"] == pytest.approx(0.15)
     assert r["density_kg_m3"] == pytest.approx(DENSITY_DEFAULT)
-    assert r["self_weight_kg_m2"] == pytest.approx(0.15 * DENSITY_DEFAULT)  # 375
+    assert r["self_weight_kg_m2"] == pytest.approx(0.15 * DENSITY_DEFAULT)  # 360
     assert r["finishes_kg_m2"] == pytest.approx(260)
-    assert r["qG_kg_m2"] == pytest.approx(375 + 260)  # 635
-    assert r["qG_kN_m2"] == pytest.approx(635 * G / 1000)  # 6.22935
+    assert r["qG_kg_m2"] == pytest.approx(360 + 260)  # 620
+    assert r["qG_kN_m2"] == pytest.approx(620 * G / 1000)  # 6.0822
 
 
 def test_L2_L3_L4_iguales_a_L1(slabs):
     for sid in ("S_L2_TYP", "S_L3_TYP", "S_L4_TYP"):
         r = row(slabs, sid)
         assert r["thickness_m"] == pytest.approx(0.15)
-        assert r["qG_kg_m2"] == pytest.approx(635)
-        assert r["qG_kN_m2"] == pytest.approx(6.22935)
+        assert r["qG_kg_m2"] == pytest.approx(620)
+        assert r["qG_kN_m2"] == pytest.approx(6.0822)
         assert r["status"] == "CONFIRMADO_e15"
 
 
@@ -72,9 +72,9 @@ def test_SC_no_incluida(slabs):
 def test_L4_confirmado(slabs):
     r = row(slabs, "S_L4_TYP")
     assert r["thickness_m"] == pytest.approx(0.15)
-    assert r["self_weight_kg_m2"] == pytest.approx(375)
+    assert r["self_weight_kg_m2"] == pytest.approx(0.15 * DENSITY_DEFAULT)  # 360
     assert r["finishes_kg_m2"] == pytest.approx(260)
-    assert r["qG_kg_m2"] == pytest.approx(635)
+    assert r["qG_kg_m2"] == pytest.approx(620)
 
 
 def test_ROOF_pendiente(slabs):

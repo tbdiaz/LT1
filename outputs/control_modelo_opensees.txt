@@ -10,19 +10,21 @@ MATERIALES
   convención: sistema lineal elástico 3D + elasticBeamColumn).
   hormigon (H°A°):
       estado       : LISTO
-      f_c_kPa      : None
-      E_kPa        : 25000000.0
+      f_c_kPa      : 35000.0
+      E_kPa        : 27800000.0
       fy_kPa       : None
       nu           : 0.2
-      G_kPa        : 10416667.0
-      fuente       : E=25000000 kPa, nu=0.20 y G=10416667 kPa: INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO (G25 = clase/resistencia del hormigón, NO módulo de corte G). NO atribuir a planos ni a documentos del proyecto.
+      G_kPa        : 11583333.33
+      densidad_kg_m3 : 2400.0
+      fuente       : E=27800000 kPa, fc=35000 kPa, nu=0.20 y G=11583333 kPa: PROPORCIONADA_POR_USUARIO (clase G35 / fc=35 MPa, E=27800 MPa, densidad 2400 kg/m3). NO atribuir a planos ni a documentos del proyecto.
   acero_estructural (perfiles):
-      estado       : MATERIAL_PENDIENTE_DE_CONVENCION_ACADEMICA
-      fy_kPa       : None
-      E_kPa        : None
+      estado       : LISTO
+      fy_kPa       : 420000.0
+      E_kPa        : 200000000.0
       G_kPa        : None
       nu           : None
-      fuente       : PENDIENTE (perfiles metálicos / segunda etapa)
+      densidad_kg_m3 : 7850.0
+      fuente       : PROPORCIONADA_POR_USUARIO (fy=420 MPa, E=200000 MPa, densidad 7850 kg/m3; nu/G sin confirmar). Perfiles metálicos siguen pendientes de modelarse.
 
 GEOMTRANSF (Linear, 3D)
   familia                tag  vecxz        ejes locales

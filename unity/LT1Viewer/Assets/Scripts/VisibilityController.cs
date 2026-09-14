@@ -21,10 +21,9 @@ public class VisibilityController : MonoBehaviour
 
     private bool initialized;
     private string wallsMessage =
-        "6 muros equivalentes (nucleo PISO_2, v2)\n" +
-        "elemento resistente lineal (elasticBeamColumn)\n" +
-        "12 rigidLink al master del diafragma\n" +
-        "PISO_1 -> PISO_2";
+        "Muros equivalentes (elasticBeamColumn)\n" +
+        "se muestran segun su tipo real del JSON\n" +
+        "(muro / muro_corner / conector V40-muro)";
 
     void Start()
     {
@@ -89,12 +88,12 @@ public class VisibilityController : MonoBehaviour
         if (GUILayout.Button($"5 Apoyos         [{BoolStr(showSupports)}]")) ToggleSupports();
         if (GUILayout.Button($"6 Diafragmas     [{BoolStr(showDiaphragms)}]")) ToggleDiaphragms();
         if (GUILayout.Button($"7 Constraint Links [{BoolStr(showConstraintLinks)}]")) ToggleConstraintLinks();
-        if (GUILayout.Button($"8 Pendientes info  [{BoolStr(showPendingInfo)}]")) TogglePendingInfo();
+        if (GUILayout.Button($"8 Notas modelo     [{BoolStr(showPendingInfo)}]")) TogglePendingInfo();
 
         if (showWalls)
         {
             GUILayout.Space(5);
-            GUILayout.Label(wallsMessage);
+            GUILayout.Label(WallsMessageComputed());
         }
 
         GUILayout.EndVertical();
@@ -107,35 +106,59 @@ public class VisibilityController : MonoBehaviour
     void DrawPendingPanel()
     {
         ModelLoader loader = FindObjectOfType<ModelLoader>();
-        if (loader == null || loader.modelData == null) return;
+        if (loader == null || loader.combinedRoot == null) return;
 
-        float pw = 400f;
-        float ph = 210f;
+        float pw = 460f;
+        float ph = 240f;
         float x = 10f;
         float y = Screen.height - ph - 40f;
 
-        GUI.Box(new Rect(x, y, pw, ph), "Geometria pendiente (no modelada)");
-        GUILayout.BeginArea(new Rect(x + 10, y + 25, pw - 20, ph - 35));
+        GUI.Box(new Rect(x, y, pw, ph), "Notas del modelo (fuente: JSON)");
+        GUILayout.BeginArea(new Rect(x + 10, y + 25, pw - 20, ph - 60));
 
-        if (loader.modelData.pending_geometry != null && loader.modelData.pending_geometry.Length > 0)
+        if (loader.combinedRoot.metadata != null
+            && loader.combinedRoot.metadata.notas_modelo != null
+            && loader.combinedRoot.metadata.notas_modelo.Length > 0)
         {
-            foreach (var p in loader.modelData.pending_geometry)
-                GUILayout.Label("- " + p.descripcion);
+            foreach (var n in loader.combinedRoot.metadata.notas_modelo)
+                GUILayout.Label("- " + n);
         }
         else
         {
-            GUILayout.Label("- Nucleo PISO_4 (plan 103): extremos sin cerrar");
-            GUILayout.Label("- Muros subterraneo (plan 101)");
-            GUILayout.Label("- V.30/45 · V.60/VAR · V.60-30/80-40");
-            GUILayout.Label("- P.M. 300x300x20 · V.M.");
-            GUILayout.Label("- Carga de salientes (PISO_2)");
+            GUILayout.Label("- (sin notas en el JSON)");
         }
 
-        GUILayout.Space(5);
-        GUIStyle orange = new GUIStyle(GUI.skin.label) { richText = true, fontSize = 10 };
-        GUILayout.Label("<color=orange>No se inventa geometria para representarlos.</color>", orange);
+        GUIStyle gap = new GUIStyle();
+        GUILayout.Space(6);
 
         GUILayout.EndArea();
+
+        GUILayout.BeginArea(new Rect(x + 10, y + ph - 50, pw - 20, 40));
+        GUIStyle orange = new GUIStyle(GUI.skin.label) { richText = true, fontSize = 10 };
+        GUILayout.Label("<color=orange>Sin valores inventados; solo lo documentado "
+            + "en modelo_combinado.json (incluye flags SUPUESTO).</color>", orange);
+        GUILayout.EndArea();
+    }
+
+    string WallsMessageComputed()
+    {
+        var loader = FindObjectOfType<ModelLoader>();
+        if (loader == null || loader.combinedRoot == null) return wallsMessage;
+
+        int muro = 0, muroCorner = 0, conector = 0;
+        foreach (var e in loader.combinedRoot.elements)
+        {
+            if (e.tipo == "muro") muro++;
+            else if (e.tipo == "muro_corner") muroCorner++;
+            else if (e.tipo == "conector_v40_muro") conector++;
+        }
+
+        return "Muros equivalentes (elasticBeamColumn):\n" +
+               $"  muro LT1: {muro}\n" +
+               $"  muro_corner LT2: {muroCorner}\n" +
+               $"  conector V40-muro (COMBINADO): {conector}\n" +
+               $"RigidLinks al master del diafragma: "
+               + (loader.modelData != null ? loader.modelData.constraint_links.Length.ToString() : "?");
     }
 
     string BoolStr(bool val) { return val ? "ON" : "OFF"; }
