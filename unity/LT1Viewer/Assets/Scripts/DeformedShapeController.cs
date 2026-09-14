@@ -248,7 +248,7 @@ public class DeformedShapeController : MonoBehaviour
     {
         GUILayout.BeginArea(new Rect(Screen.width - 220, 100, 210, 64));
         GUILayout.BeginVertical("box");
-        GUILayout.Label($"D Deformada          [{active ? "ON" : "OFF"}]");
+        GUILayout.Label($"D Deformada          [{(active ? "ON" : "OFF")}]");
         if (active) GUILayout.Label($"Escala: x{scale:F0}  (+ / - ajustar)");
         GUILayout.EndVertical();
         GUILayout.EndArea();

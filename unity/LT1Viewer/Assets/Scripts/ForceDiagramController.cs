@@ -227,7 +227,7 @@ public class ForceDiagramController : MonoBehaviour
     {
         GUILayout.BeginArea(new Rect(Screen.width - 220, 170, 210, 64));
         GUILayout.BeginVertical("box");
-        GUILayout.Label($"M Diagramas         [{active ? "ON" : "OFF"}]");
+        GUILayout.Label($"M Diagramas         [{(active ? "ON" : "OFF")}]");
         if (active)
             GUILayout.Label("Magenta=M | Verde=N | Naranja=V");
         GUILayout.EndVertical();
