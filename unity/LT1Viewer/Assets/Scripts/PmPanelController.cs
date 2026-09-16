@@ -135,13 +135,13 @@ public class PmPanelController : MonoBehaviour
         float plotR = plotL + (chart.width - ML - MR);
         float plotB = plotT + (chart.height - MT - MB);
 
-        GUI.Label(new Rect(px + 4, chartY + 2, 130f, 18f), "M (kN·m)", small);
-        GUI.Label(new Rect(px + 6, plotT - 2f, 90f, 18f), FormatV(mMax), small);
+        GUI.Label(new Rect(px + 4, chartY + 2, 130f, 18f), "N kN (compresion)", small);
+        GUI.Label(new Rect(px + 6, plotT - 2f, 90f, 18f), FormatV(pMax), small);
         GUI.Label(new Rect(plotL, plotB - 16f, 70f, 18f), "0", small);
-        GUI.Label(new Rect(plotR - 150f, plotB - 16f, 160f, 18f),
-                  FormatV(pMax) + "  (P0 compresion)", small);
+        GUI.Label(new Rect(plotR - 140f, plotB - 16f, 160f, 18f),
+                  FormatV(mMax) + "  (M max)", small);
         GUI.Label(new Rect(px + 4, plotB + 2f, 260f, 18f),
-                  "P (kN, compresion positiva) ->", small);
+                  "M (kN·m) ->", small);
 
         // --- pie (demanda vs capacidad) -------------------------------------
         float footY = chartY + chart.height + 4f;
@@ -260,11 +260,11 @@ public class PmPanelController : MonoBehaviour
             Line(px, w, h, leftX, gy, rightX, gy, grid);
         }
 
-        int zx = Mathf.Clamp(
-            Mathf.RoundToInt(leftX + (0f - pMin) / span * (rightX - leftX)),
-            leftX, rightX);
-        Line(px, w, h, zx, topY, zx, botY, axis);
-        Line(px, w, h, leftX, botY, rightX, botY, axis);
+        int zy = Mathf.Clamp(
+            Mathf.RoundToInt(botY - (0f - pMin) / span * (botY - topY)),
+            topY, botY);
+        Line(px, w, h, leftX, topY, leftX, botY, axis);
+        Line(px, w, h, leftX, zy, rightX, zy, axis);
 
         if (blk.esMuro)
         {
@@ -283,20 +283,21 @@ public class PmPanelController : MonoBehaviour
         if (d != null)
         {
             int dx = Mathf.Clamp(
-                Mathf.RoundToInt(leftX + (d.N - pMin) / span * (rightX - leftX)),
+                Mathf.RoundToInt(leftX + d.MDem / mSpan * (rightX - leftX)),
                 leftX, rightX);
             int dy = Mathf.Clamp(
-                Mathf.RoundToInt(botY - d.MDem / mSpan * (botY - topY)),
+                Mathf.RoundToInt(botY - (d.N - pMin) / span * (botY - topY)),
                 topY, botY);
             DrawMarker(px, w, h, dx, dy,
                        d.dentro ? okCore : koCore,
                        d.dentro ? okRing : koRing);
             if (blk.esMuro)
             {
-                int wy = Mathf.Clamp(
-                    Mathf.RoundToInt(botY - d.MyDem / mSpan * (botY - topY)),
-                    topY, botY);
-                DrawMarker(px, w, h, dx, wy,
+                int wx = Mathf.Clamp(
+                    Mathf.RoundToInt(leftX + d.MyDem / mSpan
+                                     * (rightX - leftX)),
+                    leftX, rightX);
+                DrawMarker(px, w, h, wx, dy,
                            d.dentroDebil ? okCore : koCore,
                            d.dentroDebil ? okRing : koRing);
             }
@@ -316,17 +317,17 @@ public class PmPanelController : MonoBehaviour
         for (int i = 1; i < pts.Count; i++)
         {
             int x0 = Mathf.Clamp(
-                Mathf.RoundToInt(leftX + (pts[i - 1].P - pMin) / span
+                Mathf.RoundToInt(leftX + pts[i - 1].M / mSpan
                                  * (rightX - leftX)), leftX, rightX);
             int y0 = Mathf.Clamp(
-                Mathf.RoundToInt(botY - pts[i - 1].M / mSpan * (botY - topY)),
-                topY, botY);
+                Mathf.RoundToInt(botY - (pts[i - 1].P - pMin) / span
+                                 * (botY - topY)), topY, botY);
             int x1 = Mathf.Clamp(
-                Mathf.RoundToInt(leftX + (pts[i].P - pMin) / span
+                Mathf.RoundToInt(leftX + pts[i].M / mSpan
                                  * (rightX - leftX)), leftX, rightX);
             int y1 = Mathf.Clamp(
-                Mathf.RoundToInt(botY - pts[i].M / mSpan * (botY - topY)),
-                topY, botY);
+                Mathf.RoundToInt(botY - (pts[i].P - pMin) / span
+                                 * (botY - topY)), topY, botY);
             if (dash) DashedLine(px, w, h, x0, y0, x1, y1, c, 5);
             else Line(px, w, h, x0, y0, x1, y1, c);
         }

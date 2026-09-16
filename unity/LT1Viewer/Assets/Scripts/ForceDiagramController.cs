@@ -2,20 +2,27 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // P1L4: diagramas de esfuerzos del elemento seleccionado.
-// - Tecla M: activa/desactiva.
-// Dibuja 3 diagramas como polilineas en 3D sobre el elemento:
+// - Tecla M o boton "M Diagramas": activa/desactiva.
+// - Botones MOMENTO / AXIAL / CORTE: elige que diagrama(s) se dibujan.
+// Dibuja hasta 3 diagramas como polilineas en 3D sobre el elemento:
 //   * Momento (magenta): perfil lineal de M_resultante = hypot(My, Mz).
 //   * Axial (verde): perfil lineal de N interno (compresion<0, traccion>0).
 //   * Corte (naranja): perfil lineal de V_resultante = hypot(Vy, Vz).
-// El perfil es LINEAL entre extremos (valores de analysis.fuerzas_elementos):
-// exacto para columnas/muros sin carga en el claro y aproximado para vigas
-// con q_G (documentado en README). Escala automatica para que la magnitud
-// maxima se vea ~0.4 m respecto del eje del elemento.
+// El perfil es LINEAL entre extremos (valores de analysis.fuerzas_elementos
+// desde results.forces del caso activo): exacto para columnas/muros sin carga
+// en el claro y aproximado para vigas con q_G (documentado en README).
+// Escala grafica RELATIVA a la longitud del elemento (pico ~25% de la
+// longitud, minimo 1.0 m) para que el diagrama sea claramente visible en la
+// escala del modelo. Las direcciones de desplazamiento usan los EJES LOCALES
+// exportados del JSON (ejes_locales.x/y/z), igual que LocalAxesController.
 public class ForceDiagramController : MonoBehaviour
 {
     private ModelLoader loader;
     private SelectionController selection;
     private bool active;
+    private bool showMoment = true;
+    private bool showAxial = true;
+    private bool showShear = true;
     private int drawnTag = -1;
     private GameObject diagramsRoot;
 
@@ -103,10 +110,10 @@ public class ForceDiagramController : MonoBehaviour
         if (len < 0.001f) return;
         dir /= len;
 
-        Vector3 up = Mathf.Abs(Vector3.Dot(dir, Vector3.up)) > 0.95f
-            ? Vector3.right : Vector3.up;
-        Vector3 p1 = Vector3.Cross(dir, up).normalized;
-        Vector3 p2 = Vector3.Cross(dir, p1).normalized;
+        // P1L4: direcciones de desplazamiento = EJES LOCALES exportados del
+        // elemento (ejes_locales.x/y/z), misma logica que LocalAxesController.
+        Vector3 localY, localZ;
+        GetLocalFrame(tag, dir, out localY, out localZ);
 
         // vectores de fuerza por extremo
         float mI = Mathf.Sqrt(f.F_i[4] * f.F_i[4] + f.F_i[5] * f.F_i[5]);
@@ -117,24 +124,62 @@ public class ForceDiagramController : MonoBehaviour
         float vJ = Mathf.Sqrt(f.F_j[1] * f.F_j[1] + f.F_j[2] * f.F_j[2]);
 
         float maxMag = Mathf.Max(Mathf.Max(mI, mJ), Mathf.Max(Mathf.Max(Mathf.Abs(nI), Mathf.Abs(nJ)), Mathf.Max(vI, vJ)));
-        float k = maxMag > 1e-9f ? 0.4f / maxMag : 0f;
+        // Escala grafica RELATIVA a la longitud del elemento: el pico del
+        // diagrama se desplaza ~25% de la longitud (minimo 1.0 m). Si el valor
+        // maximo es ~nulo (maxMag < 1e-3) se deja k=0 (sin desplegar perfiles).
+        float peak = Mathf.Max(0.25f * len, 1.0f);
+        float k = maxMag > 1e-3f ? peak / maxMag : 0f;
 
         // linea base
         DrawBaseLine(posI, posJ);
 
-        // momento (magnitud resultante, sin signo) -> p2
-        DrawProfile("M (resultante My,Mz)", posI, posJ, p2,
-                    mI * k, mJ * k, magenta, new Vector2(mI, mJ));
+        // momento (magnitud resultante, sin signo) -> eje local Z
+        if (showMoment && k > 0f)
+            DrawProfile("M (resultante My,Mz)", posI, posJ, localZ,
+                        mI * k, mJ * k, magenta, new Vector2(mI, mJ));
 
-        // axial -> -p2
-        DrawProfile("N (interno)", posI, posJ, -p2,
-                    nI * k, nJ * k, green, new Vector2(nI, nJ));
+        // axial (interno) -> -eje local Z
+        if (showAxial && k > 0f)
+            DrawProfile("N (interno)", posI, posJ, -localZ,
+                        nI * k, nJ * k, green, new Vector2(nI, nJ));
 
-        // corte (resultante Vy,Vz) -> p1
-        DrawProfile("V (resultante Vy,Vz)", posI, posJ, p1,
-                    vI * k, vJ * k, orange, new Vector2(vI, vJ));
+        // corte (resultante Vy,Vz) -> eje local Y
+        if (showShear && k > 0f)
+            DrawProfile("V (resultante Vy,Vz)", posI, posJ, localY,
+                        vI * k, vJ * k, orange, new Vector2(vI, vJ));
 
         drawnTag = tag;
+    }
+
+    void GetLocalFrame(int tag, Vector3 dir, out Vector3 localY, out Vector3 localZ)
+    {
+        ElementRef r = null;
+        if (loader.elementRefs != null && loader.elementRefs.TryGetValue(tag, out r)
+            && r.ejes_locales != null
+            && r.ejes_locales.x != null && r.ejes_locales.x.Length >= 3
+            && r.ejes_locales.y != null && r.ejes_locales.y.Length >= 3
+            && r.ejes_locales.z != null && r.ejes_locales.z.Length >= 3)
+        {
+            Vector3 x = ModelLoader.StructToUnity(
+                r.ejes_locales.x[0], r.ejes_locales.x[1], r.ejes_locales.x[2]).normalized;
+            localY = ModelLoader.StructToUnity(
+                r.ejes_locales.y[0], r.ejes_locales.y[1], r.ejes_locales.y[2]).normalized;
+            localZ = ModelLoader.StructToUnity(
+                r.ejes_locales.z[0], r.ejes_locales.z[1], r.ejes_locales.z[2]).normalized;
+            if (Vector3.Dot(x, dir) < 0f)
+            {
+                localY = -localY;
+                localZ = -localZ;
+            }
+        }
+        else
+        {
+            Vector3 perp = Vector3.Cross(Vector3.up, dir);
+            if (perp.sqrMagnitude < 0.001f)
+                perp = Vector3.Cross(Vector3.forward, dir);
+            localZ = perp.normalized;
+            localY = Vector3.Cross(localZ, dir).normalized;
+        }
     }
 
     bool TryGetEnds(int tag, out Vector3 posI, out Vector3 posJ)
@@ -225,11 +270,26 @@ public class ForceDiagramController : MonoBehaviour
 
     void OnGUI()
     {
-        GUILayout.BeginArea(new Rect(Screen.width - 220, 170, 210, 64));
+        GUILayout.BeginArea(new Rect(Screen.width - 250, 150, 240, 130));
         GUILayout.BeginVertical("box");
-        GUILayout.Label($"M Diagramas         [{(active ? "ON" : "OFF")}]");
+        if (GUILayout.Button($"M Diagramas         [{(active ? "ON" : "OFF")}]"))
+            Toggle();
         if (active)
+        {
+            GUILayout.BeginHorizontal();
+            bool m = GUILayout.Toggle(showMoment, "MOMENTO");
+            bool n = GUILayout.Toggle(showAxial, "AXIAL");
+            bool v = GUILayout.Toggle(showShear, "CORTE");
+            GUILayout.EndHorizontal();
+            if (m != showMoment || n != showAxial || v != showShear)
+            {
+                showMoment = m;
+                showAxial = n;
+                showShear = v;
+                Refresh();
+            }
             GUILayout.Label("Magenta=M | Verde=N | Naranja=V");
+        }
         GUILayout.EndVertical();
         GUILayout.EndArea();
     }
