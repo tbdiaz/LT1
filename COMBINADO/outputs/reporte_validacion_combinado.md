@@ -10,7 +10,7 @@
 ## 2. Retagging (sin colisiones)
 
 - LT2: tags nativos (nodos 1..272, masters 1001..1005, vigas 2001+ (237), columnas 3001+ (50), muros 4001+ (80), secciones 5001+, transf 1/2/3).
-- LT1: offset +100000 en nodos estructurales y muros; masters LT1 (600001-600004) NO se crean (sustituidos por masters combinados). Elementos con tags nativos (columnas 75, vigas 152, muros 6); transf 10001/10002/10003; timeSeries/pattern 1 (LT2) y 2 (LT1).
+- LT1: offset +100000 en nodos estructurales y muros; masters LT1 (600001-600004) NO se crean (sustituidos por masters combinados). Elementos con tags nativos (columnas 75, vigas 152, muros 30); transf 10001/10002/10003; timeSeries/pattern 1 (LT2) y 2 (LT1).
 
 ## 3. Elementos duplicados en la interfaz
 
@@ -25,14 +25,14 @@
 - L3: master 1003 (LT2 nativo), 63 nodos oculares cada uno una sola vez.
 - L4: master 1004 (LT2 nativo), 63 nodos oculares cada uno una sola vez.
 - ROOF: master 1005 (LT2 nativo), 73 nodos oculares cada uno una sola vez.
-- Los 12 nodos de muro LT1 se vinculan al master del nivel con ops.rigidLink('beam', master, nodo_muro) (estrategia C de LT1); NO son esclavos del rigidDiaphragm.
+- Los 24 nodos de muro LT1 se vinculan al master del nivel con ops.rigidLink('beam', master, nodo_muro) (estrategia C de LT1); NO son esclavos del rigidDiaphragm.
 
 ## 5. Apoyos
 
 - LT2: 22 fijos (B1, empotrados).
 - LT1: 15 fijos (los 3 de interfaz ya fijados como nodos LT2; sin ops.fix duplicado).
 - **COMBINADO (cajas/pilastra/2ª escalera): 10 fijos nuevos en B1** (empotrados, misma convencion de fundacion que el resto del modelo; NO son restricciones artificiales: las cajas llegan a la cimentacion en la estructura real).
-- Total apoyos fijos: **47** (6 GDL).
+- Total apoyos fijos: **53** (6 GDL).
 
 ## 6. Muros LT2 (40 tramos -> 80 columnas equivalentes)
 
@@ -67,23 +67,23 @@
 
 ## 9. Validaciones
 
-- Nodos fisicos totales: 461 (LT2 272 + LT1 no-interfaz 102 + masters 5 + nodos nuevos cajas/pilastra 50).
+- Nodos fisicos totales: 485 (LT2 272 + LT1 no-interfaz 126 + masters 5 + nodos nuevos cajas/pilastra 50).
 - Vigas: LT1 152 | LT2 237 | LT2 pendientes 0
 - VI-05 (VI15xVAR) materializada POR SUPUESTO/MODELACION (cota superior de rigidez): b=0.15 m, h=1.20 m, E/G de LT2, nodos 226-227, tag 2235 (tag nativo; 2237 no esta disponible, corresponde a ROOF_VI_07). No es una seccion real confirmada; h_min y ley de variacion siguen desconocidas (ver COMBINADO/docs/diagnostico_vi15xvar.md).
 - Columnas: LT1 75 | LT2 50
-- Muros: LT1 6 | LT2 80
+- Muros: LT1 30 | LT2 80
 - Conectores V40->Muro (excent. 0.300 m): 10
 - Duplicados descartados: 15 columnas LT1.
 - Nodos compartidos de interfaz: 18.
-- Apoyos fijos: 47. Diafragmas: 5.
+- Apoyos fijos: 53. Diafragmas: 5.
 
 ### Analisis
 - analyze() rc = **0** (OK, convergio)
 - ΣRz = 31086.259667 kN
-- |ΣRz - P_total| = 5.999027e-09 kN (rel 1.930e-13)
-- Σ|Rx| = 2.629086e-10 kN, Σ|Ry| = 5.611831e-10 kN (equilibrio horizontal)
-- Max |U| = 0.013847947 m en nodo 178
-- Max |Uz| = 0.013843565 m en nodo 178
+- |ΣRz - P_total| = 1.086300e-08 kN (rel 3.494e-13)
+- Σ|Rx| = 8.559198e-11 kN, Σ|Ry| = 7.296914e-10 kN (equilibrio horizontal)
+- Max |U| = 0.008090760 m en nodo 178
+- Max |Uz| = 0.008089996 m en nodo 178
 
 ## 10. Sistema vertical de cajas de escalera y pilastra (COMBINADO, B1->ROOF)
 
@@ -100,15 +100,15 @@
 - Nodos intermedios (B1..L4) creados SIN agregar al rigidDiaphragm (no son necesarios para cerrar el mecanismo y no se introducen restricciones artificiales).
 - Topes en ROOF coinciden exactamente con los nodos reales del anillo (226/227, 244/245/246/247, 256/257, 258/259).
 ### Chequeos estructurales
-- Nodos estructurales sin conectividad: 0 
-- Nodos sin camino de rigidez a apoyos: 17 (BFS por elementos)
-  - L1: 1 -> [1001] 
-  - L2: 7 -> [1002, 600100, 600101, 600102, 600103, 600104, 600105] 
-  - L3: 7 -> [1003, 600200, 600201, 600202, 600203, 600204, 600205] 
-  - L4: 1 -> [1004] 
-  - ROOF: 1 -> [1005] 
-- Interpretacion: los masters (1001-1005) y los nodos de muro LT1 (6001xx/6002xx) estan unidos por restricciones cinematicas (rigidDiaphragm / rigidLink 'beam'), no por elementos, por lo que no son mecanismos. El anillo VI de ROOF (226/227, 244-247, 256/257, 258/259) ya NO es la causa: el sistema vertical de cajas/pilastra materializado en COMBINADO (seccion 11) conecta esos nodos a las bases B1 (empotradas).
-- Elementos con longitud cero: 0 
+- Nodos estructurales sin conectividad: 0
+- Nodos sin camino de rigidez a apoyos: 5 (BFS por elementos)
+  - L1: 1 -> [1001]
+  - L2: 1 -> [1002]
+  - L3: 1 -> [1003]
+  - L4: 1 -> [1004]
+  - ROOF: 1 -> [1005]
+- Interpretacion: los masters (1001-1005) y los nodos de muro LT1 (6000xx-6004xx) estan unidos por restricciones cinematicas (rigidDiaphragm / rigidLink 'beam'), no por elementos, por lo que no son mecanismos. El anillo VI de ROOF (226/227, 244-247, 256/257, 258/259) ya NO es la causa: el sistema vertical de cajas/pilastra materializado en COMBINADO (seccion 11) conecta esos nodos a las bases B1 (empotradas).
+- Elementos con longitud cero: 0
 - Nodos esclavos en mas de un diafragma: 0 (cada nodo ocular una sola vez; muros LT1 por rigidLink).
 
 ## 11. Conectores V40 -> M001/M003 (excentricidad e/2=0.300 m)
@@ -130,6 +130,9 @@
 | ROOF | 221 | (0.400,1.825,11.830) | 217 | (0.100,1.825,11.830) | 0.300 | 9009 |
 | ROOF | 225 | (0.400,14.325,11.830) | 218 | (0.100,14.325,11.830) | 0.300 | 9010 |
 - Copia maquina: `conectores_v40_muro.csv`.
+### Continuidad V30x80 en el extremo oeste
+- 10 tramos de 1.50 m (tags 9011-9020) completan las vigas V30x80 indicadas por el usuario en L1, L2, L3, L4 y ROOF. Cada tramo comparte un extremo con su viga original y el otro con la cadena V40 del mismo piso.
+- Geometria: `COMBINADO/data/conexiones_v30_lt2.csv`, contrastada con plantas LT2 2024_22-101/102. Se conservan los tags y cargas puntuales de las vigas originales; los tramos nuevos no reciben carga tributaria adicional hasta recalcular esa tributacion de LT2.
 
 ## 12. Salientes sur LT1 (geometria CAD verificada)
 
@@ -157,8 +160,8 @@ Los nodos saliente NO son esclavos del rigidDiaphragm (decision de diseno: se ev
 | PISO_3 | L4 | 1004 | 10 | 2 |
 | PISO_4 | ROOF | 1005 | 8 | 2 |
 
-- Verificacion: 0 nodos saliente sin ruta de vigas hacia el diafragma (debe ser 0; tambien refrendado por los `Nodos sin camino a apoyos` = 17 preexistentes).
-- Nodos sin camino de rigidez a apoyos: 17 (masters 1001..1005 + nodos de muro compartidos, excepciones preexistentes documentadas).
+- Verificacion: 0 nodos saliente sin ruta de vigas hacia el diafragma (debe ser 0; tambien refrendado por los `Nodos sin camino a apoyos` = 5 preexistentes).
+- Nodos sin camino de rigidez a apoyos: 5 (masters 1001..1005 + nodos de muro compartidos, excepciones preexistentes documentadas).
 
 ## 13. Elementos pendientes (NO modelados, sin inventar)
 
@@ -181,19 +184,19 @@ Se documenta la existencia, NO se modela (requiere plano/dato explícito si se d
 - 7. Nodos saliente sin ruta a apoyos: **OK** (0: [])
 - 8. LT2 intacto: **237 vigas** (tags nativos, sin cambios)
 - 9. Eje I' en combinado = 45.0+31.25 = 76.25 m: **OK** (18 nodos I')
-- 10. Error de equilibrio |ΣRz-P_total|/P_total: **OK** (1.930e-13)
-- Resumen nodos: 0 sin conectividad, {'L1': [1001], 'L2': [1002, 600100, 600101, 600102, 600103, 600104, 600105], 'L3': [1003, 600200, 600201, 600202, 600203, 600204, 600205], 'L4': [1004], 'ROOF': [1005]} flotantes preexistentes, P_lt1=19817.597 kN, P_total=31086.260 kN.
+- 10. Error de equilibrio |ΣRz-P_total|/P_total: **OK** (3.494e-13)
+- Resumen nodos: 0 sin conectividad, {'L1': [1001], 'L2': [1002], 'L3': [1003], 'L4': [1004], 'ROOF': [1005]} flotantes preexistentes, P_lt1=19817.597 kN, P_total=31086.260 kN.
 
 ## Archivos generados
-- `outputs/interfaz_traceabilidad.csv`
-- `outputs/auditoria_elementos_interfaz.csv`
-- `outputs/vista_3d_combinado.png`
-- `outputs/reporte_validacion_combinado.md`
-- `outputs/verticales_cajas_pilastra.csv`
-- `outputs/conectores_v40_muro.csv`
-- `outputs/tributarias_lt1/tributarias_piso_1.png`
-- `outputs/tributarias_lt1/tributarias_piso_2.png`
-- `outputs/tributarias_lt1/tributarias_piso_3.png`
-- `outputs/tributarias_lt1/tributarias_piso_4.png`
-- `outputs/vista_3d_interactiva.html` (generado por `scripts/figura_interactiva.py`)
+- `outputs\interfaz_traceabilidad.csv`
+- `outputs\auditoria_elementos_interfaz.csv`
+- `outputs\vista_3d_combinado.png`
+- `outputs\reporte_validacion_combinado.md`
+- `outputs\verticales_cajas_pilastra.csv`
+- `outputs\conectores_v40_muro.csv`
+- `outputs\tributarias_lt1\tributarias_piso_1.png`
+- `outputs\tributarias_lt1\tributarias_piso_2.png`
+- `outputs\tributarias_lt1\tributarias_piso_3.png`
+- `outputs\tributarias_lt1\tributarias_piso_4.png`
+- `outputs\vista_3d_interactiva.html` (generado por `scripts/figura_interactiva.py`)
 

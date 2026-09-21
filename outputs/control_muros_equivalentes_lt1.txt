@@ -26,7 +26,31 @@ Unidades base: metros (m), kilonewtons (kN), kilopascales (kPa)
      NINF_01     e=0.20 m · L_planta=3.390 m · E-W (horizontal) en plano=X · tag=400004
      NINF_02     e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400005
      NINF_03     e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400006
-     total activados: 6
+     NSUP_01_PISO_1S e=0.20 m · L_planta=3.650 m · E-W (horizontal) en plano=X · tag=400301
+     NSUP_02_PISO_1S e=0.30 m · L_planta=2.250 m · N-S (vertical)   en plano=Y · tag=400302
+     NSUP_03_PISO_1S e=0.30 m · L_planta=2.250 m · N-S (vertical)   en plano=Y · tag=400303
+     NINF_01_PISO_1S e=0.20 m · L_planta=3.390 m · E-W (horizontal) en plano=X · tag=400304
+     NINF_02_PISO_1S e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400305
+     NINF_03_PISO_1S e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400306
+     NSUP_01_PISO_1 e=0.20 m · L_planta=3.650 m · E-W (horizontal) en plano=X · tag=400401
+     NSUP_02_PISO_1 e=0.30 m · L_planta=2.250 m · N-S (vertical)   en plano=Y · tag=400402
+     NSUP_03_PISO_1 e=0.30 m · L_planta=2.250 m · N-S (vertical)   en plano=Y · tag=400403
+     NINF_01_PISO_1 e=0.20 m · L_planta=3.390 m · E-W (horizontal) en plano=X · tag=400404
+     NINF_02_PISO_1 e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400405
+     NINF_03_PISO_1 e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400406
+     NSUP_01_PISO_3 e=0.20 m · L_planta=3.650 m · E-W (horizontal) en plano=X · tag=400101
+     NSUP_02_PISO_3 e=0.30 m · L_planta=2.250 m · N-S (vertical)   en plano=Y · tag=400102
+     NSUP_03_PISO_3 e=0.30 m · L_planta=2.250 m · N-S (vertical)   en plano=Y · tag=400103
+     NINF_01_PISO_3 e=0.20 m · L_planta=3.390 m · E-W (horizontal) en plano=X · tag=400104
+     NINF_02_PISO_3 e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400105
+     NINF_03_PISO_3 e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400106
+     NSUP_01_PISO_4 e=0.20 m · L_planta=3.650 m · E-W (horizontal) en plano=X · tag=400201
+     NSUP_02_PISO_4 e=0.30 m · L_planta=2.250 m · N-S (vertical)   en plano=Y · tag=400202
+     NSUP_03_PISO_4 e=0.30 m · L_planta=2.250 m · N-S (vertical)   en plano=Y · tag=400203
+     NINF_01_PISO_4 e=0.20 m · L_planta=3.390 m · E-W (horizontal) en plano=X · tag=400204
+     NINF_02_PISO_4 e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400205
+     NINF_03_PISO_4 e=0.25 m · L_planta=1.580 m · N-S (vertical)   en plano=Y · tag=400206
+     total activados: 30
 
 3) TRAMOS VERTICALES CREADOS (continuidad respaldada)
      Interpretacion (CONVENCION_NIVELES de data/inventario.py): los
@@ -50,6 +74,42 @@ Unidades base: metros (m), kilonewtons (kN), kilopascales (kPa)
      NINF_03     PISO_1 (z=-0.05) -> PISO_2 (z=3.91) | L_vertical=3.96 m | nodos 500105/500205
                  rigidLink('beam', master 600001 [PISO_1], nodo_muro 500105) [base]
                  rigidLink('beam', master 600002 [PISO_2], nodo_muro 500205) [tope]
+     NSUP_01_PISO_1S FUNDACION_SUP (z=-7.97) -> PISO_1S (z=-4.01) | L_vertical=3.96 m | nodos 500000/500050
+     NSUP_02_PISO_1S FUNDACION_SUP (z=-7.97) -> PISO_1S (z=-4.01) | L_vertical=3.96 m | nodos 500001/500051
+     NSUP_03_PISO_1S FUNDACION_SUP (z=-7.97) -> PISO_1S (z=-4.01) | L_vertical=3.96 m | nodos 500002/500052
+     NINF_01_PISO_1S FUNDACION_SUP (z=-7.97) -> PISO_1S (z=-4.01) | L_vertical=3.96 m | nodos 500003/500053
+     NINF_02_PISO_1S FUNDACION_SUP (z=-7.97) -> PISO_1S (z=-4.01) | L_vertical=3.96 m | nodos 500004/500054
+     NINF_03_PISO_1S FUNDACION_SUP (z=-7.97) -> PISO_1S (z=-4.01) | L_vertical=3.96 m | nodos 500005/500055
+     NSUP_01_PISO_1 PISO_1S (z=-4.01) -> PISO_1 (z=-0.05) | L_vertical=3.96 m | nodos 500050/500100
+     NSUP_02_PISO_1 PISO_1S (z=-4.01) -> PISO_1 (z=-0.05) | L_vertical=3.96 m | nodos 500051/500101
+     NSUP_03_PISO_1 PISO_1S (z=-4.01) -> PISO_1 (z=-0.05) | L_vertical=3.96 m | nodos 500052/500102
+     NINF_01_PISO_1 PISO_1S (z=-4.01) -> PISO_1 (z=-0.05) | L_vertical=3.96 m | nodos 500053/500103
+     NINF_02_PISO_1 PISO_1S (z=-4.01) -> PISO_1 (z=-0.05) | L_vertical=3.96 m | nodos 500054/500104
+     NINF_03_PISO_1 PISO_1S (z=-4.01) -> PISO_1 (z=-0.05) | L_vertical=3.96 m | nodos 500055/500105
+     NSUP_01_PISO_3 PISO_2 (z=3.91) -> PISO_3 (z=7.87) | L_vertical=3.96 m | nodos 500200/500300
+                 rigidLink('beam', master 600003 [PISO_3], nodo_muro 500300) [tope]
+     NSUP_02_PISO_3 PISO_2 (z=3.91) -> PISO_3 (z=7.87) | L_vertical=3.96 m | nodos 500201/500301
+                 rigidLink('beam', master 600003 [PISO_3], nodo_muro 500301) [tope]
+     NSUP_03_PISO_3 PISO_2 (z=3.91) -> PISO_3 (z=7.87) | L_vertical=3.96 m | nodos 500202/500302
+                 rigidLink('beam', master 600003 [PISO_3], nodo_muro 500302) [tope]
+     NINF_01_PISO_3 PISO_2 (z=3.91) -> PISO_3 (z=7.87) | L_vertical=3.96 m | nodos 500203/500303
+                 rigidLink('beam', master 600003 [PISO_3], nodo_muro 500303) [tope]
+     NINF_02_PISO_3 PISO_2 (z=3.91) -> PISO_3 (z=7.87) | L_vertical=3.96 m | nodos 500204/500304
+                 rigidLink('beam', master 600003 [PISO_3], nodo_muro 500304) [tope]
+     NINF_03_PISO_3 PISO_2 (z=3.91) -> PISO_3 (z=7.87) | L_vertical=3.96 m | nodos 500205/500305
+                 rigidLink('beam', master 600003 [PISO_3], nodo_muro 500305) [tope]
+     NSUP_01_PISO_4 PISO_3 (z=7.87) -> PISO_4 (z=11.83) | L_vertical=3.96 m | nodos 500300/500400
+                 rigidLink('beam', master 600004 [PISO_4], nodo_muro 500400) [tope]
+     NSUP_02_PISO_4 PISO_3 (z=7.87) -> PISO_4 (z=11.83) | L_vertical=3.96 m | nodos 500301/500401
+                 rigidLink('beam', master 600004 [PISO_4], nodo_muro 500401) [tope]
+     NSUP_03_PISO_4 PISO_3 (z=7.87) -> PISO_4 (z=11.83) | L_vertical=3.96 m | nodos 500302/500402
+                 rigidLink('beam', master 600004 [PISO_4], nodo_muro 500402) [tope]
+     NINF_01_PISO_4 PISO_3 (z=7.87) -> PISO_4 (z=11.83) | L_vertical=3.96 m | nodos 500303/500403
+                 rigidLink('beam', master 600004 [PISO_4], nodo_muro 500403) [tope]
+     NINF_02_PISO_4 PISO_3 (z=7.87) -> PISO_4 (z=11.83) | L_vertical=3.96 m | nodos 500304/500404
+                 rigidLink('beam', master 600004 [PISO_4], nodo_muro 500404) [tope]
+     NINF_03_PISO_4 PISO_3 (z=7.87) -> PISO_4 (z=11.83) | L_vertical=3.96 m | nodos 500305/500405
+                 rigidLink('beam', master 600004 [PISO_4], nodo_muro 500405) [tope]
      Los nodos de muro NO son slaves del diafragma. Cada base/tope hereda
      el movimiento de cuerpo rigido de su nivel por RESTRICCION CINEMATICA
      REAL ops.rigidLink('beam', master_del_diafragma, nodo_muro) (12).
@@ -67,11 +127,35 @@ Unidades base: metros (m), kilonewtons (kN), kilopascales (kPa)
      NINF_01      0.6780  6.493037e-01  2.260000e-03  8.704000e-03      0.200     3.390
      NINF_02      0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
      NINF_03      0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
+     NSUP_01_PISO_1S  0.7300  8.104521e-01  2.433333e-03  9.397334e-03      0.200     3.650
+     NSUP_02_PISO_1S  0.6750  5.062500e-03  2.847656e-01  1.854904e-02      2.250     0.300
+     NSUP_03_PISO_1S  0.6750  5.062500e-03  2.847656e-01  1.854904e-02      2.250     0.300
+     NINF_01_PISO_1S  0.6780  6.493037e-01  2.260000e-03  8.704000e-03      0.200     3.390
+     NINF_02_PISO_1S  0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
+     NINF_03_PISO_1S  0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
+     NSUP_01_PISO_1  0.7300  8.104521e-01  2.433333e-03  9.397334e-03      0.200     3.650
+     NSUP_02_PISO_1  0.6750  5.062500e-03  2.847656e-01  1.854904e-02      2.250     0.300
+     NSUP_03_PISO_1  0.6750  5.062500e-03  2.847656e-01  1.854904e-02      2.250     0.300
+     NINF_01_PISO_1  0.6780  6.493037e-01  2.260000e-03  8.704000e-03      0.200     3.390
+     NINF_02_PISO_1  0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
+     NINF_03_PISO_1  0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
+     NSUP_01_PISO_3  0.7300  8.104521e-01  2.433333e-03  9.397334e-03      0.200     3.650
+     NSUP_02_PISO_3  0.6750  5.062500e-03  2.847656e-01  1.854904e-02      2.250     0.300
+     NSUP_03_PISO_3  0.6750  5.062500e-03  2.847656e-01  1.854904e-02      2.250     0.300
+     NINF_01_PISO_3  0.6780  6.493037e-01  2.260000e-03  8.704000e-03      0.200     3.390
+     NINF_02_PISO_3  0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
+     NINF_03_PISO_3  0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
+     NSUP_01_PISO_4  0.7300  8.104521e-01  2.433333e-03  9.397334e-03      0.200     3.650
+     NSUP_02_PISO_4  0.6750  5.062500e-03  2.847656e-01  1.854904e-02      2.250     0.300
+     NSUP_03_PISO_4  0.6750  5.062500e-03  2.847656e-01  1.854904e-02      2.250     0.300
+     NINF_01_PISO_4  0.6780  6.493037e-01  2.260000e-03  8.704000e-03      0.200     3.390
+     NINF_02_PISO_4  0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
+     NINF_03_PISO_4  0.3950  2.057292e-03  8.217317e-02  7.408897e-03      1.580     0.250
 
 5) NODOS EN EL MODELO
-     estructurales (base opensees + 12 de muros): 120
+     estructurales (base opensees + 12 de muros): 144
      masters de diafragma: 4
-     ops.getNodeTags(): 124
+     ops.getNodeTags(): 148
      Nodos de muro: NO slaves del diafragma; conectados por rigidLink al
      master del diafragma de su nivel (constraint real, 12 links)
        nodo_muro 500100 [base de NSUP_01] -> master 600001 (PISO_1)
@@ -86,6 +170,18 @@ Unidades base: metros (m), kilonewtons (kN), kilopascales (kPa)
        nodo_muro 500204 [tope de NINF_02] -> master 600002 (PISO_2)
        nodo_muro 500105 [base de NINF_03] -> master 600001 (PISO_1)
        nodo_muro 500205 [tope de NINF_03] -> master 600002 (PISO_2)
+       nodo_muro 500300 [tope de NSUP_01_PISO_3] -> master 600003 (PISO_3)
+       nodo_muro 500301 [tope de NSUP_02_PISO_3] -> master 600003 (PISO_3)
+       nodo_muro 500302 [tope de NSUP_03_PISO_3] -> master 600003 (PISO_3)
+       nodo_muro 500303 [tope de NINF_01_PISO_3] -> master 600003 (PISO_3)
+       nodo_muro 500304 [tope de NINF_02_PISO_3] -> master 600003 (PISO_3)
+       nodo_muro 500305 [tope de NINF_03_PISO_3] -> master 600003 (PISO_3)
+       nodo_muro 500400 [tope de NSUP_01_PISO_4] -> master 600004 (PISO_4)
+       nodo_muro 500401 [tope de NSUP_02_PISO_4] -> master 600004 (PISO_4)
+       nodo_muro 500402 [tope de NSUP_03_PISO_4] -> master 600004 (PISO_4)
+       nodo_muro 500403 [tope de NINF_01_PISO_4] -> master 600004 (PISO_4)
+       nodo_muro 500404 [tope de NINF_02_PISO_4] -> master 600004 (PISO_4)
+       nodo_muro 500405 [tope de NINF_03_PISO_4] -> master 600004 (PISO_4)
 
 6) VIGAS V.60/80 (marcos esqueleto)
      108 creadas (PISO_1..PISO_4, 27 por nivel)
@@ -94,13 +190,13 @@ Unidades base: metros (m), kilonewtons (kN), kilopascales (kPa)
      90 creadas (5 tramos x 18 = 90)
 
 8) MUROS EQUIVALENTES
-     6 (elasticBeamColumn verticales)
+     30 (elasticBeamColumn verticales)
 
 9) TOTAL elasticBeamColumn (conteo REAL por tags desde ops.getEleTags())
-     ops.getEleTags() = 204
-       columnas: 90 · vigas: 108 · muros equivalentes: 6
-     consistencia: 204 == 90+108+6+0 (vínculos/sin_clasificar: 0) -> OK
-     constraint rígido de muro (rigidLink, NO eleTag): 12
+     ops.getEleTags() = 228
+       columnas: 90 · vigas: 108 · muros equivalentes: 30
+     consistencia: 228 == 90+108+30+0 (vínculos/sin_clasificar: 0) -> OK
+     constraint rígido de muro (rigidLink, NO eleTag): 24
      (resuelve la inconsistencia previa 106+92 vs 108+90: solo cuenta
      lo realmente cargado en OpenSees)
 
@@ -110,24 +206,24 @@ Unidades base: metros (m), kilonewtons (kN), kilopascales (kPa)
 
 11) SUMATORIA DE REACCIONES (gravedad)
      P_gravitatoria aplicada (q_G sobre 108 vigas): 19644.1419 kN
-     Σ Rz (18 apoyos, 6 GDL): 19644.1419 kN
-     |Σ Rz - P| = 1.818989e-11 kN
+     Σ Rz (24 apoyos, 6 GDL): 19644.1419 kN
+     |Σ Rz - P| = 1.455192e-11 kN
 
 12) ERROR RELATIVO DE EQUILIBRIO
-     err_rel = 9.260e-16 (tolerancia documentada rel <= 1e-06)
-     Σ Rx = 3.6704e-13 kN · Σ Ry = -1.5321e-13 kN
-     max|U| = 2.390261e-03 m (nodo 50303) · max|Uz| = 2.365298e-03 m
+     err_rel = 7.408e-16 (tolerancia documentada rel <= 1e-06)
+     Σ Rx = -6.1414e-14 kN · Σ Ry = -1.3503e-13 kN
+     max|U| = 2.365534e-03 m (nodo 50303) · max|Uz| = 2.365182e-03 m
      Cargas conservadas: NO se agrego peso propio de muros (no esta
      en la convencion de carga del proyecto) y NO se invento carga de
      salientes.
 
 13) DIAFRAGMAS RIGIDOS COMPATIBLES + RIGIDLINK DE MUROS
-     PISO_1: master 600001 · 18 slaves · ok=True · max_error=1.694e-21 m
+     PISO_1: master 600001 · 18 slaves · ok=True · max_error=0.000e+00 m
      PISO_2: master 600002 · 18 slaves · ok=True · max_error=0.000e+00 m
-     PISO_3: master 600003 · 18 slaves · ok=True · max_error=6.776e-21 m
+     PISO_3: master 600003 · 18 slaves · ok=True · max_error=0.000e+00 m
      PISO_4: master 600004 · 18 slaves · ok=True · max_error=0.000e+00 m
      compatibilidad global del diafragma: True
-     rigidLink de muro (u_muro = u_master + th_master x r, 6 DOF): 12 links · ok=True · max_error=8.470e-22 m
+     rigidLink de muro (u_muro = u_master + th_master x r, 6 DOF): 24 links · ok=True · max_error=0.000e+00 m
 
 14) AVISOS / PENDIENTES
      - Nucleo PISO_4 (plan 103): extremos del nucleo sin cerrar -> el
@@ -148,14 +244,14 @@ Unidades base: metros (m), kilonewtons (kN), kilopascales (kPa)
        ops.rigidLink('beam', master_del_diafragma, nodo_muro) x12 (se
        ELIMINARON los elasticBeamColumn artificiales 450001-450012 de
        'vinculacion' no respaldada), elementos de muros, guard de
-       cargas, conteos reales (204), controles y figura (se retiraron las
+       cargas, conteos reales (228), controles y figura (se retiraron las
        variables temporales de depuracion
        LT1_MUROS/LT1_COLSEC/LT1_SYSTEM/LT1_NUM)
      - data/geometria_irregular.py + data/inventario.py (geom. v2 previa)
      - tools/generar_correccion_geometria_v2_lt1.py (generador v2)
 
 16) OUTPUTS GENERADOS
-     - outputs/control_muros_equivalentes_lt1.txt
+     - outputs\control_muros_equivalentes_lt1.txt
      - outputs/modelo_con_muros_equivalentes_lt1.png
      - previos preservados: control_geometria_corregida_v2_lt1.txt,
        inventario_muros_v2_lt1.txt, modelo_geometria_corregida_v2_lt1.png

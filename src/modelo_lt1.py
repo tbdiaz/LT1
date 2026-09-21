@@ -424,14 +424,14 @@ muros_por_nivel = {nivel: [] for nivel in niveles_z}
 # Convención académica entregada por el usuario/curso (data/secciones.py,
 # CONVENCION_ACADEMICA_MUROS): cada muro M.H.A. se modela como elasticBeamColumn
 # vertical entre DOS niveles Z consecutivos, con sección A=e*L_m e Iy/Iz/J por
-# rectángulo según su orientación. Los 6 muros de MUROS_CERRADOS_PISO_2 (plan
-# 102 = CIELO PISO 2°) ocupan el entrepiso PISO_1 -> PISO_2 (convención
-# CONVENCION_NIVELES: el cielo PISO_N lo enmarcan los elementos del tramo
-# PISO_{N-1}->PISO_N). El núcleo del plan 103 (PISO_4, extremos sin cerrar)
-# queda PENDIENTE.
+# rectángulo según su orientación. Los seis paños cerrados del núcleo se
+# verifican desde FUNDACION_SUP hasta PISO_4 en las plantas CIELO 1°
+# SUBTERRANEO/PISO 1 (plano 101) y CIELO PISO 2, 3 y 4 (planos 102 y 103),
+# por lo que forman 30 segmentos verticales continuos. Los muros perimetrales
+# y los ejes inclinados siguen PENDIENTES.
 muros_equivalentes = []
 NODOS_MURO_EQUIVALENTES = set()      # nodos de muro (base+tope) NO slaves del diafragma
-RIGID_LINKS_MUROS = []               # rigidLink('beam', master, nodo_muro) x 12
+RIGID_LINKS_MUROS = []               # rigidLink('beam', master, nodo_muro) x 24
 _TAG_BASE_MURO_EQUIVALENTE = 500100   # nodos inferiores del tramo (por muro)
 _TAG_TOP_MURO_EQUIVALENTE = 500200    # nodos superiores del tramo (por muro)
 _TAG_MURO_EQUIVALENTE_PRIMERO = 400001  # elementTags de las columnas equiv.
@@ -442,7 +442,7 @@ _TAG_MURO_EQUIVALENTE_PRIMERO = 400001  # elementTags de las columnas equiv.
 
 
 def _construir_nodos_muros_equivalentes():
-    """Crea los nodos verticales de las 6 columnas equivalentes de muro.
+    """Crea nodos y 30 segmentos equivalentes de los seis paños continuos.
 
     Estrategia de constraint FINAL (auditoria):
       El nodo de muro NO es slave del rigidDiaphragm y NO lleva ningun elemento
@@ -475,23 +475,53 @@ def _construir_nodos_muros_equivalentes():
     global muros_equivalentes, NODOS_MURO_EQUIVALENTES
     muros_equivalentes = []
     NODOS_MURO_EQUIVALENTES = set()
-    nivel_abajo, nivel_arriba = "PISO_1", "PISO_2"
     excluir_muro = set()
-    for i, m in enumerate(datos_irreg.MUROS_CERRADOS_PISO_2):
+    indices_fisicos = {
+        m["id"]: i for i, m in enumerate(datos_irreg.MUROS_CERRADOS_PISO_2)
+    }
+    bases_tag_nodo = {
+        "FUNDACION_SUP": 500000,
+        "PISO_1S": 500050,
+        "PISO_1": 500100,
+        "PISO_2": 500200,
+        "PISO_3": 500300,
+        "PISO_4": 500400,
+    }
+    bases_tag_elemento = {
+        ("PISO_1", "PISO_2"): 400001,
+        ("PISO_2", "PISO_3"): 400101,
+        ("PISO_3", "PISO_4"): 400201,
+        ("FUNDACION_SUP", "PISO_1S"): 400301,
+        ("PISO_1S", "PISO_1"): 400401,
+    }
+    nodos_por_pano_nivel = {}
+    for m in datos_irreg.MUROS_CERRADOS_NIVELES:
+        nivel_abajo = m["nivel_inferior"]
+        nivel_arriba = m["nivel_superior"]
+        i = indices_fisicos[m["id_fisico"]]
+        clave_tramo = (nivel_abajo, nivel_arriba)
+        if clave_tramo not in bases_tag_elemento:
+            raise ValueError(f"Tramo de muro no documentado: {clave_tramo}")
         x0, y0, x1, y1 = m["coords"]
         x, y = (x0 + x1) / 2.0, (y0 + y1) / 2.0
-        tag_b = _TAG_BASE_MURO_EQUIVALENTE + i
-        tag_t = _TAG_TOP_MURO_EQUIVALENTE + i
-        crear_nodo_coordenadas(tag_b, x, y, nivel_abajo,
-                               f"muro equiv {m['id']} (base {nivel_abajo})")
-        crear_nodo_coordenadas(tag_t, x, y, nivel_arriba,
-                               f"muro equiv {m['id']} (tope {nivel_arriba})")
-        metadata_nodos[tag_b]["tipo"] = "muro_equivalente"
-        metadata_nodos[tag_t]["tipo"] = "muro_equivalente"
-        metadata_nodos[tag_b]["constraint"] = "rigidLink al master del diafragma"
-        metadata_nodos[tag_t]["constraint"] = "rigidLink al master del diafragma"
-        NODOS_MURO_EQUIVALENTES.update((tag_b, tag_t))
-        excluir_muro.update((tag_b, tag_t))
+        tags_extremo = {}
+        for nivel, lado in ((nivel_abajo, "base"), (nivel_arriba, "tope")):
+            clave_nodo = (m["id_fisico"], nivel)
+            tag_n = nodos_por_pano_nivel.get(clave_nodo)
+            if tag_n is None:
+                tag_n = bases_tag_nodo[nivel] + i
+                crear_nodo_coordenadas(
+                    tag_n, x, y, nivel,
+                    f"muro equiv {m['id_fisico']} ({nivel})")
+                metadata_nodos[tag_n]["tipo"] = "muro_equivalente"
+                metadata_nodos[tag_n]["constraint"] = (
+                    "rigidLink al master del diafragma")
+                nodos_por_pano_nivel[clave_nodo] = tag_n
+                NODOS_MURO_EQUIVALENTES.add(tag_n)
+                excluir_muro.add(tag_n)
+            tags_extremo[lado] = tag_n
+        tag_b = tags_extremo["base"]
+        tag_t = tags_extremo["tope"]
         anclas = {}
         for tag_m, zlv, lado in ((tag_b, nivel_abajo, "inferior"),
                                  (tag_t, nivel_arriba, "superior")):
@@ -510,6 +540,7 @@ def _construir_nodos_muros_equivalentes():
             m["espesor_cm"] / 100.0, m["longitud_m"], m["orientacion"])
         muros_equivalentes.append({
             "clave": m["id"],
+            "id_fisico": m["id_fisico"],
             "seccion": m["seccion"],
             "espesor_m": m["espesor_cm"] / 100.0,
             "longitud_planta_m": m["longitud_m"],
@@ -533,16 +564,16 @@ def _construir_nodos_muros_equivalentes():
                            "el movimiento rigido del plano (NO slave del "
                            "rigidDiaphragm, NO elemento artificial)"),
             "x_m": x, "y_m": y,
-            "element_tag": _TAG_MURO_EQUIVALENTE_PRIMERO + i,
+            "element_tag": bases_tag_elemento[clave_tramo] + i,
             "A_m2": props["A_m2"],
             "Iy_m4": props["Iy_m4"],
             "Iz_m4": props["Iz_m4"],
             "J_m4": props["J_m4"],
             "estado_geometria": m["estado"],
             "activo_opensees": True,
-            "fuente": ("GEOMETRIA_CERRADA_v2 (MUROS_CERRADOS_PISO_2) + "
-                       "CONVENCION_ACADEMICA_MUROS (INFORMACION_ACADEMICA_"
-                       "PROPORCIONADA_POR_USUARIO)"),
+            "fuente": (m["fuente_geometria"] + " + "
+                       "CONVENCION_ACADEMICA_MUROS "
+                       "(INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO)"),
         })
     return len(muros_equivalentes)
 
@@ -588,6 +619,27 @@ def crear_apoyos_fundacion():
                         "grilla V.F.; idealización académica de base empotrada"),
                 }
                 ops.fix(tag, 1, 1, 1, 1, 1, 1)
+    for m in muros_equivalentes:
+        if m["nivel_inferior"] != base:
+            continue
+        tag = m["nodo_inferior"]
+        if tag in apoyos:
+            continue
+        apoyos[tag] = {
+            "nodeTag": tag,
+            "nivel": base,
+            "eje_x": "-",
+            "eje_y": "-",
+            "restriccion": (1, 1, 1, 1, 1, 1),
+            "gdl_documentado": "Ux,Uy,Uz,Rx,Ry,Rz (6 GDL, empotrado)",
+            "fuente": (
+                "PLANTA FUNDACIONES (100) + PLANTA CIELO 1° SUBTERRANEO "
+                "(101) + elevaciones 300-303; misma idealización académica "
+                "de base empotrada aplicada a columnas y muros"),
+            "tipo": "apoyo_muro_equivalente",
+            "id_fisico_muro": m["id_fisico"],
+        }
+        ops.fix(tag, 1, 1, 1, 1, 1, 1)
     return apoyos
 
 
@@ -662,14 +714,18 @@ def _crear_rigid_links_muros():
     Los rigidLink no crean elementos: NO cuentan en ops.getEleTags()."""
     global RIGID_LINKS_MUROS
     RIGID_LINKS_MUROS = []
+    vistos = set()
     for m in muros_equivalentes:
         for nt, nivel in ((m["nodo_inferior"], m["nivel_inferior"]),
                           (m["nodo_superior"], m["nivel_superior"])):
+            if nt in vistos:
+                continue
             d = diafragmas.get(nivel)
             if not d or d["nodo_maestro"] not in set(ops.getNodeTags()):
                 continue
             master = d["nodo_maestro"]
             ops.rigidLink("beam", master, nt)
+            vistos.add(nt)
             RIGID_LINKS_MUROS.append({
                 "nodo_muro": nt, "nivel": nivel,
                 "nodo_maestro": master,
@@ -983,13 +1039,13 @@ def _familia_transformacion(reg):
 
 
 def crear_elementos_elasticos():
-    """Crea elasticBeamColumn: 90 columnas + 108 vigas + 6 muros equivalentes
-    = 204 en total, con los tags ya reservados. Devuelve la cantidad creada
+    """Crea elasticBeamColumn: 90 columnas + 108 vigas + 30 muros equivalentes
+    = 228 en total, con los tags ya reservados. Devuelve la cantidad creada
     (0 si materiales PENDIENTES: E/nu/G aún son None).
 
     Los nodos de muro NO tienen elementos horizontales: se conectan a su nivel
     por restricción cinemática real ops.rigidLink('beam', master, nodo_muro)
-    (12 links, ver _crear_rigid_links_muros). Los rigidLink no son elementos y
+    (24 links, ver _crear_rigid_links_muros). Los rigidLink no son elementos y
     no cuentan en ops.getEleTags(). Esto fue decidido tras la auditoría empírica
     (estrategia A: nodos de muro como slaves directos -> matriz singular;
     estrategia B: rigidLink al nodo ancla slave -> no propaga el plano;
@@ -1738,9 +1794,9 @@ def verificacion_esqueleto(ruta_control, ruta_3d):
     print(f"  5. elementos OpenSees realmente creados:"
           f" ops.node() = {len(nodos)} (existentes en dom) ·"
           f" elasticBeamColumn = {len(elementos_opensees)}"
-          + (" (E/G de materiales PENDIENTES; 204 esperados cuando estén definidos)"
+          + (" (E/G de materiales PENDIENTES; 228 esperados cuando estén definidos)"
              if not materiales_listos()
-             else "  (90 columnas + 108 vigas + 6 muros equiv. + 12 rigidLink de muro)"))
+             else "  (90 columnas + 108 vigas + 30 muros equiv. + 24 rigidLink de muro)"))
     print(f"  6. verificaciones: nodos duplicados {duplicados_nodos} ·"
           f" conectividad inexistente {len(inexistente)} {inexistente[:3]} ·"
           f" longitud cero {len(cero_long)} · elementTags duplicados {tags_dup}")
@@ -1777,11 +1833,11 @@ def verificacion_opensees():
     print("-" * 62)
     print("VERIFICACIONES BLOQUE OPENSEES (elementos elásticos)")
     print("-" * 62)
-    print(f"  ops.getNodeTags() = {nodos_ops} (120 estructurales + {len(nodos_maestros)} masters)")
+    print(f"  ops.getNodeTags() = {nodos_ops} (144 estructurales + {len(nodos_maestros)} masters)")
     print(f"  ops.getEleTags()  = {n_ele_ops}"
-          + (f" (esperado 204 cuando E/G estén definidos)"
+          + (f" (esperado 228 cuando E/G estén definidos)"
              if materiales_listos() is False else
-             " (90 col + 108 vigas + 6 muros equiv. elasticBeamColumn)"))
+             " (90 col + 108 vigas + 30 muros equiv. elasticBeamColumn)"))
     print(f"  elasticBeamColumn creados: {len(elementos_opensees)}")
     print(f"  constr. rígidas de muro (rigidLink al master): {len(RIGID_LINKS_MUROS)}")
     print(f"  tags de elemento únicos: {tags_unicos}")
@@ -1905,7 +1961,7 @@ def escribir_control_opensees(ruta):
     w("ELEMENTOS OPENSEES\n")
     w(f"  elasticBeamColumn creados: {len(elementos_opensees)}\n")
     if not materiales_listos():
-        w("  esperados: 204 (90 columnas + 108 vigas + 6 muros equiv.) cuando E ")
+        w("  esperados: 228 (90 columnas + 108 vigas + 30 muros equiv.) cuando E ")
         w("y G estén respaldados\n")
         w("  ACTIVACION INMEDIATA: listo con E y nu/G definidos ")
         w("(G = E/[2(1+nu)]); conectividades y tags ya reservados\n")
@@ -1924,12 +1980,12 @@ def escribir_control_opensees(ruta):
     w("\n")
 
     w("VERIFICACIONES\n")
-    w(f"  ops.node = {nodos_ops} (120 estructurales + {len(nodos_maestros)} masters)\n")
-    w(f"  ops.element = {len(ops.getEleTags())} (204 esperados: 90 col + 108 vigas "
-      "+ 6 muros equiv.; material HºAº y convención de muro por "
+    w(f"  ops.node = {nodos_ops} (144 estructurales + {len(nodos_maestros)} masters)\n")
+    w(f"  ops.element = {len(ops.getEleTags())} (228 esperados: 90 col + 108 vigas "
+      "+ 30 muros equiv.; material HºAº y convención de muro por "
       "INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO)\n")
     w(f"  elementTags únicos: "
-      f"{len({*col_tags, *viga_tags, *[m['element_tag'] for m in muros_equivalentes]}) == len(col_tags) + len(viga_tags) + 6}\n")
+      f"{len({*col_tags, *viga_tags, *[m['element_tag'] for m in muros_equivalentes]}) == len(col_tags) + len(viga_tags) + 18}\n")
     w(f"  constr. rígidas de muro (rigidLink al master del diafragma): "
       f"{len(RIGID_LINKS_MUROS)} (no cuentan como elasticBeamColumn)\n")
     w(f"  nodos duplicados: {len(nodos) - len({tuple(v) for v in nodos.values()})}\n")
@@ -2058,8 +2114,8 @@ def verificacion_apoyos_diafragmas():
     ok = True
 
     problemas_apoyos = []
-    if len(apoyos) != 18:
-        problemas_apoyos.append(f"esperados 18 apoyos, hay {len(apoyos)}")
+    if len(apoyos) != 24:
+        problemas_apoyos.append(f"esperados 24 apoyos, hay {len(apoyos)}")
     for tag, a in apoyos.items():
         if tag not in nodos or tag not in nodos_ops:
             problemas_apoyos.append(f"apoyo {tag} inexistente en dom")
@@ -2104,7 +2160,7 @@ def verificacion_apoyos_diafragmas():
     print("-" * 62)
     print("VERIFICACION APOYOS + DIAFRAGMAS")
     print("-" * 62)
-    print(f"  apoyos: {len(apoyos)} (18 esperados), todos con 6 GDL "
+    print(f"  apoyos: {len(apoyos)} (24 esperados), todos con 6 GDL "
           f"empotrados -> {'OK' if not problemas_apoyos else problemas_apoyos}")
     print(f"  diafragmas: {len([d for d in diafragmas.values() if d])} activos"
           f" ({', '.join(NIVELES_DIAFRAGMA)})")
@@ -2115,9 +2171,9 @@ def verificacion_apoyos_diafragmas():
     print(f"  niveles con diafragma: {NIVELES_DIAFRAGMA} | sin: PISO_1S (documentado)")
     print(f"  nodos base (FUNDACION_SUP) incorporados a diafragma: 0")
     print(f"  ops.getNodeTags(): {len(nodos_ops)} "
-          f"(120 estructurales: 108 esqueleto + 12 de muros + {len(nodos_maestros)} masters)")
+          f"(144 estructurales: 108 esqueleto + 36 de muros + {len(nodos_maestros)} masters)")
     print(f"  ops.getEleTags(): {len(ops.getEleTags())} "
-          f"(204: 90 columnas + 108 vigas + 6 muros equivalentes)")
+          f"(228: 90 columnas + 108 vigas + 30 muros equivalentes)")
     print(f"  rigidLink de muro al master del diafragma: {len(RIGID_LINKS_MUROS)} "
           f"(constraints, no eleTags)")
     print("-" * 62)
@@ -2814,8 +2870,8 @@ def escribir_convencion_niveles_lt1(ruta):
 
 # ============================================================================
 # P1L2 · MODELO OPENSEES CLASE A ACTIVADO + GRAVEDAD (previo a Unity)
-# Clase A: 120 nodos estructurales + 4 masters + 90 columnas + 108 vigas +
-# 6 MUROS EQUIVALENTES (CONVENCION_ACADEMICA_MUROS) + 18 apoyos + 4 diafragmas
+# Clase A: 144 nodos estructurales + 4 masters + 90 columnas + 108 vigas +
+# 30 MUROS EQUIVALENTES (CONVENCION_ACADEMICA_MUROS) + 24 apoyos + 4 diafragmas
 # rígidos. Clase B/C quedan documentadas fuera del modelo.
 # Material H°A° DEFINIDO por INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO:
 #   E = 25 000 000 kPa · nu = 0.20 · G = 10 416 667 kPa (G = E/[2(1+nu)],
@@ -2879,10 +2935,10 @@ def material_ha_resumen():
 
 def verificar_preparacion_elementos():
     """Pre-verificación de los elementTags reservados (90 columnas + 108 vigas
-    + 6 muros equivalentes = 204 elasticBeamColumn) SIN crear nada. Comprueba:
+    + 30 muros equivalentes = 228 elasticBeamColumn) SIN crear nada. Comprueba:
     tags únicos, extremos existentes, longitud > 0, sección con A/Iy/Iz/J
     computables, geomTransf de su familia definida, y que ningún nodo maestro
-    de diafragma figure como extremo de elemento. Los 12 rigidLink de muros no
+    de diafragma figure como extremo de elemento. Los 24 rigidLink de muros no
     son elementos: se verifican aparte (pares master/nodo_muro por nivel)."""
     cols = {c["element_tag"]: c for g in columnas_por_nivel.values() for c in g}
     vigas = {v["element_tag"]: v for g in vigas_por_nivel.values() for v in g}
@@ -2963,7 +3019,7 @@ def verificar_preparacion_elementos():
             problemas.append(f"muro equiv {tag}: geomTransf {fam} sin definir")
 
     listo = (not problemas and not rigidlinks_prob
-             and len(cols) == 90 and len(vigas) == 108 and len(muros) == 6)
+             and len(cols) == 90 and len(vigas) == 108 and len(muros) == 18)
     return {
         "columnas_preparadas": len(cols),
         "vigas_preparadas": len(vigas),
@@ -3246,15 +3302,15 @@ def escribir_control_preparacion_opensees(ruta):
     material_listo = res_mat["estado"] == "LISTO"
     n_ele = len(elementos_opensees)
     w("ESTADOS\n")
-    w(f"  GEOMETRIA_CLASE_A = {'LISTA' if pre_ele['estado'] == 'LISTA' and len(nodos) == 120 else 'CON_REVISION'}\n")
-    w(f"  APOYOS = {'LISTOS' if len(apoyos) == 18 else 'CON_REVISION'}\n")
+    w(f"  GEOMETRIA_CLASE_A = {'LISTA' if pre_ele['estado'] == 'LISTA' and len(nodos) == 144 else 'CON_REVISION'}\n")
+    w(f"  APOYOS = {'LISTOS' if len(apoyos) == 24 else 'CON_REVISION'}\n")
     w(f"  DIAFRAGMAS = {'LISTOS' if len([d for d in diafragmas.values() if d]) == 4 else 'CON_REVISION'}\n")
     w(f"  SECCIONES = {'LISTAS' if not any('sección' in p for p in pre_ele['problemas']) else 'CON_REVISION'}\n")
     w(f"  GEOMTRANSF = {'LISTAS' if sum(1 for v in geomtransf_definidas.values() if v['estado']=='DEFINIDA') == 3 else 'CON_REVISION'}\n")
     w(f"  TRIBUTACION = {'LISTA' if not any(t['bordes_sin_viga'] for t in tributacion_por_nivel.values()) else 'CON_REVISION'}\n")
     w(f"  CARGAS_GRAVEDAD = {'PREPARADAS Y APLICADAS' if res_car['n_cargas_preparadas'] == 108 else 'CON_REVISION'}\n")
     w(f"  MATERIAL = {'LISTO' if material_listo else 'BLOQUEADO'}\n")
-    w(f"  ELEMENTOS_OPENSEES = {'CREADOS (' + str(n_ele) + ')' if n_ele == 204 else ('BLOQUEADOS' if not material_listo else 'INCOMPLETOS')}\n")
+    w(f"  ELEMENTOS_OPENSEES = {'CREADOS (' + str(n_ele) + ')' if n_ele == 228 else ('BLOQUEADOS' if not material_listo else 'INCOMPLETOS')}\n")
     w(f"  RIGIDLINKS_MUROS = {n_rigidlinks_muros} (restricciones cinemáticas al master del diafragma)\n")
     w(f"  ANALISIS = {res_anal.get('estado', 'PENDIENTE')}\n")
     w("\n")
@@ -3356,8 +3412,8 @@ def escribir_control_preparacion_opensees(ruta):
     w(f"     verificación G: {res_mat.get('G_formula')}\n")
     w(f"     {res_mat.get('nota_unidades')} · {res_mat.get('nota_G25')}\n")
     w(f"     fuente: {res_mat['fuente']}\n")
-    w("     Con E y G definidos, el run creó los 204 elasticBeamColumn (90 "
-          "columnas + 108 vigas + 6 muros equivalentes), los 12 rigidLink de "
+    w("     Con E y G definidos, el run creó los 228 elasticBeamColumn (90 "
+          "columnas + 108 vigas + 30 muros equivalentes), los 24 rigidLink de "
           "muro al master del diafragma y ejecutó el análisis\n")
     w("     de gravedad. Estado: MATERIAL LISTO · ELEMENTOS CREADOS · ANALISIS "
       "EJECUTADO.\n")
@@ -3688,11 +3744,9 @@ def exportar_modelo_unity(ruta_json):
         })
 
     PENDIENTES_GEOMETRIA = [
-        {"id": "nucleo_piso_4", "descripcion": "Núcleo PISO_4 (plan 103): "
-         "extremos sin cerrar; tramo PISO_3->PISO_4 NO modelado",
-         "tipo": "muros", "estado": "PENDIENTE"},
-        {"id": "muros_subterraneo_plan101", "descripcion": "Muros del "
-         "subterráneo (plan 101): posiciones pendientes",
+        {"id": "muros_perimetrales_subterraneo_plan101", "descripcion":
+         "Muros perimetrales/inclinados del subterráneo (plan 101): "
+         "extremos pendientes; los seis paños del núcleo ya están modelados",
          "tipo": "muros", "estado": "PENDIENTE"},
         {"id": "V.30/45", "descripcion": "Vigas V.30/45: extremos/posición "
          "pendientes", "tipo": "vigas", "estado": "PENDIENTE"},
@@ -3822,7 +3876,7 @@ def exportar_modelo_unity(ruta_json):
                 "nodos_totales": len(nodes_out),
                 "nodos_estructurales": len(nodos),
                 "nodos_master": len(nodos_maestros),
-                "elasticBeamColumn": 204,
+                "elasticBeamColumn": len(elementos_opensees),
                 "columnas": 90,
                 "vigas": 108,
                 "muros_equivalentes": len(walls_out),
@@ -3842,7 +3896,7 @@ def exportar_modelo_unity(ruta_json):
             },
             "pendientes": PENDIENTES_GEOMETRIA,
             "limitaciones": [
-                "Solo geometria clase A modelada; 8 items de geometria "
+                "Solo geometria clase A modelada; 7 items de geometria "
                 "pendiente (ver metadata.pendientes)",
                 "Perfiles metalicos y P.M. 300x300x20 pendientes (segunda etapa)",
                 "Material H°A°: E/nu/G INFORMACION_ACADEMICA_PROPORCIONADA_"
@@ -3878,11 +3932,12 @@ def exportar_modelo_unity(ruta_json):
     print(f"       vigas: {len(beams_out)} · columnas: {len(columns_out)}")
     print(f"       apoyos: {len(supports_out)} · diafragmas: {len(diaphragms_out)}")
     print(f"       tributarias: {len(trib_out)} · paños: {len(paños_out)}")
-    print(f"       muros equivalentes: {len(walls_out)} (núcleo PISO_2)")
+    print(f"       muros equivalentes: {len(walls_out)} "
+          "(núcleos FUNDACION_SUP-PISO_4)")
     print(f"       rigidLink constraint de muros: {len(constraint_links_out)}")
     print(f"       analisis: {analysis_out.get('estado', 'NO_DISPONIBLE')}")
     print(f"       caso activo: {analysis_out.get('caso', 'N/D')} | "
-          f"fuerzas por elemento: {len(fuerzas_elementos)} de 204")
+          f"fuerzas por elemento: {len(fuerzas_elementos)} de 228")
     print(f"       capacidades P-M: col tag {col_pm.get('elementTag')} "
           f"({col_pm.get('estado')}) · muro tag "
           f"{muro_pm.get('elementTag')} ({muro_pm.get('estado')})")
@@ -3930,8 +3985,8 @@ def escribir_control_analisis_gravedad_lt1(ruta):
     w(f"     nodos: {len(nodos)} estructurales + {len(nodos_maestros)} maestros "
       f"= {len(ops.getNodeTags())} en el dominio OpenSees\n")
     n_ele = len(elementos_opensees)
-    w(f"     elasticBeamColumn: {n_ele} (esperados 204)\n")
-    w(f"       columnas P.70x70: 90 · vigas V.60/80: 108 · muros equiv.: 6\n")
+    w(f"     elasticBeamColumn: {n_ele} (esperados 228)\n")
+    w(f"       columnas P.70x70: 90 · vigas V.60/80: 108 · muros equiv.: 30\n")
     w(f"     rigidLink de muro al master del diafragma: "
       f"{len(RIGID_LINKS_MUROS)} (constraint, no eleTag)\n")
     w(f"     apoyos: {len(apoyos)} empotrados (6 GDL) en FUNDACION_SUP\n")
@@ -3968,7 +4023,7 @@ def escribir_control_analisis_gravedad_lt1(ruta):
     if res_post.get("estado") == "OK":
         w(f"     carga gravitacional total aplicada: "
           f"{res_post['P_aplicada_kN']:.4f} kN\n")
-        w(f"     Σ reacciones verticales (18 apoyos, Rz): "
+        w(f"     Σ reacciones verticales (24 apoyos, Rz): "
           f"{res_post['suma_Rz_kN']:.4f} kN\n")
         w(f"     |Σ Rz - Σ P| = {res_post['err_abs_kN']:.6e} kN\n")
         w(f"     error relativo de equilibrio: {res_post['err_rel']:.3e} "
@@ -4058,7 +4113,7 @@ def control_gravedad_lt1(output_dir="outputs"):
         Patch(fc="gold", label="nodo master diafragma"),
         Patch(fc="0.55", label="columnas P.70x70 (90)"),
         Patch(fc="0.7", label="vigas V.60/80 (108) con q_G aplicado"),
-        Patch(fc="0.9", label="muros equivalentes (6, núcleo PISO_2)"),
+        Patch(fc="0.9", label="muros equivalentes (30, FUNDACION_SUP-PISO_4)"),
     ]
     ax.legend(handles=handles, loc="upper left", fontsize=8)
     ax.set_xlabel("X [m]"); ax.set_ylabel("Y [m]"); ax.set_zlabel("Z [m]")
@@ -4197,7 +4252,7 @@ def escribir_control_muros_equivalentes_lt1(ruta):
     if res_post.get("estado") == "OK":
         w(f"     P_gravitatoria aplicada (q_G sobre 108 vigas): "
           f"{res_post['P_aplicada_kN']:.4f} kN\n")
-        w(f"     Σ Rz (18 apoyos, 6 GDL): {res_post['suma_Rz_kN']:.4f} kN\n")
+        w(f"     Σ Rz (24 apoyos, 6 GDL): {res_post['suma_Rz_kN']:.4f} kN\n")
         w(f"     |Σ Rz - P| = {res_post['err_abs_kN']:.6e} kN\n")
         w("\n")
 
@@ -4250,7 +4305,7 @@ def escribir_control_muros_equivalentes_lt1(ruta):
       "       ops.rigidLink('beam', master_del_diafragma, nodo_muro) x12 (se\n"
       "       ELIMINARON los elasticBeamColumn artificiales 450001-450012 de\n"
       "       'vinculacion' no respaldada), elementos de muros, guard de\n"
-      "       cargas, conteos reales (204), controles y figura (se retiraron las\n"
+      "       cargas, conteos reales (228), controles y figura (se retiraron las\n"
       "       variables temporales de depuracion\n"
       "       LT1_MUROS/LT1_COLSEC/LT1_SYSTEM/LT1_NUM)\n")
     w("     - data/geometria_irregular.py + data/inventario.py (geom. v2 previa)\n")
@@ -4350,10 +4405,10 @@ def control_modelo_con_muros_equivalentes_lt1(ruta=None):
     ]
     ax.legend(handles=handles, loc="upper left", fontsize=8)
     ax.set_xlabel("X [m]"); ax.set_ylabel("Y [m]"); ax.set_zlabel("Z [m]")
-    ax.set_title("LT1 · Modelo con muros equivalentes (núcleo PISO_2 v2) · "
-                 "convención académica \ncolumna equivalente e x L · 204 "
-                 "elasticBeamColumn (90 col + 108 vigas + 6 muros) · "
-                 "12 rigidLink al master del diafragma")
+    ax.set_title("LT1 · Modelo con muros equivalentes (FUNDACION_SUP-PISO_4) · "
+                 "convención académica \ncolumna equivalente e x L · 228 "
+                 "elasticBeamColumn (90 col + 108 vigas + 30 muros) · "
+                 "24 rigidLink al master del diafragma")
     ax.set_box_aspect((xmax - xmin, ymax - ymin, max(zs) - min(zs)))
     if ruta is None:
         ruta = os.path.join("outputs", "modelo_con_muros_equivalentes_lt1.png")
@@ -4449,7 +4504,7 @@ n_muro_ops = sum(1 for e in elementos_opensees
                  if e.get("tipo_inventario") == "muro_ha")
 print(f"  4. columnas P.70x70: {n_col_ops} (5 tramos x 18)")
 print(f"  5. vigas V.60/80: {n_vig_ops} · PISO_1 a PISO_4")
-print(f"  5b. muros equivalentes (núcleo PISO_2, v2): {n_muro_ops} · "
+print(f"  5b. muros equivalentes (núcleos FUNDACION_SUP-PISO_4): {n_muro_ops} · "
       f"rigidLink de muro: {len(RIGID_LINKS_MUROS)} "
       f"(clasificación real ops.getEleTags(): "
       f"{clasificacion_real['columnas']}+{clasificacion_real['vigas']}+"
@@ -4464,7 +4519,7 @@ print(f"  7. carga transferida a vigas vía eleLoad: "
 print(f"  8. analyze(1): {reporte_analisis_p1l2['analize_retorno']} "
       f"({reporte_analisis_p1l2['estado']})")
 if reporte_postanalisis_p1l2.get("estado") == "OK":
-    print(f"  9. Σ reacciones verticales (18 apoyos, Rz): "
+    print(f"  9. Σ reacciones verticales (24 apoyos, Rz): "
           f"{reporte_postanalisis_p1l2['suma_Rz_kN']:.3f} kN")
     print(f" 10. error de equilibrio: abs={reporte_postanalisis_p1l2['err_abs_kN']:.3e} kN"
           f" · rel={reporte_postanalisis_p1l2['err_rel']:.3e} "
@@ -4485,7 +4540,7 @@ else:
 print(f" 13. estado del modelo: MODELO_ANALIZABLE_CON_GEOMETRIA_RESPALDADA_ACTUAL "
       f"(NO 'modelo completo')")
 print(f" 14. auditados/eliminados: elasticBeamColumn 'vínculos' 450001-450012 "
-      f"removidos (no respaldados); sustituidos por 12 rigidLink al master del "
+      f"removidos (no respaldados); sustituidos por 24 rigidLink al master del "
       f"diafragma; conteo de columnas corregido a 5 tramos x 18")
 print(f" 15. archivos modificados: data/secciones.py (material HºAº definido) · "
       f"src/modelo_lt1.py (bloque P1L2 + analisis + control)")

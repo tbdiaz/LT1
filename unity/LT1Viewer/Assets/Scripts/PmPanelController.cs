@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using UnityEngine;
 
@@ -34,6 +35,9 @@ public class PmPanelController : MonoBehaviour
     private PmData pm;
     private Texture2D chart;
     private string chartKey = "";
+    private bool panelVisible = true;
+    private int lastCapacityTag = -1;
+    private bool chartFromAuditedImage;
 
     void Start()
     {
@@ -60,6 +64,7 @@ public class PmPanelController : MonoBehaviour
         {
             chart = null;
             chartKey = "";
+            lastCapacityTag = -1;
             return;
         }
 
@@ -71,20 +76,33 @@ public class PmPanelController : MonoBehaviour
         {
             chart = null;
             chartKey = "";
+            lastCapacityTag = -1;
             return;
+        }
+
+        if (tag != lastCapacityTag)
+        {
+            panelVisible = true;
+            lastCapacityTag = tag;
         }
 
         string key = blk.clave + "|" + caso;
         if (key != chartKey)
         {
             chartKey = key;
-            chart = BuildChart(blk, caso, 560, 400);
+            if (chart != null) Destroy(chart);
+            chart = LoadAuditedChart(blk);
+            if (chart == null)
+            {
+                chartFromAuditedImage = false;
+                chart = BuildChart(blk, caso, 560, 400);
+            }
         }
     }
 
     void OnGUI()
     {
-        if (pm == null || selection == null || chart == null) return;
+        if (!panelVisible || pm == null || selection == null || chart == null) return;
 
         int tag = selection.SelectedTag;
         if (tag < 0) return;
@@ -101,13 +119,23 @@ public class PmPanelController : MonoBehaviour
         GUIStyle small = new GUIStyle(GUI.skin.label)
         { richText = true, wordWrap = true, fontSize = 10 };
 
-        float pw = 800f;
-        float px = Mathf.Max(4f, (Screen.width - pw) / 2f);
+        // Mantener el panel dentro del espacio central libre entre el HUD de
+        // capas y el inspector derecho, incluso en resoluciones reducidas.
+        float centerLeft = 274f;
+        float centerRight = Screen.width - 456f;
+        float available = Mathf.Max(600f, centerRight - centerLeft);
+        float pw = Mathf.Min(800f, available);
+        float px = Mathf.Max(4f, centerLeft + (available - pw) / 2f);
         float py = 60f;
         float headerH = 78f;
 
         // --- cabecera ------------------------------------------------------
         GUI.Box(new Rect(px, py, pw, headerH), "Capacidad P-M (FASE B)");
+        if (GUI.Button(new Rect(px + pw - 34f, py + 4f, 28f, 22f), "X"))
+        {
+            panelVisible = false;
+            return;
+        }
         GUILayout.BeginArea(new Rect(px + 8, py + 20, pw - 16, headerH - 26));
         if (blk.esMuro)
         {
@@ -126,25 +154,49 @@ public class PmPanelController : MonoBehaviour
 
         // --- grafico -------------------------------------------------------
         float chartY = py + headerH + 4f;
-        GUI.DrawTexture(new Rect(px, chartY, chart.width, chart.height), chart);
+        float chartW = 560f;
+        float chartH = chartFromAuditedImage
+            ? Mathf.Min(400f, chartW * chart.height / chart.width)
+            : chart.height;
+        GUI.DrawTexture(new Rect(px, chartY, chartW, chartH), chart,
+                        ScaleMode.ScaleToFit, false);
 
         float pMin, pMax, mMax;
         Ranges(blk, caso, out pMin, out pMax, out mMax);
         float plotL = px + ML;
         float plotT = chartY + MT;
         float plotR = plotL + (chart.width - ML - MR);
-        float plotB = plotT + (chart.height - MT - MB);
+        float plotB = plotT + (chartH - MT - MB);
 
-        GUI.Label(new Rect(px + 4, chartY + 2, 130f, 18f), "N kN (compresion)", small);
-        GUI.Label(new Rect(px + 6, plotT - 2f, 90f, 18f), FormatV(pMax), small);
-        GUI.Label(new Rect(plotL, plotB - 16f, 70f, 18f), "0", small);
-        GUI.Label(new Rect(plotR - 140f, plotB - 16f, 160f, 18f),
-                  FormatV(mMax) + "  (M max)", small);
-        GUI.Label(new Rect(px + 4, plotB + 2f, 260f, 18f),
-                  "M (kN·m) ->", small);
+        if (!chartFromAuditedImage)
+        {
+        GUI.Label(new Rect(px + 5, chartY + 1, 185f, 18f),
+                  "Compresion N [kN] ↑", small);
+        for (int i = 0; i <= 4; i++)
+        {
+            float tx = Mathf.Lerp(plotL, plotR, i / 4f);
+            float mv = mMax * i / 4f;
+            GUI.Label(new Rect(tx - 28f, plotB + 1f, 58f, 18f),
+                      FormatV(mv), small);
+            float ty = Mathf.Lerp(plotB, plotT, i / 4f);
+            float pv = Mathf.Lerp(pMin, pMax, i / 4f);
+            GUI.Label(new Rect(px + 2f, ty - 8f, 50f, 18f),
+                      FormatV(pv), small);
+        }
+        GUI.Label(new Rect(plotL + 150f, plotB + 18f, 260f, 18f),
+                  "Momento M [kN·m] →", small);
+        if (pw >= 730f)
+        {
+            string legend = blk.esMuro
+                ? "<b>CURVAS</b>\n— rojo: eje fuerte\n-- naranja: eje debil\n\n<b>DEMANDAS</b>\nX azul: todos los casos\nX amarilla: caso activo"
+                : "<b>CAPACIDAD</b>\n— rojo: columna 113022\n  P70x70 · 16Ø22\n\n<b>DEMANDAS</b>\nX azul: G, Q, EX, EY, COMBO_R\nX amarilla: caso activo";
+            GUI.Label(new Rect(px + 570f, chartY + 28f, pw - 578f, 180f),
+                      legend, rich);
+        }
+        }
 
         // --- pie (demanda vs capacidad) -------------------------------------
-        float footY = chartY + chart.height + 4f;
+        float footY = chartY + chartH + 4f;
         float footH = blk.esMuro ? 228f : 120f;
         GUI.Box(new Rect(px, footY, pw, footH),
                 "Demanda vs capacidad - caso activo");
@@ -199,6 +251,31 @@ public class PmPanelController : MonoBehaviour
     // -----------------------------------------------------------------------
     //  Grafico
     // -----------------------------------------------------------------------
+    Texture2D LoadAuditedChart(PmBloque blk)
+    {
+        chartFromAuditedImage = false;
+        string filename = blk.esMuro ? "pm_wall_M001.png"
+                                     : "pm_column_113022.png";
+        string path = Path.Combine(Application.streamingAssetsPath, filename);
+        if (!File.Exists(path)) return null;
+        try
+        {
+            Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            if (!tex.LoadImage(File.ReadAllBytes(path)))
+            {
+                Destroy(tex);
+                return null;
+            }
+            chartFromAuditedImage = true;
+            return tex;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning("[PmPanel] No se pudo cargar " + path + ": " + ex.Message);
+            return null;
+        }
+    }
+
     void Ranges(PmBloque blk, string caso, out float pMin, out float pMax,
                 out float mMax)
     {
@@ -216,14 +293,15 @@ public class PmPanelController : MonoBehaviour
             p0 = Mathf.Max(p0, Mathf.Abs(blk.curvaDebil[i].P));
             mMax = Mathf.Max(mMax, blk.curvaDebil[i].M);
         }
-        PmDemanda d = blk.Demanda(caso);
-        if (d != null)
+        foreach (KeyValuePair<string, PmDemanda> kv in blk.demandas)
         {
+            PmDemanda d = kv.Value;
+            if (d == null) continue;
             p0 = Mathf.Max(p0, Mathf.Abs(d.N));
-            mMax = Mathf.Max(mMax, d.MDem);
-            if (blk.esMuro) mMax = Mathf.Max(mMax, d.MyDem);
+            mMax = Mathf.Max(mMax, Mathf.Abs(d.MDem));
+            if (blk.esMuro) mMax = Mathf.Max(mMax, Mathf.Abs(d.MyDem));
             // traccion (N compresion negativo) -> pequeno margen a traccion
-            if (d.N < 0f) pMin = d.N * 1.3f;
+            if (d.N < 0f) pMin = Mathf.Min(pMin, d.N * 1.3f);
         }
         pMax = p0 * 1.06f + 1f;
         mMax = mMax * 1.06f + 1f;
@@ -234,13 +312,12 @@ public class PmPanelController : MonoBehaviour
         Color32 bg = new Color32(250, 250, 250, 255);
         Color32 grid = new Color32(214, 214, 214, 255);
         Color32 axis = new Color32(130, 130, 130, 255);
-        Color32 colC = new Color32(0, 77, 204, 255);
-        Color32 fuC = new Color32(200, 40, 40, 255);
+        Color32 colC = new Color32(220, 40, 40, 255);
+        Color32 fuC = new Color32(220, 40, 40, 255);
         Color32 deC = new Color32(230, 140, 0, 255);
-        Color32 okCore = new Color32(10, 154, 10, 255);
-        Color32 okRing = new Color32(0, 92, 0, 255);
-        Color32 koCore = new Color32(208, 0, 0, 255);
-        Color32 koRing = new Color32(140, 0, 0, 255);
+        Color32 demand = new Color32(30, 125, 200, 255);
+        Color32 activeDemand = new Color32(255, 190, 0, 255);
+        Color32 outside = new Color32(180, 0, 0, 255);
 
         Color32[] px = new Color32[w * h];
         for (int i = 0; i < px.Length; i++) px[i] = bg;
@@ -279,27 +356,40 @@ public class PmPanelController : MonoBehaviour
                      leftX, rightX, topY, botY);
         }
 
-        PmDemanda d = blk.Demanda(caso);
-        if (d != null)
+        // Marcadores de capacidad, equivalentes a los puntos rojos de la
+        // figura de referencia.
+        DrawCurvePoints(px, w, h, blk.curva, blk.esMuro ? fuC : colC,
+                        pMin, span, mSpan, leftX, rightX, topY, botY);
+        if (blk.esMuro)
+            DrawCurvePoints(px, w, h, blk.curvaDebil, deC,
+                            pMin, span, mSpan, leftX, rightX, topY, botY);
+
+        // Todos los casos se ven simultaneamente. El activo se destaca en
+        // amarillo; un caso fuera de capacidad agrega un anillo rojo.
+        foreach (KeyValuePair<string, PmDemanda> kv in blk.demandas)
         {
+            PmDemanda d = kv.Value;
+            if (d == null) continue;
             int dx = Mathf.Clamp(
-                Mathf.RoundToInt(leftX + d.MDem / mSpan * (rightX - leftX)),
+                Mathf.RoundToInt(leftX + Mathf.Abs(d.MDem) / mSpan * (rightX - leftX)),
                 leftX, rightX);
             int dy = Mathf.Clamp(
                 Mathf.RoundToInt(botY - (d.N - pMin) / span * (botY - topY)),
                 topY, botY);
-            DrawMarker(px, w, h, dx, dy,
-                       d.dentro ? okCore : koCore,
-                       d.dentro ? okRing : koRing);
+            DrawXMarker(px, w, h, dx, dy,
+                        kv.Key == caso ? activeDemand : demand,
+                        d.dentro ? demand : outside,
+                        kv.Key == caso ? 7 : 5);
             if (blk.esMuro)
             {
                 int wx = Mathf.Clamp(
-                    Mathf.RoundToInt(leftX + d.MyDem / mSpan
+                    Mathf.RoundToInt(leftX + Mathf.Abs(d.MyDem) / mSpan
                                      * (rightX - leftX)),
                     leftX, rightX);
-                DrawMarker(px, w, h, wx, dy,
-                           d.dentroDebil ? okCore : koCore,
-                           d.dentroDebil ? okRing : koRing);
+                DrawXMarker(px, w, h, wx, dy,
+                            kv.Key == caso ? activeDemand : deC,
+                            d.dentroDebil ? deC : outside,
+                            kv.Key == caso ? 7 : 5);
             }
         }
 
@@ -331,6 +421,33 @@ public class PmPanelController : MonoBehaviour
             if (dash) DashedLine(px, w, h, x0, y0, x1, y1, c, 5);
             else Line(px, w, h, x0, y0, x1, y1, c);
         }
+    }
+
+    static void DrawCurvePoints(Color32[] px, int w, int h,
+                                List<PmPoint> pts, Color32 color,
+                                float pMin, float span, float mSpan,
+                                int leftX, int rightX, int topY, int botY)
+    {
+        if (pts == null) return;
+        foreach (PmPoint pt in pts)
+        {
+            int x = Mathf.Clamp(Mathf.RoundToInt(leftX + pt.M / mSpan *
+                                                (rightX - leftX)), leftX, rightX);
+            int y = Mathf.Clamp(Mathf.RoundToInt(botY - (pt.P - pMin) / span *
+                                                (botY - topY)), topY, botY);
+            for (int oy = -4; oy <= 4; oy++)
+                for (int ox = -4; ox <= 4; ox++)
+                    if (ox * ox + oy * oy <= 16) SetPixel(px, w, h, x + ox, y + oy, color);
+        }
+    }
+
+    static void DrawXMarker(Color32[] px, int w, int h, int cx, int cy,
+                            Color32 core, Color32 ring, int radius)
+    {
+        Line(px, w, h, cx - radius, cy - radius, cx + radius, cy + radius, ring);
+        Line(px, w, h, cx - radius, cy + radius, cx + radius, cy - radius, ring);
+        Line(px, w, h, cx - radius + 1, cy - radius, cx + radius, cy + radius - 1, core);
+        Line(px, w, h, cx - radius + 1, cy + radius, cx + radius, cy - radius + 1, core);
     }
 
     static void Line(Color32[] px, int w, int h, int x0, int y0, int x1, int y1,

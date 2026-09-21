@@ -6,12 +6,12 @@ Recomposicion del muro fisico M001 a partir del par 4001+4002 (idealizacion 'dos
 
 | termino | valor | procedencia |
 |---|---|---|
-| Mz1(4001) | 4343.575161014324 kN.m | = reaccion Mx(apoyo node1) del mismo modelo |
-| Mz1(4002) | 4372.675285072908 kN.m | = reaccion Mx(apoyo node3) del mismo modelo |
+| Mz1(4001) | 4258.794929747031 kN.m | = reaccion Mx(apoyo node1) del mismo modelo |
+| Mz1(4002) | 4292.273583616694 kN.m | = reaccion Mx(apoyo node3) del mismo modelo |
 | N1(4001) | 0.0 kN | 0: esquina A sin canales axiales |
-| N1(4002) | -82.18247978711408 kN | traccion neta (Rz(node3) del modelo) |
-| par axial 1.46*(N4001-N4002) | 119.98642048918654 kN.m | Steiner (lever=1.46=L/2) |
-| SUMA (M_muro EY) | 8836.23686657642 kN.m | |
+| N1(4002) | -129.9896261028665 kN | traccion neta (Rz(node3) del modelo) |
+| par axial 1.46*(N4001-N4002) | 189.7848541101851 kN.m | Steiner (lever=1.46=L/2) |
+| SUMA (M_muro EY) | 8740.85336747391 kN.m | |
 
 ## Verificaciones
 
@@ -29,4 +29,4 @@ FiberSection2d usa la 1a coordenada del patch como brazo del momento. Con L=2.92
 
 ## Consecuencia del chequeo
 
-M_muro(EY)=8836.23686657642 kN.m es la demanda real de la idealizacion (reaccion de fundacion del modelo). Con el acero minimo modelado (4 22/cara/extremo) la capacidad de eje fuerte en EY (N=-82 kN) es ~4966 kN.m => D/C ~ 1.78 (FUERA). No se afirma que mayor armadura de borde lo mitigue sin mostrar el calculo.
+M_muro(EY)=8740.85336747391 kN.m es la demanda real de la idealizacion (reaccion de fundacion del modelo). Con el acero minimo modelado (4 22/cara/extremo) la capacidad de eje fuerte en EY (N=-82 kN) es ~4966 kN.m => D/C ~ 1.78 (FUERA). No se afirma que mayor armadura de borde lo mitigue sin mostrar el calculo.

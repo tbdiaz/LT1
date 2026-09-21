@@ -15,6 +15,7 @@ Fuentes (generadas por p1l4_pm.py en COMBINADO/outputs/p1l4/):
 Uso:  python3 integrar_p1l4_unity.py
 """
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -288,13 +289,21 @@ def run():
         return 1
     pm = build_pm()
     _escribir_md_auditoria(pm)
-    for path in (_JSON, _UNITY):
-        with open(path, "r", encoding="utf-8") as f:
-            d = json.load(f)
-        d["results"]["pm"] = pm
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(d, f, ensure_ascii=False, indent=1)
-        print("integrado ->", path)
+    # COMBINADO/outputs es la unica fuente. Reescribir cada copia partiendo de
+    # su contenido anterior permitia que StreamingAssets conservara campos
+    # obsoletos (por ejemplo, antes no incluia los poligonos tributarios).
+    with open(_JSON, "r", encoding="utf-8") as f:
+        d = json.load(f)
+    d["results"]["pm"] = pm
+    with open(_JSON, "w", encoding="utf-8") as f:
+        json.dump(d, f, ensure_ascii=False, indent=1)
+    _UNITY.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(_JSON, _UNITY)
+    for figure in ("pm_column_113022.png", "pm_wall_M001.png"):
+        shutil.copyfile(_OUT / figure, _UNITY.parent / figure)
+    print("integrado ->", _JSON)
+    print("sincronizado ->", _UNITY)
+    print("figuras P-M sincronizadas ->", _UNITY.parent)
     return 0
 
 

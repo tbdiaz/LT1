@@ -46,6 +46,10 @@ public class StructuralResultsController : MonoBehaviour
 
     void OnGUI()
     {
+        // ViewerHUD presenta estos resultados con una convencion de seccion
+        // unica (-F_i, +F_j) y evita superponer dos fichas del mismo elemento.
+        return;
+#pragma warning disable CS0162
         if (selection == null || loader == null) return;
         if (selection.SelectedTag < 0) return;
 
@@ -89,6 +93,7 @@ public class StructuralResultsController : MonoBehaviour
 
         if (cap != null)
             DrawCapacidadPanel(cap);
+#pragma warning restore CS0162
     }
 
     string Neg(float[] v) { return v != null && v.Length > 0 ? v[0].ToString("F1") : "-"; }

@@ -25,6 +25,8 @@ public class CaseSelector : MonoBehaviour
 
     void OnGUI()
     {
+        return; // selector horizontal en ViewerHUD
+#pragma warning disable CS0162
         if (loader == null || loader.combinedRoot == null) return;
         if (cases == null || cases.Length == 0) return;
 
@@ -63,5 +65,6 @@ public class CaseSelector : MonoBehaviour
                 + $" + {info.coef.EX:0.#}EX + {info.coef.EY:0.#}EY</color>", grey);
 
         GUILayout.EndArea();
+#pragma warning restore CS0162
     }
 }

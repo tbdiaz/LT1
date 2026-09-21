@@ -73,7 +73,7 @@ COMBINADO/
 | 203 | losa cielo 2° piso (inf/sup) | EXACT / needs |
 | 204 | losa cielo 3° piso (inf/sup) | EXACT / needs |
 | 205 | losa cielo 4° piso (inf/sup) | EXACT / needs |
-| 300 | muros: armadura especifica por elevacion/eje/nivel (300-303), 165 registros | NEEDS_DRAWING_VALUE_CONFIRMATION |
+| 300 | muros: armadura especifica por elevacion/eje/nivel (300-303), 165 registros | 164 NEEDS_DRAWING_VALUE_CONFIRMATION; 1 DETAIL_FROM_DRAWING_REQUIRED |
 | COL | columnas LT1: 16 B22 longitudinales (1 regla) | EXACT / RESOLVED |
 | 400 | vigas: familia representativa V.80/80 (2 reglas) | SUPERSEDED_BY_EXACT_BEAM_DRAWINGS |
 | 500 | escaleras (2 reglas de metadata) | DETAIL_FROM_DRAWING |
@@ -118,7 +118,7 @@ del plano 402 (`SECC_402`) con su detalle propio.
 ```
 mesh : resolved 61 | unresolved 34
 local: resolved 15 | unresolved  2
-walls: resolved 165 (RESOLVED_METADATA por elevacion) | unresolved 0 |
+walls: metadata 165 (RESOLVED_METADATA por elevacion; 0 elementTags FE) |
        superseded 1 (regla tipica historica, sin geometria)
 cols : resolved  1 (RESOLVED, 90 tags, geometry_pending) | unresolved 0
 beams: resolved  2 (RESOLVED_METADATA, SUPERSEDED) | unresolved 0
@@ -156,8 +156,10 @@ texto en los PDFs (son trazos de dibujo): por regla del proyecto quedan
 `geometry_pending=True`. **No se inventa ningun valor, no se inventan
 recubrimientos ni configuraciones transversales** (no hay barras 3D de
 muro). La correspondencia eje->elementTag FE del modelo no es inequivoca
-(la elevacion se desarrolla en E'..J; el modelo LT1 modela 6 muros
-PISO_1-PISO_2), por lo que `element_tags` quedan VACIOS.
+(la elevacion se desarrolla en E'..J; el modelo LT1 actual modela 6
+paneles de nucleo en 5 tramos de altura, 30 elementos FE), por lo que
+`element_tags` quedan VACIOS. `RESOLVED_METADATA` identifica la lamina
+y zona del registro, no una asignacion fisica a esos 30 elementos.
 La lista `armadura_lt1_necesita_confirmacion.csv` enumera los 165
 registros con lo que falta confirmar en pliego.
 
@@ -199,10 +201,10 @@ El analisis combinado se re-ejecuta con la armadura cargada:
 
 ```
 rc            = 0
-P_total       = 31902.275078 kN   (igual al baseline)
-sum Rz        = 31902.275 prints (|errz_rel| < 1e-12)
-nodos fisicos = 461
-apoyos        = 47
+P_total       = 31086.259667 kN   (igual al baseline)
+sum Rz        = 31086.259667 kN   (|errz_rel| < 1e-12)
+nodos fisicos = 485
+apoyos        = 53
 ```
 
 Verificado por `test_combined_model_invariante` (marcado `slow`) y

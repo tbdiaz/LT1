@@ -139,7 +139,7 @@ class Validator:
 
         # apoyos / masters / diafragmas
         supp = d.get("supports", [])
-        self.check("supports.47", len(supp) == 47)
+        self.check("supports.53", len(supp) == 53)
         self.check("supports.tags", all(int(s["nodeTag"]) in node_set
                                         for s in supp))
         self.check("supports.restricciones",

@@ -29,6 +29,7 @@ public class SelectionController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) && !Input.GetKey(KeyCode.LeftAlt))
         {
+            if (ViewerHUD.PointerOverHud(Input.mousePosition)) return;
             HandleClick();
         }
     }
@@ -90,7 +91,7 @@ public class SelectionController : MonoBehaviour
         return -1;
     }
 
-    ElementRef GetElementRef()
+    public ElementRef GetElementRef()
     {
         if (SelectedTag < 0) return null;
         ModelLoader loader = FindObjectOfType<ModelLoader>();
@@ -142,6 +143,8 @@ public class SelectionController : MonoBehaviour
 
     void OnGUI()
     {
+        return; // ficha unificada (propiedades + esfuerzos) en ViewerHUD
+#pragma warning disable CS0162
         if (SelectedTag < 0) return;
 
         var loader = FindObjectOfType<ModelLoader>();
@@ -215,6 +218,7 @@ public class SelectionController : MonoBehaviour
         GUIStyle style = new GUIStyle(GUI.skin.label) { richText = true, fontSize = 12, wordWrap = true };
         GUILayout.Label(info, style);
         GUILayout.EndArea();
+#pragma warning restore CS0162
     }
 
     bool TryRange(ElementRef r, out string range)

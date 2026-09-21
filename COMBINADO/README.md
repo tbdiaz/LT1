@@ -1,49 +1,52 @@
-# COMBINADO — Modelo integrado LT1 + LT2 (en preparación)
+# COMBINADO — modelo estructural integrado LT1 + LT2
 
-Este directorio corresponde al **futuro modelo estructural independiente** que
-resulta de la unión de los dos modelos existentes:
+Este directorio contiene el modelo OpenSeesPy combinado y sus resultados para
+Unity. LT1 y LT2 permanecen como fuentes separadas; la integración específica
+se mantiene dentro de `COMBINADO/`.
 
-| Módulo | Ubicación | Rol en el conjunto |
-| --- | --- | --- |
-| LT1 | `../` (raíz del repositorio) | Módulo **derecho** (este) |
-| LT2 | `../LT2/` | Módulo **izquierdo** (oeste) |
+## Estado actual
 
-Los dos modelos originales son las *fuentes*. **No se modifican**; todos los
-archivos nuevos específicos de la integración se crean dentro de `COMBINADO/`.
+- [x] Auditoría y transformación geométrica.
+- [x] Modelo FE 3D combinado: 485 nodos y 694 elementos (incluye 10 tramos V30x80 de conexión al extremo oeste).
+- [x] Interfaz, apoyos, diafragmas y rigid links.
+- [x] Materiales, secciones, cargas G/Q/EX/EY y `COMBO_R`.
+- [x] Resultados OpenSees verificados y exportados a Unity.
+- [x] Deformada, diagramas M/N/V/T, cargas, apoyos y áreas tributarias.
+- [x] Demanda–capacidad P–M para columna 113022 y muro M001.
 
-## Estado actual (se informa en cada commit)
+## Directorios
 
-- [x] Estructura de carpetas creada.
-- [x] Auditoría de transformación geométrica (ver `docs/`).
-- [ ] Modelo FE combinado (pendiente — NO construido).
-- [ ] Conexión de interfaz (equalDOF / rigidLink / diafragmas entre módulos) — pendiente.
-- [ ] Unificación de materiales, muros (idealización de muro equivalente) y cargas — pendiente.
-- [ ] Visualización Unity del combinado — pendiente (iría en `unity/`).
+- `src/`: construcción, análisis, exportación, integración P–M y validadores.
+- `data/`: geometría y datos explícitos separados de la lógica del modelo.
+- `outputs/`: JSON, CSV, curvas y auditorías generadas.
+- `docs/`: informes de integración y trazabilidad.
+- `tests/`: pruebas automáticas del modelo y del visor.
 
-## Estructura
+## Convenciones
 
-- `docs/` — auditorías y estudios previos a la integración.
-- `scripts/` — herramientas de estudio/ensamblado del combinado (lectora de LT1/LT2).
-- `outputs/` — resultados, CSV, JSON y figuras del combinado (nunca de LT1/LT2).
-- `unity/` — visualización Unity del combinado (futuro).
+- Unidades: m, kN y kPa.
+- Modelo: `ops.model('basic', '-ndm', 3, '-ndf', 6)`.
+- Transformación LT1 al sistema global: `X' = X + 31.250`, `Y' = -Y`,
+  `Z' = Z`; LT2 conserva sus coordenadas.
+- Interfaz global: plano `X = 31.250 m`.
 
-## Convenciones comunes
+## Flujo reproducible
 
-- Unidades base: metros (m), kilonewtons (kN), kilopascales (kPa).
-- `OpenSeesPy`, `ops.model('basic','-ndm',3,'-ndf',6)`.
-- El datum vertical es coincidente entre LT1 y LT2 (verificados en la auditoría).
-- La transformación aplicada a LT1 para el sistema global es:
-  `X' = X + 31.250`, `Y' = -Y`, `Z' = Z` (LT2 conserva sus coordenadas).
-  Interfaz global propuesta: plano vertical `X = 31.250 m`.
+```powershell
+python COMBINADO/src/exportar_unity_combinado.py
+python COMBINADO/src/integrar_p1l4_unity.py
+python COMBINADO/src/validar_unity_combinado.py
+python COMBINADO/src/validar_unity_viewer_estatico.py
+python -m pytest -q
+```
+
+`integrar_p1l4_unity.py` toma el JSON de `COMBINADO/outputs/unity` como fuente
+única y sincroniza una copia idéntica en
+`unity/LT1Viewer/Assets/StreamingAssets`.
 
 ## Trazabilidad
 
-Toda la información proviene de los modelos fuente:
-
-- **LT1**: `data/geometria.py`, `data/inventario.py`, `data/secciones.py`,
-  `data/cargas.py`, `data/tributacion.py`, `src/modelo_lt1.py`.
-- **LT2**: `LT2/data/geometry/*.csv`, `LT2/data/sections/sections_LT2.csv`,
-  `LT2/src/build_opensees_model.py`.
-
-Ver `docs/auditoria_transformacion_geometrica.md` para el detalle de la
-correspondencia de ejes, nodos de interfaz y distancias.
+Cada elemento conserva origen, tag, nodos, sección, material y ejes locales.
+Unity enlaza `elementTag -> objeto -> resultados -> sección/capacidad`. Los
+datos confirmados y los supuestos de la comprobación P–M quedan declarados en
+`results.pm` y en `outputs/p1l4/`.

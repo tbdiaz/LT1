@@ -283,8 +283,8 @@ class Lt1ReinforcementAssigner:
 
         # (2) registros especificos por elevacion/eje/nivel: un registro
         # por eje/clase/tramo. RESOLVED_METADATA: la asociacion eje->muro
-        # FE no es inequivoca (elevacion en ejes E'..J; el modelo LT1
-        # modela 6 muros PISO_1-PISO_2) -> element_tags quedan VACIOS,
+        # FE no es inequívoca (elevación en ejes E'..J; el modelo LT1
+        # modela seis paños en cinco tramos verticales) -> element_tags VACÍOS,
         # sin inventar correspondencias.
         for rec in load_lt1_wall_data()["records"]:
             self.resolved["walls"].append(rec)

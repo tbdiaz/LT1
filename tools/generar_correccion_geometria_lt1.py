@@ -267,7 +267,7 @@ def escribir_control(d, checks):
         w(f"    {nv}: superficie losa = {ar:.3f} m2\n")
     w(f"  P gravitatoria total (PISO_1..4) = {an['P_aplicada_kN']:.3f} kN\n")
     w(f"  P_losas = P_transferida_a_vigas (108 vigas) = {an['P_aplicada_kN']:.3f} kN\n")
-    w(f"  Sum Rz (18 apoyos) = {an['suma_Rz_kN']:.3f} kN · "
+    w(f"  Sum Rz (24 apoyos) = {an['suma_Rz_kN']:.3f} kN · "
       f"err abs = {an['err_abs_kN']:.3e} · err rel = {an['err_rel']:.3e} "
       f"(tol 1e-6)\n")
     w("  NOTA: el saliente NO se cerro -> la superficie de losa total NO cambia\n"

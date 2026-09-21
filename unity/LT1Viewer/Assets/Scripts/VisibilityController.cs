@@ -75,8 +75,20 @@ public class VisibilityController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P)) TogglePendingInfo();
     }
 
+    public bool ShowNodes => showNodes;
+    public bool ShowBeams => showBeams;
+    public bool ShowColumns => showColumns;
+    public bool ShowWalls => showWalls;
+    public bool ShowSupports => showSupports;
+    public bool ShowDiaphragms => showDiaphragms;
+    public bool ShowConstraintLinks => showConstraintLinks;
+
     void OnGUI()
     {
+        // La interfaz principal se dibuja en ViewerHUD para evitar paneles
+        // superpuestos. Las teclas 1..8 siguen disponibles.
+        return;
+#pragma warning disable CS0162
         GUILayout.BeginArea(new Rect(10, 10, 240, 250));
         GUILayout.BeginVertical("box");
         GUILayout.Label("<b>Visibilidad</b>");
@@ -101,6 +113,7 @@ public class VisibilityController : MonoBehaviour
 
         if (showPendingInfo)
             DrawPendingPanel();
+#pragma warning restore CS0162
     }
 
     void DrawPendingPanel()
@@ -163,14 +176,14 @@ public class VisibilityController : MonoBehaviour
 
     string BoolStr(bool val) { return val ? "ON" : "OFF"; }
 
-    void ToggleNodes()          { showNodes = !showNodes;           SetGroup(nodesGroup, showNodes); }
-    void ToggleBeams()          { showBeams = !showBeams;           SetGroup(beamsGroup, showBeams); }
-    void ToggleColumns()        { showColumns = !showColumns;       SetGroup(columnsGroup, showColumns); }
-    void ToggleWalls()          { showWalls = !showWalls;           SetGroup(wallsGroup, showWalls); }
-    void ToggleConstraintLinks(){ showConstraintLinks = !showConstraintLinks; SetGroup(constraintLinksGroup, showConstraintLinks); }
-    void ToggleSupports()       { showSupports = !showSupports;     SetGroup(supportsGroup, showSupports); }
-    void ToggleDiaphragms()     { showDiaphragms = !showDiaphragms; SetGroup(diaphragmsGroup, showDiaphragms); }
-    void TogglePendingInfo()    { showPendingInfo = !showPendingInfo; }
+    public void ToggleNodes()          { showNodes = !showNodes;           SetGroup(nodesGroup, showNodes); }
+    public void ToggleBeams()          { showBeams = !showBeams;           SetGroup(beamsGroup, showBeams); }
+    public void ToggleColumns()        { showColumns = !showColumns;       SetGroup(columnsGroup, showColumns); }
+    public void ToggleWalls()          { showWalls = !showWalls;           SetGroup(wallsGroup, showWalls); }
+    public void ToggleConstraintLinks(){ showConstraintLinks = !showConstraintLinks; SetGroup(constraintLinksGroup, showConstraintLinks); }
+    public void ToggleSupports()       { showSupports = !showSupports;     SetGroup(supportsGroup, showSupports); }
+    public void ToggleDiaphragms()     { showDiaphragms = !showDiaphragms; SetGroup(diaphragmsGroup, showDiaphragms); }
+    public void TogglePendingInfo()    { showPendingInfo = !showPendingInfo; }
 
     void SetGroup(GameObject go, bool active)
     {

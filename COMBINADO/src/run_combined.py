@@ -68,6 +68,7 @@ OUT_REPORT = OUT / "reporte_validacion_combinado.md"
 OUT_FIG = OUT / "vista_3d_combinado.png"
 OUT_LINKS = OUT / "conectores_v40_muro.csv"
 OUT_BOX = OUT / "verticales_cajas_pilastra.csv"
+V30_CONN_CSV = COMB / "data" / "conexiones_v30_lt2.csv"
 
 SHIFT_X = 31.250
 TOL = 1e-6
@@ -378,6 +379,7 @@ class CombinedBuilder:
         self.diaphs = pd.read_csv(LT2_GEOM / "diaphragms_LT2.csv")
         self.mat = pd.read_csv(LT2_MAT)
         self.loads = pd.read_csv(LT2_LOADS)
+        self.v30_connection_data = pd.read_csv(V30_CONN_CSV)
         with open(JSON_LT1, "r", encoding="utf-8") as f:
             self.json_lt1 = json.load(f)
         d = self.json_lt1
@@ -604,8 +606,56 @@ class CombinedBuilder:
 
         self._build_diaphragms_and_links()
         self._build_v40_wall_links()
+        self._build_v30_connections()
         self._build_box_verticals(e2, g2)
         self._build_salientes_lt1()
+
+    def _build_v30_connections(self):
+        """Completa los 1.50 m V30x80 entre cadena V40 y vano existente.
+
+        Los diez trazados están separados de la lógica en data/ y proceden
+        de las plantas LT2 101/102. Se conservan los tags y cargas de las
+        vigas 2081..2207; no se inventan cargas para el tramo agregado.
+        """
+        self.v30_connections = []
+        rows = self.v30_connection_data
+        if len(rows) != 10 or rows["element_tag"].duplicated().any():
+            raise RuntimeError("V30: se esperan 10 tramos con tags unicos")
+        existing = set(ops.getEleTags())
+        for r in rows.itertuples(index=False):
+            tag = int(r.element_tag)
+            parent = int(r.beam_tag_original)
+            z = _zname(self.levels, str(r.nivel))
+            ki = _key(r.x_i_m, r.y_i_m, z)
+            kj = _key(r.x_j_m, r.y_j_m, z)
+            if ki not in self.lt2_key_to_tag or kj not in self.lt2_key_to_tag:
+                raise RuntimeError(f"V30 {tag}: extremo no existe en LT2")
+            ni, nj = self.lt2_key_to_tag[ki], self.lt2_key_to_tag[kj]
+            if tag in existing or parent not in existing:
+                raise RuntimeError(f"V30 {tag}: tag duplicado o padre ausente")
+            parent_idx = parent - TAG_BEAM_BASE
+            parent_rec = self.lt2_elems["beams"][parent_idx]
+            if (parent_rec["n1"] != nj or parent_rec["level"] != str(r.nivel)
+                    or parent_rec["section"] != "V30x80"):
+                raise RuntimeError(f"V30 {tag}: padre {parent} inesperado")
+            if not any(
+                rec["section"] == "V40x80"
+                and rec["level"] == str(r.nivel)
+                and ni in (rec["n1"], rec["n2"])
+                for rec in self.lt2_elems["beams"]
+            ):
+                raise RuntimeError(f"V30 {tag}: no toca V40 del mismo piso")
+            if abs(float(r.x_j_m) - float(r.x_i_m) - 1.5) > TOL:
+                raise RuntimeError(f"V30 {tag}: longitud no coincide con plano")
+            if str(r.seccion) != "V30x80":
+                raise RuntimeError(f"V30 {tag}: seccion inesperada")
+            ops.element("elasticBeamColumn", tag, ni, nj,
+                        self.section_tag[str(r.seccion)], TRANS_B_X)
+            existing.add(tag)
+            self.v30_connections.append(dict(
+                tag=tag, beam_id=str(r.beam_id), parent=parent,
+                nivel=str(r.nivel), node_i=ni, node_j=nj,
+                seccion=str(r.seccion), fuente=str(r.plano_fuente)))
 
     def _build_v40_wall_links(self):
         """Conectores de excentricidad cadenas V40 -> muros M001/M003.
@@ -627,8 +677,9 @@ class CombinedBuilder:
             nivel (Z) y mismo Y que el nodo de muro;
           - se verifica existencia del nodo de muro al mismo Y y Z, que sea
             nodo real de un elemento de muro, y que la longitud = 0.300 m;
-          - NO se conectan nodos intermedios (y=4.265/8.9/11.885, sin apoyo
-            fisico en muro) ni vigas V30/VI cercanas.
+          - NO se conectan nodos intermedios directamente al MURO. Las
+            V30x80 en y=4.265/11.885 se completan aparte hasta la cadena
+            V40 mediante tramos fisicos respaldados por las plantas.
         """
         # Seccion de enlace (documentada en el reporte, seccion 10):
         #   100 x E_LT2 -> rigidez axial >= ~110x la del muro (e*L/2) y
@@ -1888,7 +1939,7 @@ class CombinedBuilder:
                 add(f"  - {lv}: {len(ns)} -> {ns[:12]} "
                     f"{'...' if len(ns) > 12 else ''}")
             add("- Interpretacion: los masters (1001-1005) y los nodos de "
-                "muro LT1 (6001xx/6002xx) estan unidos por restricciones "
+                "muro LT1 (6000xx-6004xx) estan unidos por restricciones "
                 "cinematicas (rigidDiaphragm / rigidLink 'beam'), no por "
                 "elementos, por lo que no son mecanismos. El anillo VI de "
                 "ROOF (226/227, 244-247, 256/257, 258/259) ya NO es la "
@@ -1930,6 +1981,16 @@ class CombinedBuilder:
                 f"({ln['x_w']:.3f},{ln['y_w']:.3f},{ln['z_w']:.3f}) | "
                 f"{ln['longitud_m']:.3f} | {ln['tag_conector']} |")
         add("- Copia maquina: `conectores_v40_muro.csv`.")
+        add("### Continuidad V30x80 en el extremo oeste")
+        add(f"- {len(self.v30_connections)} tramos de 1.50 m (tags 9011-9020) "
+            "completan las vigas V30x80 indicadas por el usuario en L1, "
+            "L2, L3, L4 y ROOF. Cada tramo comparte un extremo con su "
+            "viga original y el otro con la cadena V40 del mismo piso.")
+        add("- Geometria: `COMBINADO/data/conexiones_v30_lt2.csv`, "
+            "contrastada con plantas LT2 2024_22-101/102. Se conservan "
+            "los tags y cargas puntuales de las vigas originales; los "
+            "tramos nuevos no reciben carga tributaria adicional hasta "
+            "recalcular esa tributacion de LT2.")
         add("")
         add("## 12. Salientes sur LT1 (geometria CAD verificada)")
         add("")
@@ -2044,7 +2105,8 @@ class CombinedBuilder:
         add(f"- `{(OUT / 'vista_3d_interactiva.html').relative_to(COMB)}` "
             "(generado por `scripts/figura_interactiva.py`)")
         add("")
-        OUT_REPORT.write_text("\n".join(L) + "\n", encoding="utf-8")
+        OUT_REPORT.write_text("\n".join(line.rstrip() for line in L) + "\n",
+                              encoding="utf-8")
 
     def write_fig(self):
         try:
@@ -2149,6 +2211,8 @@ def main():
           f"LT2={len(b.created['lt2_walls'])}")
     print(f"Conectores V40->Muro (excent. 0.300 m) = "
           f"{len(b.created['links'])}")
+    print(f"Tramos V30x80 completados hacia V40 = "
+          f"{len(b.v30_connections)}")
     print(f"Verticales cajas/pilastra (B1->ROOF) = "
           f"{len(b.box_verticals)} elementos, "
           f"{len(b.box_nodes)} nodos nuevos, "

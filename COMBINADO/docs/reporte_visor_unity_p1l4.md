@@ -1,6 +1,6 @@
 # Reporte — Adaptación del visor Unity al modelo combinado (P1L4)
 
-Fecha: 2026-09-11
+Fecha: 2026-09-16
 Ámbito: `unity/LT1Viewer` (scripts C# y editor) + `COMBINADO` (validación).
 
 El visor Unity existente (antes limitado a `modelo_lt1.json`) se adaptó para
@@ -13,12 +13,13 @@ proviene exclusivamente del JSON exportado.
 
 ## 1. Fuente única de datos
 
-- `ModelLoader` carga `StreamingAssets/modelo_combinado.json` (14540527 B,
-  sha256 `0db8d908…`).
+- `ModelLoader` carga `StreamingAssets/modelo_combinado.json`; el integrador
+  copia exactamente el JSON maestro de `COMBINADO/outputs/unity` y las pruebas
+  verifican igualdad SHA-256.
 - `modelo_lt1.json` se conserva intacto en StreamingAssets por compatibilidad
   histórica, pero no es fuente de datos del visor.
-- No existe ningún archivo `.unity` en el proyecto: la escena se genera por
-  menú de editor (`LT1/Build LT1Viewer Scene`), como antes.
+- La escena fuente es `Assets/Scenes/LT1Viewer.unity` y también puede
+  regenerarse con `LT1/Build LT1Viewer Scene`.
 
 ## 2. Esquema C# espejo del JSON (`CombinedModelData.cs`)
 
@@ -41,9 +42,9 @@ mapeos explícitos de categoría:
 
 | Categoría visor | Tipos combinados | Cantidad |
 |---|---|---|
-| Beam | viga, viga_saliente, segmento_fachada | 389 |
+| Beam | viga, viga_saliente, segmento_fachada | 399 |
 | Column | columna, vertical_caja | 175 |
-| Wall | muro, muro_corner, conector_v40_muro | 96 |
+| Wall | muro, muro_corner, conector_v40_muro | 108 |
 
 ## 4. Casos de carga desde `results.cases`
 
@@ -60,7 +61,7 @@ mapeos explícitos de categoría:
 
 Cada caso expone su `descripcion` desde `metadata.casos`; para `COMBO_R` se
 muestra la combinación real del JSON:
-`R = 1G + 1Q + 1EX + 1EY`.
+`R = 1G + 1Q + 1EX + 0EY`.
 
 ## 6. Trazabilidad completa elemento a elemento
 
@@ -88,22 +89,25 @@ cuando el eje local X resulta opuesto a la dirección física del elemento.
 desplazamientos del caso activo (re-capturados vía `CaseChanged`), respetando
 el factor de amplificación configurado.
 
-## 10. Diagramas M/N/V
+## 10. Diagramas M/N/V/T
 
-`ForceDiagramController` dibuja momentos y axiles/cortantes por caso;
-al congelar un caso (`freeze`) conserva el diagrama mientras se navega.
+`ForceDiagramController` dibuja un componente con signo a la vez y permite
+recorrer `Mz`, `My`, `N`, `Vy`, `Vz` y `T`. Usa la convención de sección
+`i=-F_i`, `j=+F_j`; el perfil es lineal entre los resultados de extremo.
 
-## 11. Cargas y equilibrio (tecla **L**)
+## 11. Cargas, áreas e interfaz
 
-`LoadInspector` muestra las cargas aplicadas del caso activo (G/Q/EX/EY),
-la ficha de equilibrio parseada (`P`, `R`, error relativo), el conteo de
-reacciones/masters y el resumen de áreas tributarias LT1 y LT2.
+El HUD único reemplaza los paneles superpuestos. Permite activar cargas,
+áreas, apoyos, deformada, diagramas y capas mediante botones. Las cargas
+verticales se agregan por viga y EX/EY se dibujan en masters. LT2 usa sus
+polígonos tributarios exportados; LT1 muestra una franja equivalente `A/L`
+porque su fuente no contiene vértices.
 
 ## 12. Restricciones de borde y conectividad
 
-- 47 apoyos B1 (6 GDL) y masters 1001–1005 reconstruidos en
+- 53 apoyos B1 (6 GDL) y masters 1001–1005 reconstruidos en
   `boundaryRestricciones` con su `boundaryOrigen` (apoyos / masters).
-- 5 diafragmas y 12 constraint_links representados en el visor.
+- 5 diafragmas y 24 constraint_links representados en el visor.
 - El panel de selección indica si el elemento es de borde y detalla sus
   grados restringidos.
 
@@ -111,32 +115,32 @@ reacciones/masters y el resumen de áreas tributarias LT1 y LT2.
 
 Datos verificados contra el JSON (validación estática):
 
-- 461 nodos, 660 elementos, 47 apoyos, 5 masters, 5 diafragmas, 12 links.
+- 485 nodos, 694 elementos, 53 apoyos, 5 masters, 5 diafragmas, 24 links.
 - Cargas: G=27282, Q=27282, EX=4, EY=4 (independientes).
 - Áreas tributarias: LT1=108 filas, LT2=320 filas (agregadas en el visor).
 
-## 14. Capacidad P-M (preparada, sin datos)
+## 14. Capacidad P-M
 
-La estructura de resultados contempla una pestaña de capacidad desplegable y
-el campo `capacidades` (existentes en el esquema de resultados), pero el
-JSON combinado no entrega aún esos datos: el visor lo reporta como **pendiente
-de datos** y no muestra curvas inventadas. Por ello la etapa P1L4 (capacidad
-P-M) **no se puede declarar completada**, solo la preparación del visor.
+`results.pm` contiene curvas, demanda por caso y trazabilidad para la columna
+113022 y el muro M001. Al seleccionar 113022, 4001 o 4002 se muestra curva,
+punto de demanda, caso y DENTRO/FUERA. Los objetos 4001+4002 se agrupan como
+un muro físico. Los datos confirmados y los supuestos de material, armado y
+recubrimiento están declarados dentro del JSON y deben exponerse como tales.
 
 ## 15. Validación estática
 
-- `COMBINADO/src/validar_unity_viewer_estatico.py`: 25 comprobaciones OK
+- `COMBINADO/src/validar_unity_viewer_estatico.py`: 27 comprobaciones OK
   (inventario, consistencia esquema C#↔JSON, casos↔results, balance de llaves
   por archivo .cs, sin clases duplicadas, sin referencias obsoletas a
-  `pending_geometry`/`modelo_lt1.json`, sin escenas `.unity`).
+  referencias obsoletas y escena fuente controlada).
 - `COMBINADO/tests/test_unity_viewer_static.py`: nuevo wrapper pytest.
-- Suite completa: **146 tests en verde**. El modelo estructural no fue tocado
-  ni re-analizado en esta etapa.
+- Suite completa: **158 tests en verde**.
+- `validar_unity_combinado.py`: **61.612 verificaciones, 0 problemas**.
+- Compilación `Assembly-CSharp`: **0 errores**.
 
 ## 16. Pendientes para la integradora
 
-- **Prueba visual en Unity** (apertura del proyecto, generación de escena,
-  capturas): no realizada aquí y por tanto no se afirma nada al respecto.
-- Sin `git add/commit/push` (según restricción).
-- Cuando existan datos de capacidad P-M, conectar el desplegable con los
-  resultados correspondientes para cerrar P1L4.
+- **Prueba visual final en Unity**: pendiente en una sesión con licencia
+  activa; el modo batch disponible no pudo completar el handshake de licencia.
+- Los warnings de compilación son de APIs `FindObjectOfType` obsoletas y del
+  analizador de serialización sobre diccionarios públicos; no hay errores.

@@ -3,7 +3,7 @@ CONTROL PREPARACION MODELO OPENSEES CLASE A · LT1
 Material H°A° DEFINIDO por INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO
 ==========================================================================================
 ESTADOS
-  GEOMETRIA_CLASE_A = LISTA
+  GEOMETRIA_CLASE_A = CON_REVISION
   APOYOS = LISTOS
   DIAFRAGMAS = LISTOS
   SECCIONES = LISTAS
@@ -11,17 +11,17 @@ ESTADOS
   TRIBUTACION = LISTA
   CARGAS_GRAVEDAD = PREPARADAS Y APLICADAS
   MATERIAL = LISTO
-  ELEMENTOS_OPENSEES = CREADOS (204)
-  RIGIDLINKS_MUROS = 12 (restricciones cinemáticas al master del diafragma)
+  ELEMENTOS_OPENSEES = CREADOS (228)
+  RIGIDLINKS_MUROS = 24 (restricciones cinemáticas al master del diafragma)
   ANALISIS = OK_COMPLETADO
 
 1) GEOMETRIA CLASE A
-     nodos estructurales: 120 | masters: 4 | ops.getNodeTags(): 124
-     columnas P.70x70 : 90 | vigas V.60/80 : 108 | muros equiv. : 6 | rigidLink de muro : 12 (ok: True) | elementTags : 204 (tags únicos: True)
+     nodos estructurales: 144 | masters: 4 | ops.getNodeTags(): 148
+     columnas P.70x70 : 90 | vigas V.60/80 : 108 | muros equiv. : 30 | rigidLink de muro : 60 (ok: False) | elementTags : 228 (tags únicos: True)
      problemas detectados en el pre-check: ninguno
 
 2) APOYOS (FUNDACION_SUP z=-7.97 m)
-     18 apoyos, 6 GDL empotrados cada uno.
+     24 apoyos, 6 GDL empotrados cada uno.
 
 3) DIAFRAGMAS RIGIDOS
      PISO_1: master 600001 · 18 slaves · z=-0.050
@@ -187,8 +187,8 @@ ESTADOS
 
 9) VERIFICACIONES POST-ANALISIS
      P aplicada = 19644.1419 kN
-     Σ Rz = 19644.1419 kN · err abs = 1.818989e-11 · err rel = 9.260e-16
-     desplazamiento máximo = 2.390261e-03 m (nodo 50303) · max|Uz| = 2.365298e-03 m
+     Σ Rz = 19644.1419 kN · err abs = 1.455192e-11 · err rel = 7.408e-16
+     desplazamiento máximo = 2.365534e-03 m (nodo 50303) · max|Uz| = 2.365182e-03 m
      NaN/Inf: ninguno
      diafragmas compatibles: True
 
@@ -198,6 +198,6 @@ MATERIAL (INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO)
      verificación G: G = E/[2(1+nu)] = 27.8e6/[2(1.20)] = 11 583 333.33 kPa (valor exacto 27.8e6/2.4 a 2 decimales)
      1 kN/m² = 1 kPa; 1 MPa = 1000 kPa · None
      fuente: E=27800000 kPa, fc=35000 kPa, nu=0.20 y G=11583333 kPa: PROPORCIONADA_POR_USUARIO (clase G35 / fc=35 MPa, E=27800 MPa, densidad 2400 kg/m3). NO atribuir a planos ni a documentos del proyecto.
-     Con E y G definidos, el run creó los 204 elasticBeamColumn (90 columnas + 108 vigas + 6 muros equivalentes), los 12 rigidLink de muro al master del diafragma y ejecutó el análisis
+     Con E y G definidos, el run creó los 228 elasticBeamColumn (90 columnas + 108 vigas + 30 muros equivalentes), los 24 rigidLink de muro al master del diafragma y ejecutó el análisis
      de gravedad. Estado: MATERIAL LISTO · ELEMENTOS CREADOS · ANALISIS EJECUTADO.
 ==========================================================================================

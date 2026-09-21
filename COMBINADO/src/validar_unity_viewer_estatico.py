@@ -11,9 +11,9 @@ Etapa P1L4. Verifica, SIN abrir Unity solo este script:
   3. `results.cases` coincide con las claves de forces/displacements/
      reactions/equilibrio (los casos desplegables son exactamente los
      exportados; COMBO_R solo la superposicion existente).
-  4. Inventario: 461 nodos, 660 elementos (389 viga + 175 columna + 96 muro
-     por categoria del visor), 47 apoyos, 5 masters, 5 diafragmas,
-     12 constraint_links, cargas G/Q 27282 y EX/EY 4, tributarias LT1 108 y
+  4. Inventario: 485 nodos, 694 elementos (399 viga + 175 columna + 120 muro
+     por categoria del visor), 53 apoyos, 5 masters, 5 diafragmas,
+     24 constraint_links, cargas G/Q 27282 y EX/EY 4, tributarias LT1 108 y
      LT2 320 (datos tal cual; no se recalcula).
   5. Checks de fuente C#:
        - llaves/pararentesis balanceados en todos los .cs,
@@ -22,8 +22,8 @@ Etapa P1L4. Verifica, SIN abrir Unity solo este script:
          ningun script apunta a modelo_lt1.json como fuente),
        - ModelLoader usa el nombre de archivo correcto,
        - LT1SceneBuilder registra los componentes nuevos.
-  6. Sin escenas nuevas: el visor genera su escena por editor (LT1SceneBuilder)
-     y no hay archivos .unity de mas en el proyecto.
+  6. La unica escena fuente permitida es Assets/Scenes/LT1Viewer.unity;
+     se ignoran artefactos internos de Library.
 
 Uso:
     cd COMBINADO/src && python3 validar_unity_viewer_estatico.py
@@ -42,16 +42,18 @@ EDITOR = ROOT / "unity" / "LT1Viewer" / "Assets" / "Editor"
 OUT = ROOT / "COMBINADO" / "outputs" / "unity" / "modelo_combinado.json"
 SA_OUT = ROOT / "unity" / "LT1Viewer" / "Assets" / "StreamingAssets" \
     / "modelo_combinado.json"
+P1L4_OUT = ROOT / "COMBINADO" / "outputs" / "p1l4"
+SA_DIR = SA_OUT.parent
 PANEL = SCRIPTS / "PmPanelController.cs"
 
 EXPECTED = {
     "metadata.modelo": "COMBINADO_LT1_LT2",
-    "nodos": 461,
-    "elementos": 660,
-    "apoyos": 47,
+    "nodos": 485,
+    "elementos": 694,
+    "apoyos": 53,
     "masters": 5,
     "diafragmas": 5,
-    "constraint_links": 12,
+    "constraint_links": 24,
     "cargas_G": 27282,
     "cargas_Q": 27282,
     "cargas_EX": 4,
@@ -61,11 +63,11 @@ EXPECTED = {
 }
 
 TIPOS = {
-    "viga": 334, "columna": 125, "muro_corner": 80, "vertical_caja": 50,
+    "viga": 344, "columna": 125, "muro_corner": 80, "vertical_caja": 50,
     "viga_saliente": 30, "segmento_fachada": 25, "conector_v40_muro": 10,
-    "muro": 6,
+    "muro": 30,
 }
-CATEGORIAS = {"Beam": 389, "Column": 175, "Wall": 96}
+CATEGORIAS = {"Beam": 399, "Column": 175, "Wall": 120}
 
 # Clases [Serializable] que corresponden a cada seccion del JSON.
 CLASS_SCHEMA = {
@@ -542,6 +544,13 @@ class StaticValidator:
             if sa.get("results", {}).get("pm") != pm:
                 self.fail.append("results.pm desincronizado en "
                                  "StreamingAssets (copia del viewer)")
+        for figure in ("pm_column_113022.png", "pm_wall_M001.png"):
+            source = P1L4_OUT / figure
+            viewer = SA_DIR / figure
+            if not source.exists() or not viewer.exists():
+                self.fail.append(f"figura P-M ausente: {figure}")
+            elif source.read_bytes() != viewer.read_bytes():
+                self.fail.append(f"figura P-M desincronizada: {figure}")
         self.ok.append("results.pm OK (curvas/demandas/caso activo/panel)")
 
     # ---------------------------------------------------------------- fuentes
@@ -607,19 +616,48 @@ class StaticValidator:
 
         builder = EDITOR / "LT1SceneBuilder.cs"
         text = builder.read_text(encoding="utf-8")
-        for component in ("CaseSelector", "LoadInspector"):
+        for component in (
+                "CaseSelector", "LoadInspector", "LoadVisualizationController",
+                "TributaryAreaVisualizationController", "ViewerHUD"):
             if f"AddComponent<{component}>" not in text:
                 self.fail.append(f"LT1SceneBuilder no registra {component}")
+
+        required_sources = {
+            "ViewerHUD.cs": ("class ViewerHUD", "DrawForces", "DrawTributaryData"),
+            "ForceDiagramController.cs": ("class ForceDiagramController", "DiagramMode", "Mz", "N", "Vy", "T"),
+            "LoadVisualizationController.cs": ("class LoadVisualizationController", "DrawArrow"),
+            "TributaryAreaVisualizationController.cs": ("class TributaryAreaVisualizationController", "polygon"),
+        }
+        for filename, tokens in required_sources.items():
+            source = SCRIPTS / filename
+            if not source.exists():
+                self.fail.append(f"{filename} ausente")
+                continue
+            source_text = source.read_text(encoding="utf-8")
+            for token in tokens:
+                if token not in source_text:
+                    self.fail.append(f"{filename} sin '{token}'")
 
         self.ok.append(f"{len(cs_files)} archivos .cs revisados")
 
     # ---------------------------------------------------------------- escenas
     def _scene_checks(self):
-        unity_files = list((ROOT / "unity").rglob("*.unity"))
-        if unity_files:
+        assets = ROOT / "unity" / "LT1Viewer" / "Assets"
+        # Unity crea Assets/_Recovery al recuperar una sesion interrumpida.
+        # No es una escena fuente del proyecto y puede contener trabajo local
+        # recuperable, por lo que se ignora sin borrarla.
+        unity_files = [p for p in assets.rglob("*.unity")
+                       if "_Recovery" not in p.parts]
+        allowed = {assets / "Scenes" / "LT1Viewer.unity"}
+        unexpected = [p for p in unity_files if p not in allowed]
+        if unexpected:
             self.fail.append(
-                f"Se encontraron archivos .unity (la escena se genera por "
-                f"editor): {[p.relative_to(ROOT) for p in unity_files]}")
+                "Se encontraron escenas Unity no previstas: "
+                f"{[p.relative_to(ROOT) for p in unexpected]}")
+        elif unity_files:
+            self.ok.append("escena fuente Assets/Scenes/LT1Viewer.unity OK")
+        else:
+            self.ok.append("escena reproducible mediante LT1SceneBuilder")
 
 
 def main():

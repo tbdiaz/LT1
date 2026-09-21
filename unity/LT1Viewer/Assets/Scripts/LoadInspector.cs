@@ -14,7 +14,7 @@ using UnityEngine;
 public class LoadInspector : MonoBehaviour
 {
     private ModelLoader loader;
-    private bool show = true;
+    private bool show = false;
 
     void Start()
     {
@@ -28,6 +28,8 @@ public class LoadInspector : MonoBehaviour
 
     void OnGUI()
     {
+        return; // la capa grafica y su estado se controlan desde ViewerHUD
+#pragma warning disable CS0162
         if (!show) return;
         if (loader == null || loader.combinedRoot == null) return;
         if (loader.combinedRoot.loads == null) return;
@@ -84,6 +86,7 @@ public class LoadInspector : MonoBehaviour
         GUILayout.Label($"  Area tributaria LT1: {tribLt1} filas | LT2: {tribLt2} filas");
 
         GUILayout.EndArea();
+#pragma warning restore CS0162
     }
 
     void DrawLoads()

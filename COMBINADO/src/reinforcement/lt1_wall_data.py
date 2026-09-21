@@ -33,9 +33,10 @@ CLASIFICACIONES (extensión de WallReinforcementClass):
 NOTAS DE HONESTIDAD:
 - NO se copia armadura de un eje a otro (E-F vs G-H vs I-J).
 - NO se aproximan 1A/1BB a muro rectangular tipico (geometry_special).
-- NO se asocian elementTags FE: el modelo LT1 modela 6 muros de un solo
-  nivel (400001-400006) y la correspondencia eje->muro del plano no es
-  inequivoca; la armadura pertenece al muro fisico de la elevacion.
+- NO se asocian elementTags FE: el modelo LT1 representa seis paños de núcleo
+  en cinco tramos verticales (30 elementos, 400001-400406), pero la
+  correspondencia entre cada registro de elevación y cada paño/tramo FE no es
+  inequívoca; la armadura pertenece al muro físico de la elevación.
 - Los valores no legibles se listan explicitamente en el reporte.
 
 Este modulo NO depende de OpenSeesPy ni del modelo combinado.

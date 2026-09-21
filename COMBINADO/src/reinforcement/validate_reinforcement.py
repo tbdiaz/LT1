@@ -51,8 +51,8 @@ from .reinforcement_types import (
 BASELINE_MODEL = {
     "rc": 0,
     "P_total": 31086.259667,
-    "n_nodos_fisicos": 461,
-    "n_apoyos": 47,
+    "n_nodos_fisicos": 485,
+    "n_apoyos": 53,
 }
 
 VALID_STATUS = {s.value for s in Status}

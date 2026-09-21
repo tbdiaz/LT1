@@ -413,7 +413,8 @@ def write_resumen(curves, df_chk, df_dem):
               "5 32 L=900, atribucion por nivel NO_LEGIBLE).")
     ln.append("* Concrete01 no confinado, Steel01 b=0.01; capacidad nominal "
               "sin phi.")
-    ln.append("* EY: M_muro = 8836 kN.m CONFIRMADO como demanda real de la "
+    ey_muro = abs(float(df_chk.loc[df_chk["caso"] == "EY", "M_muro"].iloc[0]))
+    ln.append(f"* EY: M_muro = {ey_muro:.3f} kN.m CONFIRMADO como demanda real de la "
               "idealizacion (reacciones de fundacion del modelo). Su D/C se "
               "reporta contra la capacidad de eje fuerte con el acero minimo "
               "modelado; no se afirma que mas armadura lo mitigue sin "

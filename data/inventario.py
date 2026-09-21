@@ -366,9 +366,11 @@ coordenadas_aux_faltantes = {
                  "confirmados por el usuario (SALIENTE_1 X 10.00-17.49; SALIENTE_2 "
                  "X 20.00-30.00). La posición de P.M. 300x300x20 y los extremos de "
                  "V.30/45, V.60/VAR, V.60-30/80-40 siguen PENDIENTE.",
-    "TRAMO_NUCLEO_E_F": "PARCIALMENTE RESUELTO (v2): 6 tramos del núcleo PISO_2 "
-                        "cerrados (MUROS_CERRADOS_PISO_2, longitudes 3.65/2.25/2.25 "
-                        "y 3.39/1.58/1.58). Núcleo PISO_4 (plan 103) PENDIENTE.",
+    "TRAMO_NUCLEO_E_F": "RESUELTO FUNDACION-PISO 4: 6 paños por planta, 30 "
+                        "segmentos verticales cerrados (MUROS_CERRADOS_NIVELES, "
+                        "longitudes 3.65/2.25/2.25 y 3.39/1.58/1.58). Continuidad "
+                        "comprobada en las plantas cielo 1° subterráneo y PISO_1 "
+                        "del plano 101, PISO_2/PISO_3 del 102 y PISO_4 del 103.",
     "ASOC_2A": "elementos alrededor del eje 2a (asociación tramo-ejes pendiente)",
 }
 

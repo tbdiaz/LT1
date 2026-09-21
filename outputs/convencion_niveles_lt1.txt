@@ -79,9 +79,9 @@ A · GEOMETRIA LISTA PARA OPENSees (construida, verificada, sin material):
     esqueleto retícula principal + bloque 1 (sub-plano CIELO PISO 3°):
       columnas P.70x70 : 90
       vigas    V.60/80 : 108
-      nodos            : 120
+      nodos            : 144
       diafragmas rigidos ([600001, 600002, 600003, 600004]): 4 con 72 nodos esclavos
-      apoyos base      : 18
+      apoyos base      : 24
 
 B · POSICION RESPALDADA, LONGITUD/EXTREMOS PENDIENTES (sin construir):
     muros nucleo M.H.A. e=20  : 6 (M102_01..03 en PISO_2, M103_01..03 en PISO_4; INFERIDO_RESPALDADO)

@@ -42,13 +42,13 @@ SECCIONES (resumen A/Iy/Iz/J)
   contrastada contra la serie exacta en data/secciones.py)
 
 NODOS
-  ops.getNodeTags() = 124
-    FUNDACION_SUP: 18
-    PISO_1S     : 18
+  ops.getNodeTags() = 148
+    FUNDACION_SUP: 24
+    PISO_1S     : 24
     PISO_1      : 24
     PISO_2      : 24
-    PISO_3      : 18
-    PISO_4      : 18
+    PISO_3      : 24
+    PISO_4      : 24
     CUBIERTA_SUP: 0
 
 COLUMNAS (marcos esqueleto, H.A. P. 70x70)
@@ -67,17 +67,17 @@ VIGAS (marcos esqueleto, V. 60/80)
     PISO_4: 27
 
 ELEMENTOS OPENSEES
-  elasticBeamColumn creados: 204
+  elasticBeamColumn creados: 228
   ejemplos de tags: 113000, 113001, 113002, 113010 ...
   tags reservados columna: 100000, 100002, 100004, 100300, 100302 ...
   tags reservados viga: 200001, 200002, 200003, 200004, 200005 ...
-  tags muros equivalentes: 400001, 400002, 400003, 400004, 400005, 400006
+  tags muros equivalentes: 400001, 400002, 400003, 400004, 400005, 400006, 400301, 400302, 400303, 400304, 400305, 400306, 400401, 400402, 400403, 400404, 400405, 400406, 400101, 400102, 400103, 400104, 400105, 400106, 400201, 400202, 400203, 400204, 400205, 400206
 
 VERIFICACIONES
-  ops.node = 124 (120 estructurales + 4 masters)
-  ops.element = 204 (204 esperados: 90 col + 108 vigas + 6 muros equiv.; material HºAº y convención de muro por INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO)
-  elementTags únicos: True
-  constr. rígidas de muro (rigidLink al master del diafragma): 12 (no cuentan como elasticBeamColumn)
+  ops.node = 148 (144 estructurales + 4 masters)
+  ops.element = 228 (228 esperados: 90 col + 108 vigas + 30 muros equiv.; material HºAº y convención de muro por INFORMACION_ACADEMICA_PROPORCIONADA_POR_USUARIO)
+  elementTags únicos: False
+  constr. rígidas de muro (rigidLink al master del diafragma): 24 (no cuentan como elasticBeamColumn)
   nodos duplicados: 0
   pendientes geométricos conservados: 334
 ========================================================================

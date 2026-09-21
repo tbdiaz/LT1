@@ -179,7 +179,7 @@ z_vals = [n["z"] for n in nodes]
 fig.update_layout(
     title=dict(
         text="LT1 · Modelo estructural clase A (interactivo)<br>"
-             "<sup>108 nodos · 90 columnas · 108 vigas · 18 apoyos · 4 diafragmas · "
+             "<sup>144 nodos · 90 columnas · 108 vigas · 30 muros · 24 apoyos · 4 diafragmas · "
              "gravedad P=20182.63 kN</sup>",
         x=0.5,
         font=dict(size=14),

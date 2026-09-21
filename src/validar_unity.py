@@ -42,31 +42,31 @@ def warn(cond, msg):
 # --- Estructura base (P1L2/P1L3) -------------------------------------------
 n_est = len(n_struct)
 n_mas = len(n_masters)
-chk(n_est == 120, f"nodos estructurales: {n_est} (esperados 120)",
+chk(n_est == 144, f"nodos estructurales: {n_est} (esperados 144)",
     f"nodos estructurales: {n_est} OK")
 chk(n_mas == 4, f"nodos master: {n_mas} (esperados 4)",
     f"nodos master: {n_mas} OK")
-chk(len(nodes) == 124, f"nodos totales: {len(nodes)} (esperados 124)",
+chk(len(nodes) == 148, f"nodos totales: {len(nodes)} (esperados 148)",
     f"nodos totales: {len(nodes)} OK")
 chk(len(beams) == 108, f"vigas: {len(beams)} (esperadas 108)",
     f"vigas: {len(beams)} OK")
 chk(len(columns) == 90, f"columnas: {len(columns)} (esperadas 90)",
     f"columnas: {len(columns)} OK")
-chk(len(supports) == 18, f"apoyos: {len(supports)} (esperados 18)",
+chk(len(supports) == 24, f"apoyos: {len(supports)} (esperados 24)",
     f"apoyos: {len(supports)} OK")
 chk(len(diaphragms) == 4, f"diafragmas: {len(diaphragms)} (esperados 4)",
     f"diafragmas: {len(diaphragms)} OK")
-chk(len(walls) == 6, f"muros: {len(walls)} (esperados 6)",
+chk(len(walls) == 30, f"muros: {len(walls)} (esperados 30)",
     f"muros: {len(walls)} OK")
-chk(len(constraints) == 12, f"constraint_links: {len(constraints)} (esperados 12)",
+chk(len(constraints) == 24, f"constraint_links: {len(constraints)} (esperados 24)",
     f"constraint_links: {len(constraints)} OK")
 
 beam_tags = [b["elementTag"] for b in beams]
 col_tags = [c["elementTag"] for c in columns]
 wall_tags = [w["elementTag"] for w in walls]
 all_elem_tags = beam_tags + col_tags + wall_tags
-chk(len(all_elem_tags) == 204, f"total elementos: {len(all_elem_tags)} (esperados 204)")
-chk(len(set(all_elem_tags)) == 204,
+chk(len(all_elem_tags) == 228, f"total elementos: {len(all_elem_tags)} (esperados 228)")
+chk(len(set(all_elem_tags)) == 228,
     f"elementTags duplicados: {len(all_elem_tags) - len(set(all_elem_tags))}")
 
 node_tags = [n["tag"] for n in nodes]
@@ -114,7 +114,7 @@ else:
 # --- P1L4: postproceso conectado a resultados ------------------------------
 chk(analysis.get("caso"), "analysis.caso ausente", f"caso activo: {analysis.get('caso')} OK")
 fe = analysis.get("fuerzas_elementos", [])
-chk(len(fe) == 204, f"fuerzas_elementos: {len(fe)} (esperados 204)",
+chk(len(fe) == 228, f"fuerzas_elementos: {len(fe)} (esperados 228)",
     f"fuerzas_elementos: {len(fe)} OK")
 
 fe_tags = set()
@@ -228,7 +228,7 @@ with open(ruta_ctrl, "w", encoding="utf-8") as f:
     f.write("4. P1L4 · RESULTADOS DISPONIBLES\n")
     f.write(f"   caso activo: {analysis.get('caso', 'N/D')} | "
             f"escenarios: {analysis.get('escenarios')}\n")
-    f.write(f"   fuerzas por elemento: {len(fe)} de 204\n")
+    f.write(f"   fuerzas por elemento: {len(fe)} de 228\n")
     f.write(f"   demandas exportadas: {len(capacidades)} capacidades\n")
     for c in capacidades:
         d = c.get("demanda") or {}

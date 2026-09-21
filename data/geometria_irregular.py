@@ -298,6 +298,47 @@ for _m in MUROS_CERRADOS_PISO_2:
     _m["nivel"] = "PISO_2"
     _m["plano"] = "102"
     _m["z_m"] = 3.91
+    _m["nivel_inferior"] = "PISO_1"
+    _m["nivel_superior"] = "PISO_2"
+    _m["id_fisico"] = _m["id"]
+    _m["fuente_geometria"] = (
+        "2017_67-102-Model.pdf, PLANTA CIELO PISO 2; geometria cerrada v2")
+
+
+# Continuidad vertical confirmada visualmente en las plantas estructurales:
+# - el folio 101 contiene PLANTA CIELO 1° SUBTERRANEO (nivel superior -4.01)
+#   y PLANTA CIELO PISO 1° (nivel superior -0.05), ambas con los dos nucleos;
+# - el subplano PLANTA CIELO PISO 3 del folio 102 repite los dos nucleos;
+# - la PLANTA CIELO PISO 4 del folio 103 repite sus seis panos y rotulos
+#   e=20/e=30 (nucleo superior) y e=20/e=25 (nucleo inferior).
+# Se reutilizan exclusivamente las coordenadas ya cerradas de cada pano. No se
+# agregan aqui los muros perimetrales ni los ejes inclinados 1A/1BB porque sus
+# extremos aun no estan determinados de forma inequivoca.
+MUROS_CERRADOS_NIVELES = list(MUROS_CERRADOS_PISO_2)
+for _nivel_inf, _nivel_sup, _plano, _z, _planta in (
+        ("FUNDACION_SUP", "PISO_1S", "101", -4.01,
+         "PLANTA CIELO 1° SUBTERRANEO"),
+        ("PISO_1S", "PISO_1", "101", -0.05,
+         "PLANTA CIELO PISO 1°"),
+        ("PISO_2", "PISO_3", "102", 7.87, "PLANTA CIELO PISO 3"),
+        ("PISO_3", "PISO_4", "103", 11.83, "PLANTA CIELO PISO 4")):
+    for _base in MUROS_CERRADOS_PISO_2:
+        _seg = dict(_base)
+        _seg["id"] = f"{_base['id']}_{_nivel_sup}"
+        _seg["id_fisico"] = _base["id_fisico"]
+        _seg["nivel"] = _nivel_sup
+        _seg["nivel_inferior"] = _nivel_inf
+        _seg["nivel_superior"] = _nivel_sup
+        _seg["plano"] = _plano
+        _seg["z_m"] = _z
+        _seg["estado"] = "GEOMETRIA_CERRADA_CONTINUIDAD_VERTICAL_VERIFICADA"
+        _seg["fuente_geometria"] = (
+            f"2017_67-{_plano}-Model.pdf, {_planta}; continuidad visual "
+            "con los nucleos cerrados del PISO_2")
+        _seg["evidencia"] = (
+            _base["evidencia"] + f" Continuidad del mismo pano confirmada en "
+            f"{_planta} (plano {_plano}).")
+        MUROS_CERRADOS_NIVELES.append(_seg)
 
 
 def eje_cercano(X, Y, tolerancia_x=1.5, tolerancia_y=1.0):

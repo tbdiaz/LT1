@@ -331,7 +331,10 @@ class ExportadorCombinado:
             sec["espesor_m"] = float(rec.get("espesor_m", 0.0) or 0.0)
             add(tag, "muro", "LT1", sec,
                 VEC_TRANS_COL_LT1,
-                dict(nivel=rec.get("nivel"), transf_tag=10001,
+                dict(nivel=rec.get("nivel_superior") or rec.get("nivel"),
+                     nivel_inferior=rec.get("nivel_inferior"),
+                     nivel_superior=rec.get("nivel_superior"),
+                     transf_tag=10001,
                      clave=rec.get("clave", ""),
                      fuente=rec.get("fuente", ""),
                      estado_geometria=rec.get("estado_geometria", ""),
@@ -348,6 +351,12 @@ class ExportadorCombinado:
             add(r["tag_conector"], "conector_v40_muro", "COMBINADO", sec, VEC_TRANS_B_X,
                 dict(nivel=r["nivel"], muro=r["muro"], transf_tag=2,
                      nodo_muro=int(r["nodo_muro"])))
+        for r in b.v30_connections:
+            sec = self._lt2_sec_meta(b, r["seccion"], e2, g2)
+            add(r["tag"], "viga", "COMBINADO", sec, VEC_TRANS_B_X,
+                dict(nivel=r["nivel"], beam_id=r["beam_id"],
+                     tag_original=r["parent"], transf_tag=2,
+                     seccion_id=r["seccion"], fuente=r["fuente"]))
         for v in b.box_verticals:
             sec = dict(label="VERTICAL %s" % v["tipo"].upper(),
                        b_m=None, h_m=None, A_m2=v["A"], Iy_m4=v["Iy"],
@@ -363,6 +372,7 @@ class ExportadorCombinado:
                       | set(b.created["lt2_walls"]) | set(b.created["lt1_beams"])
                       | set(b.created["lt1_cols"]) | set(b.created["lt1_walls"])
                       | set(b.created["links"])
+                      | set(r["tag"] for r in b.v30_connections)
                       | set(v["tag"] for v in b.box_verticals))
         if tags != registered:
             raise RuntimeError(
@@ -642,6 +652,8 @@ class ExportadorCombinado:
                          else None),
                 element_tag=elem, area_m2=float(r.area_m2),
                 qG_kN_m2=float(r.qG_kN_m2), load_kN=float(r.load_kN),
+                polygon=(str(r.polygon) if isinstance(r.polygon, str)
+                         and r.polygon.strip() else None),
                 status=str(r.status), n_puntos_poligono=ngon))
         return rows
 

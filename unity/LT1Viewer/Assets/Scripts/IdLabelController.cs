@@ -10,6 +10,8 @@ public class IdLabelController : MonoBehaviour
 
     private List<GameObject> nodeLabels = new List<GameObject>();
     private List<GameObject> elementLabels = new List<GameObject>();
+    public bool ShowNodeIds => showNodeIds;
+    public bool ShowElementIds => showElementIds;
 
     void Update()
     {
@@ -19,6 +21,8 @@ public class IdLabelController : MonoBehaviour
 
     void OnGUI()
     {
+        return; // controles centralizados en ViewerHUD
+#pragma warning disable CS0162
         GUILayout.BeginArea(new Rect(Screen.width - 220, 10, 210, 80));
         GUILayout.BeginVertical("box");
         GUILayout.Label("<b>Etiquetas</b>");
@@ -26,11 +30,12 @@ public class IdLabelController : MonoBehaviour
         if (GUILayout.Button($"E IDs Elementos [{BoolStr(showElementIds)}]")) ToggleElementIds();
         GUILayout.EndVertical();
         GUILayout.EndArea();
+#pragma warning restore CS0162
     }
 
     string BoolStr(bool v) { return v ? "ON" : "OFF"; }
 
-    void ToggleNodeIds()
+    public void ToggleNodeIds()
     {
         showNodeIds = !showNodeIds;
         EnsureInitialized();
@@ -38,7 +43,7 @@ public class IdLabelController : MonoBehaviour
             if (go != null) go.SetActive(showNodeIds);
     }
 
-    void ToggleElementIds()
+    public void ToggleElementIds()
     {
         showElementIds = !showElementIds;
         EnsureInitialized();

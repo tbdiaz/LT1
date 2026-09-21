@@ -8,20 +8,20 @@ CONTROL UNITY LT1 · VALIDACION JSON + P1L4 POSTPROCESO
    El usuario debe abrir con Unity Hub (2022.3 LTS)
 
 2. JSON EXPORTADO
-   ruta: /Users/trinidaddiaz/Documents/PROYECTO_LT1_LT2/outputs/unity/modelo_lt1.json
-   tamano: 312246 bytes
+   ruta: C:\Users\natig\OneDrive\Escritorio\2026\P0MCOC\Proyecto 2\LT1\outputs\unity\modelo_lt1.json
+   tamano: 384529 bytes
 
 3. VALIDACIONES
-   [OK] nodos estructurales: 120 OK
+   [OK] nodos estructurales: 144 OK
    [OK] nodos master: 4 OK
-   [OK] nodos totales: 124 OK
+   [OK] nodos totales: 148 OK
    [OK] vigas: 108 OK
    [OK] columnas: 90 OK
-   [OK] apoyos: 18 OK
+   [OK] apoyos: 24 OK
    [OK] diafragmas: 4 OK
-   [OK] muros: 6 OK
-   [OK] constraint_links: 12 OK
-   [OK] total elementos: 204 (esperados 204)
+   [OK] muros: 30 OK
+   [OK] constraint_links: 24 OK
+   [OK] total elementos: 228 (esperados 228)
    [OK] elementTags duplicados: 0
    [OK] nodeTags duplicados: 0
    [OK] coordenadas no finitas encontradas
@@ -33,11 +33,11 @@ CONTROL UNITY LT1 · VALIDACION JSON + P1L4 POSTPROCESO
    [OK] metadata.limitaciones OK
    [OK] analisis OK_COMPLETADO
    [OK] P aplicada: 19644.141914249998 (esperado ~19644)
-   [OK] error equilibrio: 9.259704045542193e-16
+   [OK] error equilibrio: 7.407763236433753e-16
    [OK] NaN/Inf encontrado en resultados de analisis
    [OK] diafragmas rigidos incompatibles
    [OK] caso activo: G_gravedad OK
-   [OK] fuerzas_elementos: 204 OK
+   [OK] fuerzas_elementos: 228 OK
    [OK] fuerzas_elementos: 6 comp por extremo y finitas OK
    [OK] tags de fuerzas no coinciden con geometria (0 faltan)
    [OK] fuerzas_elementos: nodo_i/j consistentes con beams/columns/walls OK
@@ -45,7 +45,7 @@ CONTROL UNITY LT1 · VALIDACION JSON + P1L4 POSTPROCESO
    [OK] capacidad columna tag 111000 OK
    [OK] columna 111000: NO_DISPONIBLE (sin curva SUPUESTA) OK
    [OK] columna 111000: curva_pm vacia (faltan f'c/fy/recubrimiento) OK
-   [OK] demanda columna 111000 (modelo, informativa): N=-506.0575 kN, M=120.3397 kN·m OK
+   [OK] demanda columna 111000 (modelo, informativa): N=-499.3168 kN, M=122.0966 kN·m OK
    [OK] demanda columna compresion < 0 OK
    [OK] columna 111000: faltantes listados OK
    [OK] capacidad muro: NO_DISPONIBLE con faltantes OK
@@ -56,26 +56,54 @@ CONTROL UNITY LT1 · VALIDACION JSON + P1L4 POSTPROCESO
 
 4. P1L4 · RESULTADOS DISPONIBLES
    caso activo: G_gravedad | escenarios: ['G']
-   fuerzas por elemento: 204 de 204
+   fuerzas por elemento: 228 de 228
    demandas exportadas: 2 capacidades
-   - columna tag 111000: estado=NO_DISPONIBLE | demanda N=-506.0575 kN, M=120.3397 kN·m (G_gravedad)
-   - muro tag 400001: estado=NO_DISPONIBLE | demanda N=-0.0 kN, M=120.1768 kN·m (G_gravedad)
+   - columna tag 111000: estado=NO_DISPONIBLE | demanda N=-499.3168 kN, M=122.0966 kN·m (G_gravedad)
+   - muro tag 400001: estado=NO_DISPONIBLE | demanda N=-0.0 kN, M=74.9071 kN·m (G_gravedad)
 
    convencion fuerzas: Fuerzas locales elasticBeamColumn via ops.eleResponse('localForce') (12 comp por elemento, orden [N, Vy, Vz, T, My, Mz] en extremo i y j; unidades kN y kN·m; sistema local del elemento). F_i[0] = -N_interno y F_j[0] = +N_interno, con N_interno traccion positiva (compresion < 0); misma convencion usada en la curva P-M.
 
 5. SCRIPTS C# (unity/LT1Viewer/Assets/Scripts)
-   DeformedShapeController.cs       8194 bytes
-   ForceDiagramController.cs        7910 bytes
-   IdLabelController.cs             5307 bytes
-   LocalAxesController.cs           4744 bytes
-   ModelData.cs                     6934 bytes
-   ModelLoader.cs                  17118 bytes
-   OrbitCamera.cs                   3845 bytes
-   SelectionController.cs           6276 bytes
-   StructuralResultsController.cs   5558 bytes
-   StructuralViewer.cs              6314 bytes
-   TributaryAreaInspector.cs        2378 bytes
-   VisibilityController.cs          6058 bytes
+   CaseSelector.cs                  2518 bytes
+   CaseSelector.cs.meta              243 bytes
+   CombinedModelData.cs             8256 bytes
+   CombinedModelData.cs.meta         243 bytes
+   DeformedShapeController.cs       4063 bytes
+   DeformedShapeController.cs.meta    243 bytes
+   ElementRef.cs                    2889 bytes
+   ElementRef.cs.meta                243 bytes
+   ForceDiagramController.cs       11932 bytes
+   ForceDiagramController.cs.meta    243 bytes
+   IdLabelController.cs             5688 bytes
+   IdLabelController.cs.meta         243 bytes
+   LoadInspector.cs                 6293 bytes
+   LoadInspector.cs.meta             243 bytes
+   LoadVisualizationController.cs   4902 bytes
+   LoadVisualizationController.cs.meta     59 bytes
+   LocalAxesController.cs           6505 bytes
+   LocalAxesController.cs.meta       243 bytes
+   ModelData.cs                     7239 bytes
+   ModelData.cs.meta                 243 bytes
+   ModelLoader.cs                  45109 bytes
+   ModelLoader.cs.meta               243 bytes
+   OrbitCamera.cs                   3988 bytes
+   OrbitCamera.cs.meta               243 bytes
+   PmPanelController.cs            37414 bytes
+   PmPanelController.cs.meta         243 bytes
+   SelectionController.cs          10696 bytes
+   SelectionController.cs.meta       243 bytes
+   StructuralResultsController.cs   5930 bytes
+   StructuralResultsController.cs.meta    243 bytes
+   StructuralViewer.cs              8142 bytes
+   StructuralViewer.cs.meta          243 bytes
+   TributaryAreaInspector.cs        2605 bytes
+   TributaryAreaInspector.cs.meta    243 bytes
+   TributaryAreaVisualizationController.cs   4026 bytes
+   TributaryAreaVisualizationController.cs.meta     59 bytes
+   ViewerHUD.cs                    12948 bytes
+   ViewerHUD.cs.meta                  59 bytes
+   VisibilityController.cs          7659 bytes
+   VisibilityController.cs.meta      243 bytes
 
    Responsabilidades P1L4:
    - ModelData.cs: clases de resultados (fuerzas_elementos, capacidades)

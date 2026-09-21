@@ -328,6 +328,9 @@ public class CombinedTribRow
     public string receiver_id;
     public string beam_id;
     public string status;
+    // LT2: vertices estructurales X,Y separados por ';' y ','; provienen
+    // literalmente de tributary_areas_LT2.csv.
+    public string polygon;
     public int n_puntos_poligono;
     // LT1 (y comun)
     public int element_tag;

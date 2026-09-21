@@ -6,6 +6,7 @@ public class LocalAxesController : MonoBehaviour
     private bool showAxes;
     private bool initialized;
     private readonly List<GameObject> axisObjects = new List<GameObject>();
+    public bool ShowAxes => showAxes;
 
     void Update()
     {
@@ -14,15 +15,18 @@ public class LocalAxesController : MonoBehaviour
 
     void OnGUI()
     {
+        return; // controles centralizados en ViewerHUD
+#pragma warning disable CS0162
         GUILayout.BeginArea(new Rect(10, Screen.height - 50, 220, 40));
         GUILayout.BeginVertical("box");
         if (GUILayout.Button($"A Ejes Locales [{(showAxes ? "ON" : "OFF")}]"))
             ToggleAxes();
         GUILayout.EndVertical();
         GUILayout.EndArea();
+#pragma warning restore CS0162
     }
 
-    void ToggleAxes()
+    public void ToggleAxes()
     {
         showAxes = !showAxes;
         EnsureInitialized();

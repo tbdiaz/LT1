@@ -110,13 +110,14 @@ public class ModelLoader : MonoBehaviour
 
     void CreateMaterials()
     {
-        beamMaterial = CreateMaterial(new Color(0.44f, 0.56f, 0.69f));
-        columnMaterial = CreateMaterial(new Color(0.56f, 0.56f, 0.56f));
-        supportMaterial = CreateMaterial(new Color(0.80f, 0.20f, 0.20f));
-        nodeMaterial = CreateMaterial(new Color(0.17f, 0.42f, 0.69f));
+        // Paleta de alto contraste para lectura tipo videojuego/visor BIM.
+        beamMaterial = CreateMaterial(new Color(0.10f, 0.55f, 0.95f));
+        columnMaterial = CreateMaterial(new Color(0.12f, 0.78f, 0.28f));
+        supportMaterial = CreateMaterial(new Color(0.95f, 0.12f, 0.18f));
+        nodeMaterial = CreateMaterial(new Color(0.20f, 0.85f, 1.00f));
         masterMaterial = CreateMaterial(new Color(1.0f, 0.84f, 0.0f));
         diaphragmMaterial = CreateTransparentMaterial(new Color(0.5f, 0.8f, 0.5f, 0.25f));
-        wallMaterial = CreateMaterial(new Color(0.61f, 0.11f, 0.13f));
+        wallMaterial = CreateMaterial(new Color(0.75f, 0.18f, 0.85f));
         constraintLinkMaterial = new Material(Shader.Find("Sprites/Default"));
         constraintLinkMaterial.color = new Color(0.0f, 0.85f, 0.90f);
     }
@@ -689,7 +690,8 @@ public class ModelLoader : MonoBehaviour
         {
             GameObject go = CreateElementGO(
                 beam.elementTag, beam.node_i, beam.node_j,
-                beam.longitud_m, 0.12f, beamMaterial, "Beam"
+                // Grosor de representacion; no modifica la seccion ni rigidez OpenSees.
+                beam.longitud_m, 0.55f, beamMaterial, "Beam"
             );
             if (go != null)
             {
@@ -708,7 +710,8 @@ public class ModelLoader : MonoBehaviour
         {
             GameObject go = CreateElementGO(
                 col.elementTag, col.node_i, col.node_j,
-                col.longitud_m, 0.16f, columnMaterial, "Column"
+                // Mantener una diferencia visual clara respecto de las vigas.
+                col.longitud_m, 0.70f, columnMaterial, "Column"
             );
             if (go != null)
             {
@@ -734,7 +737,7 @@ public class ModelLoader : MonoBehaviour
             // vertical diferenciada (color/grosor) SOLO como visualizacion.
             GameObject go = CreateElementGO(
                 wall.elementTag, wall.node_i, wall.node_j,
-                wall.longitud_vertical_m, 0.55f, wallMaterial, "Wall"
+                wall.longitud_vertical_m, 0.72f, wallMaterial, "Wall"
             );
             if (go != null)
             {

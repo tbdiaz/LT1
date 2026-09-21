@@ -20,10 +20,27 @@ public class StructuralViewer : MonoBehaviour
         }
 
         loader.BuildScene();
+        EnsureRuntimeControllers();
         modelLoaded = true;
 
         ConfigureCamera();
         LogSummary();
+    }
+
+    void EnsureRuntimeControllers()
+    {
+        // Mantiene compatibles las escenas ya generadas: al abrir una escena
+        // antigua, los nuevos controladores se agregan automaticamente.
+        if (GetComponent<LoadVisualizationController>() == null)
+            gameObject.AddComponent<LoadVisualizationController>();
+        if (GetComponent<TributaryAreaVisualizationController>() == null)
+            gameObject.AddComponent<TributaryAreaVisualizationController>();
+        if (GetComponent<ViewerHUD>() == null)
+            gameObject.AddComponent<ViewerHUD>();
+        if (GetComponent<DeformedShapeController>() == null)
+            gameObject.AddComponent<DeformedShapeController>();
+        if (GetComponent<ForceDiagramController>() == null)
+            gameObject.AddComponent<ForceDiagramController>();
     }
 
     void ConfigureCamera()
@@ -100,6 +117,8 @@ public class StructuralViewer : MonoBehaviour
 
     void DrawInfoPanel()
     {
+        return; // resumen incorporado al HUD principal
+#pragma warning disable CS0162
         float pw = 340f;
         float ph = modelLoaded ? 210f : 60f;
         float x = 10f;
@@ -160,6 +179,7 @@ public class StructuralViewer : MonoBehaviour
         }
 
         GUILayout.EndArea();
+#pragma warning restore CS0162
     }
 
     void DrawStatusBar()
@@ -172,7 +192,7 @@ public class StructuralViewer : MonoBehaviour
             fontSize = 12
         };
         GUI.Label(new Rect(0, Screen.height - h, Screen.width, h),
-                  "LMB orbit | Scroll zoom | MMB pan | R reset | 1-8 toggles | N/E IDs | A axes | P notas | D deformada (+/- escala) | M diagramas | C caso | L cargas",
+                  "RMB orbitar | Rueda zoom | MMB pan | LMB seleccionar | R reset | Controles principales en botones",
                   centered);
     }
 

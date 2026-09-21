@@ -30,6 +30,9 @@ public class TributaryAreaInspector : MonoBehaviour
 
     void OnGUI()
     {
+        // El inspector se integra en ViewerHUD para evitar paneles superpuestos.
+        return;
+#pragma warning disable CS0162
         if (selection == null) return;
         if (selection.SelectedTag < 0 || selection.SelectedType != "Viga") return;
 
@@ -69,5 +72,6 @@ public class TributaryAreaInspector : MonoBehaviour
         }
 
         GUILayout.EndArea();
+#pragma warning restore CS0162
     }
 }
