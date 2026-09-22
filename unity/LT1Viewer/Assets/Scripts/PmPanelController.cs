@@ -86,12 +86,14 @@ public class PmPanelController : MonoBehaviour
             lastCapacityTag = tag;
         }
 
-        string key = blk.clave + "|" + caso;
+        string key = blk.clave + "|" + caso + "|"
+            + (loader != null ? loader.ResultRevision.ToString() : "0");
         if (key != chartKey)
         {
             chartKey = key;
             if (chart != null) Destroy(chart);
-            chart = LoadAuditedChart(blk);
+            chart = loader != null && loader.IsLinearSuperposition
+                ? null : LoadAuditedChart(blk);
             if (chart == null)
             {
                 chartFromAuditedImage = false;
@@ -112,7 +114,7 @@ public class PmPanelController : MonoBehaviour
 
         string caso = loader != null && !string.IsNullOrEmpty(loader.activeCase)
             ? loader.activeCase : pm.casoActivo;
-        PmDemanda d = blk.Demanda(caso);
+        PmDemanda d = DemandFor(blk, caso);
 
         GUIStyle rich = new GUIStyle(GUI.skin.label)
         { richText = true, wordWrap = true, fontSize = 12 };
@@ -162,7 +164,7 @@ public class PmPanelController : MonoBehaviour
                         ScaleMode.ScaleToFit, false);
 
         float pMin, pMax, mMax;
-        Ranges(blk, caso, out pMin, out pMax, out mMax);
+        Ranges(blk, caso, d, out pMin, out pMax, out mMax);
         float plotL = px + ML;
         float plotT = chartY + MT;
         float plotR = plotL + (chart.width - ML - MR);
@@ -234,8 +236,12 @@ public class PmPanelController : MonoBehaviour
                 small);
         }
 
-        string traz = "Trazabilidad: elementTag -> results.pm." + blk.clave
-            + " -> demanda_por_caso." + caso + ";  capacidad: pico M de la "
+        string traz = loader != null && loader.IsLinearSuperposition
+            ? "Trazabilidad: sliders -> combinacion lineal de results.forces[G,Q,EX,EY]"
+              + " -> demanda P-M; capacidad interpolada sobre la curva exportada. "
+            : "Trazabilidad: elementTag -> results.pm." + blk.clave
+              + " -> demanda_por_caso." + caso + ";  ";
+        traz += "capacidad: pico M de la "
             + "fiber section a la N de demanda (estado limite eps_cu=0.003; "
             + "FASE A verificada por reacciones).  P0 = "
             + Mathf.Abs(blk.P0).ToString("F0") + " kN";
@@ -276,7 +282,8 @@ public class PmPanelController : MonoBehaviour
         }
     }
 
-    void Ranges(PmBloque blk, string caso, out float pMin, out float pMax,
+    void Ranges(PmBloque blk, string caso, PmDemanda active,
+                out float pMin, out float pMax,
                 out float mMax)
     {
         pMin = 0f;
@@ -303,6 +310,13 @@ public class PmPanelController : MonoBehaviour
             // traccion (N compresion negativo) -> pequeno margen a traccion
             if (d.N < 0f) pMin = Mathf.Min(pMin, d.N * 1.3f);
         }
+        if (active != null && !blk.demandas.ContainsKey(caso))
+        {
+            p0 = Mathf.Max(p0, Mathf.Abs(active.N));
+            mMax = Mathf.Max(mMax, Mathf.Abs(active.MDem));
+            if (blk.esMuro) mMax = Mathf.Max(mMax, Mathf.Abs(active.MyDem));
+            if (active.N < 0f) pMin = Mathf.Min(pMin, active.N * 1.3f);
+        }
         pMax = p0 * 1.06f + 1f;
         mMax = mMax * 1.06f + 1f;
     }
@@ -323,7 +337,8 @@ public class PmPanelController : MonoBehaviour
         for (int i = 0; i < px.Length; i++) px[i] = bg;
 
         float pMin, pMax, mMax;
-        Ranges(blk, caso, out pMin, out pMax, out mMax);
+        PmDemanda active = DemandFor(blk, caso);
+        Ranges(blk, caso, active, out pMin, out pMax, out mMax);
 
         int leftX = ML, rightX = w - MR, topY = MT, botY = h - MB;
         float span = Mathf.Max(pMax - pMin, 1e-3f);
@@ -392,11 +407,88 @@ public class PmPanelController : MonoBehaviour
                             kv.Key == caso ? 7 : 5);
             }
         }
+        if (active != null && !blk.demandas.ContainsKey(caso))
+        {
+            int dx = Mathf.Clamp(
+                Mathf.RoundToInt(leftX + Mathf.Abs(active.MDem) / mSpan
+                                 * (rightX - leftX)), leftX, rightX);
+            int dy = Mathf.Clamp(
+                Mathf.RoundToInt(botY - (active.N - pMin) / span
+                                 * (botY - topY)), topY, botY);
+            DrawXMarker(px, w, h, dx, dy, activeDemand,
+                        active.dentro ? activeDemand : outside, 8);
+            if (blk.esMuro)
+            {
+                int wx = Mathf.Clamp(
+                    Mathf.RoundToInt(leftX + Mathf.Abs(active.MyDem) / mSpan
+                                     * (rightX - leftX)), leftX, rightX);
+                DrawXMarker(px, w, h, wx, dy, activeDemand,
+                            active.dentroDebil ? deC : outside, 8);
+            }
+        }
 
         Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
         tex.SetPixels32(px);
         tex.Apply();
         return tex;
+    }
+
+    PmDemanda DemandFor(PmBloque blk, string caso)
+    {
+        if (loader == null || !loader.IsLinearSuperposition)
+            return blk.Demanda(caso);
+
+        PmDemanda d = new PmDemanda { caso = caso };
+        if (!blk.esMuro)
+        {
+            if (!loader.elementForceI.TryGetValue(113022, out float[] f) ||
+                f == null || f.Length < 6) return null;
+            d.N = f[0];
+            d.MDem = Mathf.Sqrt(f[4] * f[4] + f[5] * f[5]);
+            d.MCap = CapacityAt(blk.curva, d.N);
+            d.dentro = CapacityCovers(blk.curva, d.N) && d.MDem <= d.MCap;
+            return d;
+        }
+
+        if (!loader.elementForceI.TryGetValue(4001, out float[] a) ||
+            !loader.elementForceI.TryGetValue(4002, out float[] b) ||
+            a == null || b == null || a.Length < 6 || b.Length < 6) return null;
+        d.N = a[0] + b[0];
+        d.MDem = Mathf.Abs(a[5] + b[5] + blk.semilongitud * (a[0] - b[0]));
+        d.MyDem = Mathf.Abs(a[4] + b[4]);
+        d.MCap = CapacityAt(blk.curva, d.N);
+        d.MyCap = CapacityAt(blk.curvaDebil, d.N);
+        d.dentro = CapacityCovers(blk.curva, d.N) && d.MDem <= d.MCap;
+        d.dentroDebil = CapacityCovers(blk.curvaDebil, d.N) && d.MyDem <= d.MyCap;
+        return d;
+    }
+
+    static bool CapacityCovers(List<PmPoint> curve, float p)
+    {
+        if (curve == null || curve.Count == 0) return false;
+        float lo = curve[0].P, hi = curve[0].P;
+        foreach (PmPoint pt in curve)
+        {
+            lo = Mathf.Min(lo, pt.P);
+            hi = Mathf.Max(hi, pt.P);
+        }
+        return p >= lo && p <= hi;
+    }
+
+    static float CapacityAt(List<PmPoint> curve, float p)
+    {
+        if (!CapacityCovers(curve, p)) return 0f;
+        PmPoint lower = null, upper = null;
+        foreach (PmPoint pt in curve)
+        {
+            if (pt.P <= p && (lower == null || pt.P > lower.P)) lower = pt;
+            if (pt.P >= p && (upper == null || pt.P < upper.P)) upper = pt;
+        }
+        if (lower == null || upper == null) return 0f;
+        if (Mathf.Abs(upper.P - lower.P) < 1e-6f)
+            return Mathf.Min(lower.M, upper.M);
+        return Mathf.Lerp(lower.M, upper.M,
+                          (p - lower.P) / (upper.P - lower.P));
     }
 
     static void Polyline(Color32[] px, int w, int h, List<PmPoint> pts,
@@ -650,6 +742,7 @@ public class PmBloque
     public List<PmPoint> curvaDebil = new List<PmPoint>();
     public float P0;
     public float P0Debil;
+    public float semilongitud;
     public Dictionary<string, PmDemanda> demandas =
         new Dictionary<string, PmDemanda>();
 
@@ -681,6 +774,8 @@ public class PmBloque
         b.curvaDebil = Puntos(Leaf(cap, "curva_debil"));
         b.P0 = (float)Num(cap, "P0_kN_compresion", 0f);
         b.P0Debil = (float)Num(cap, "P0_kN_debil", 0f);
+        b.semilongitud = (float)Num(Obj(obj, "recomposicion"),
+                                    "semilongitud_m", 0f);
         b.demandas = Demandas(Obj(obj, "demanda_por_caso"), true);
         if (b.curva == null || b.curva.Count == 0) return null;
         return b;

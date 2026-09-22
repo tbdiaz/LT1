@@ -32,6 +32,9 @@ public class ModelLoader : MonoBehaviour
     [HideInInspector] public string rawJson;
     [HideInInspector] public string activeCase = "";
     [HideInInspector] public ActiveEquilibrium Eq = new ActiveEquilibrium();
+    [HideInInspector] public bool IsLinearSuperposition;
+    [HideInInspector] public float[] SuperpositionCoefficients = { 1f, 1f, 1f, 0f };
+    [HideInInspector] public int ResultRevision;
 
     [HideInInspector] public Dictionary<int, GameObject> nodeObjects = new Dictionary<int, GameObject>();
     [HideInInspector] public Dictionary<int, GameObject> beamObjects = new Dictionary<int, GameObject>();
@@ -65,6 +68,14 @@ public class ModelLoader : MonoBehaviour
 
     private Dictionary<int, int> elementJsonIndex = new Dictionary<int, int>();
     private Dictionary<int, int[]> elementNodePair = new Dictionary<int, int[]>();
+    private Dictionary<string, Dictionary<int, float[]>> forceCaseCache =
+        new Dictionary<string, Dictionary<int, float[]>>();
+    private Dictionary<string, Dictionary<int, float[]>> displacementCaseCache =
+        new Dictionary<string, Dictionary<int, float[]>>();
+    private Dictionary<string, Dictionary<int, float[]>> reactionCaseCache =
+        new Dictionary<string, Dictionary<int, float[]>>();
+    private Dictionary<string, ActiveEquilibrium> equilibriumCaseCache =
+        new Dictionary<string, ActiveEquilibrium>();
     private int[] emptyInt6 = { 0, 0, 0, 0, 0, 0 };
 
     public string[] CaseList
@@ -167,6 +178,7 @@ public class ModelLoader : MonoBehaviour
         }
 
         BuildAggregates();
+        PrepareResultCaches();
 
         if (!SetActiveCase(CaseList.Length > 0 ? CaseList[0] : "G"))
         {
@@ -493,6 +505,25 @@ public class ModelLoader : MonoBehaviour
     // =======================================================================
     //  Caso activo
     // =======================================================================
+    void PrepareResultCaches()
+    {
+        forceCaseCache.Clear();
+        displacementCaseCache.Clear();
+        reactionCaseCache.Clear();
+        equilibriumCaseCache.Clear();
+        string forcesObj = ExtractValue(rawJson, "forces");
+        string dispObj = ExtractValue(rawJson, "displacements");
+        string reacObj = ExtractValue(rawJson, "reactions");
+        string eqObj = ExtractValue(rawJson, "equilibrio");
+        foreach (string c in CaseList)
+        {
+            forceCaseCache[c] = ParseForceCase(forcesObj, c);
+            displacementCaseCache[c] = ParseValueDict(dispObj, c);
+            reactionCaseCache[c] = ParseValueDict(reacObj, c);
+            equilibriumCaseCache[c] = ParseEquilibrio(eqObj, c) ?? new ActiveEquilibrium();
+        }
+    }
+
     public bool SetActiveCase(string caseKey)
     {
         if (combinedRoot == null || combinedRoot.results == null ||
@@ -503,18 +534,75 @@ public class ModelLoader : MonoBehaviour
             if (c == caseKey) { found = true; break; }
         if (!found) return false;
 
+        IsLinearSuperposition = false;
+        return ApplyResults(caseKey, forceCaseCache[caseKey],
+            displacementCaseCache[caseKey], reactionCaseCache[caseKey],
+            equilibriumCaseCache[caseKey]);
+    }
+
+    public bool ApplyLinearSuperposition(float g, float q, float ex, float ey)
+    {
+        string[] cases = { "G", "Q", "EX", "EY" };
+        float[] coef = { g, q, ex, ey };
+        var forces = new Dictionary<int, float[]>();
+        var displacements = new Dictionary<int, float[]>();
+        var reactions = new Dictionary<int, float[]>();
+        var eq = new ActiveEquilibrium { rc = 0, lat_axis = "XY" };
+
+        for (int k = 0; k < cases.Length; k++)
+        {
+            if (!forceCaseCache.ContainsKey(cases[k])) return false;
+            AccumulateCase(forces, forceCaseCache[cases[k]], coef[k]);
+            AccumulateCase(displacements, displacementCaseCache[cases[k]], coef[k]);
+            AccumulateCase(reactions, reactionCaseCache[cases[k]], coef[k]);
+            AccumulateEquilibrium(eq, equilibriumCaseCache[cases[k]], coef[k]);
+        }
+
+        SuperpositionCoefficients = coef;
+        IsLinearSuperposition = true;
+        return ApplyResults("SUPERPOSICION", forces, displacements, reactions, eq);
+    }
+
+    static void AccumulateCase(Dictionary<int, float[]> target,
+                               Dictionary<int, float[]> source, float factor)
+    {
+        if (source == null || Mathf.Abs(factor) <= 1e-8f) return;
+        foreach (var kv in source)
+        {
+            if (!target.TryGetValue(kv.Key, out float[] sum))
+            {
+                sum = new float[kv.Value.Length];
+                target[kv.Key] = sum;
+            }
+            int n = Mathf.Min(sum.Length, kv.Value.Length);
+            for (int i = 0; i < n; i++) sum[i] += factor * kv.Value[i];
+        }
+    }
+
+    static void AccumulateEquilibrium(ActiveEquilibrium sum,
+                                      ActiveEquilibrium value, float factor)
+    {
+        if (value == null || Mathf.Abs(factor) <= 1e-8f) return;
+        if (value.rc != 0) sum.rc = value.rc;
+        sum.P_aplicada_kN += factor * value.P_aplicada_kN;
+        sum.sum_Rx_kN += factor * value.sum_Rx_kN;
+        sum.sum_Ry_kN += factor * value.sum_Ry_kN;
+        sum.sum_Rz_kN += factor * value.sum_Rz_kN;
+        sum.vert_ref_kN += factor * value.vert_ref_kN;
+        sum.lat_ref_kN += factor * value.lat_ref_kN;
+        sum.corte_basal_kN += factor * value.corte_basal_kN;
+        sum.err_abs_vertical_kN += factor * value.err_abs_vertical_kN;
+        sum.err_abs_lateral_kN += factor * value.err_abs_lateral_kN;
+    }
+
+    bool ApplyResults(string caseKey, Dictionary<int, float[]> forces,
+                      Dictionary<int, float[]> displacements,
+                      Dictionary<int, float[]> reactions, ActiveEquilibrium eq)
+    {
         activeCase = caseKey;
+        ResultRevision++;
         if (modelData.analysis == null) modelData.analysis = NewAnalysis();
-
-        var forcesObj = ExtractValue(rawJson, "forces");
-        var dispObj = ExtractValue(rawJson, "displacements");
-        var reacObj = ExtractValue(rawJson, "reactions");
-        var eqObj = ExtractValue(rawJson, "equilibrio");
-
-        var forces = ParseForceCase(forcesObj, caseKey);
-        var displacements = ParseValueDict(dispObj, caseKey);
-        var reactions = ParseValueDict(reacObj, caseKey);
-        Eq = ParseEquilibrio(eqObj, caseKey) ?? new ActiveEquilibrium();
+        Eq = eq ?? new ActiveEquilibrium();
 
         elementForceI.Clear();
         elementForceJ.Clear();
@@ -549,10 +637,14 @@ public class ModelLoader : MonoBehaviour
         var a = modelData.analysis;
         a.caso = caseKey;
         var info = GetCaseInfo(caseKey);
-        a.caso_descripcion = info != null ? info.descripcion : "";
+        a.caso_descripcion = IsLinearSuperposition
+            ? "Combinacion lineal interactiva de G, Q, EX y EY"
+            : info != null ? info.descripcion : "";
         a.convencion_fuerzas = combinedRoot.metadata != null
             ? combinedRoot.metadata.convencion_fuerzas_locales : "";
-        a.estado = Eq.rc == 0 ? "OK" : $"RC={Eq.rc}";
+        a.estado = Eq.rc == 0
+            ? (IsLinearSuperposition ? "SUPERPOSICION LINEAL" : "OK")
+            : $"RC={Eq.rc}";
         a.P_aplicada_kN = Eq.P_aplicada_kN;
         a.suma_Rz_kN = Eq.sum_Rz_kN;
         a.err_abs_kN = Eq.err_abs_vertical_kN;

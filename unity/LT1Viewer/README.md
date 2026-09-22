@@ -37,6 +37,62 @@ conservación de fuerza y primer momento. No son las reacciones reales del
 marco. Es una ayuda visual de Semana 5: no modifica el JSON ni reanaliza
 OpenSees.
 
+## SQ4 — carga móvil asociada al usuario
+
+El panel derecho incluye un prototipo independiente de la carga puntual sobre
+una viga. Al activar `USUARIO`, aparece un marcador amarillo que puede moverse
+con `WASD`, las flechas del teclado o los cuatro botones de la interfaz.
+
+- `NIVEL −/+` cambia entre los niveles 1 a 4.
+- La posición se contrasta continuamente con los polígonos tributarios LT2 y
+  con las franjas equivalentes LT1 construidas a partir de su área exportada.
+- La interfaz informa el panel o región encontrado, resalta en rojo las vigas
+  receptoras y muestra la carga del usuario asignada por viga.
+- En puntos compartidos por varias regiones, la carga se reparte en partes
+  iguales entre las vigas receptoras únicas.
+
+La carga base de las regiones también se muestra como dato de trazabilidad.
+SQ4 es una asignación visual: no modifica el JSON, no ejecuta OpenSees y no
+actualiza diagramas ni demanda–capacidad.
+
+## Laboratorio de modificaciones y reanálisis
+
+El panel derecho incorpora un flujo reproducible para dos modificaciones:
+
+1. Elegir un caso en la barra superior, escribir su **factor de carga** y
+   presionar `APLICAR`.
+2. Seleccionar una viga, columna o muro y presionar
+   `DESACTIVAR ELEMENTO SELECCIONADO` (el mismo botón permite reactivarlo).
+
+Estas acciones crean un escenario local y no modifican el JSON fuente. Las
+flechas de carga reflejan gráficamente el factor, y el elemento desactivado
+se oculta, pero las deformadas, esfuerzos, reacciones y comprobaciones P–M
+siguen siendo los resultados del modelo base. Por eso la interfaz muestra
+**REQUIERE REANÁLISIS** mientras exista cualquier modificación y etiqueta los
+resultados como no actualizados. `RESTAURAR ESCENARIO BASE` elimina todos los
+cambios y recupera la vigencia de los resultados originales.
+
+## Superposición interactiva
+
+El panel izquierdo contiene sliders independientes para `G`, `Q`, `EX` y
+`EY`, con coeficientes entre −2.00 y +2.00. Al mover cualquiera, el viewer
+combina inmediatamente los resultados base ya analizados:
+
+- la deformada usa la suma de desplazamientos nodales;
+- el inspector y los diagramas usan la suma de fuerzas de extremo;
+- el punto de demanda P–M se reconstruye desde las fuerzas combinadas.
+
+Para M001 se conserva la recomposición documentada de los elementos 4001 y
+4002, leyendo `semilongitud_m` desde el JSON. La capacidad mostrada para un
+punto combinado se interpola sobre la curva P–M exportada. `COMBO_R` carga
+los coeficientes documentados del modelo y `CERO` anula los cuatro.
+
+Esta operación es superposición de respuestas lineales existentes y no
+requiere reanálisis mientras no se cambien geometría, rigidez, apoyos,
+materiales, secciones ni activación de elementos. Las modificaciones del
+apartado anterior siguen marcándose separadamente como **REQUIERE
+REANÁLISIS**.
+
 ## Resultados y convenciones
 
 Los casos disponibles se leen de `results.cases`: `COMBO_R`, `EX`, `EY`,

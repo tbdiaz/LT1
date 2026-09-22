@@ -20,12 +20,15 @@ public class ViewerHUD : MonoBehaviour
     LoadVisualizationController loads;
     TributaryAreaVisualizationController tributary;
     MovingLoadController movingLoad;
+    ScenarioModificationController scenario;
+    SuperpositionController superposition;
+    UserMovingLoadController userLoad;
     Vector2 selectionScroll;
 
     public static bool PointerOverHud(Vector3 mouse)
     {
         float y = Screen.height - mouse.y;
-        float leftH = Application.isMobilePlatform ? Screen.height - 8f : 455f;
+        float leftH = Screen.height - 42f;
         return (mouse.x <= LeftW + 8f && y <= leftH) ||
                mouse.x >= Screen.width - RightW - 8f ||
                (y <= TopH + 8f && mouse.x > LeftW && mouse.x < Screen.width - RightW);
@@ -45,6 +48,9 @@ public class ViewerHUD : MonoBehaviour
         loads = FindObjectOfType<LoadVisualizationController>();
         tributary = FindObjectOfType<TributaryAreaVisualizationController>();
         movingLoad = FindObjectOfType<MovingLoadController>();
+        scenario = FindObjectOfType<ScenarioModificationController>();
+        superposition = FindObjectOfType<SuperpositionController>();
+        userLoad = FindObjectOfType<UserMovingLoadController>();
     }
 
     void OnGUI()
@@ -70,6 +76,18 @@ public class ViewerHUD : MonoBehaviour
           normal = { textColor = new Color(0.92f, 0.95f, 1f) } };
     }
 
+    GUIStyle Sq4ButtonStyle()
+    {
+        return new GUIStyle(GUI.skin.button)
+        { fontSize = 15, fontStyle = FontStyle.Bold };
+    }
+
+    GUIStyle Sq4FieldStyle()
+    {
+        return new GUIStyle(GUI.skin.textField)
+        { fontSize = 17, alignment = TextAnchor.MiddleCenter };
+    }
+
     bool ToggleButton(string label, bool on, System.Action action)
     {
         Color old = GUI.backgroundColor;
@@ -82,7 +100,7 @@ public class ViewerHUD : MonoBehaviour
 
     void DrawLeftPanel()
     {
-        float panelH = Application.isMobilePlatform ? Screen.height - 16f : 444f;
+        float panelH = Screen.height - 42f;
         GUI.Box(new Rect(8, 8, LeftW, panelH), "");
         GUILayout.BeginArea(new Rect(16, 13, LeftW - 16, panelH - 12f));
         GUILayout.Label("LT1 + LT2  |  CAPAS", Header(16));
@@ -106,7 +124,47 @@ public class ViewerHUD : MonoBehaviour
         }
         GUILayout.EndHorizontal();
         if (axes != null) ToggleButton("EJES LOCALES", axes.ShowAxes, axes.ToggleAxes);
+        GUILayout.Space(7);
+        DrawSuperpositionControls();
         GUILayout.EndArea();
+    }
+
+    void DrawSuperpositionControls()
+    {
+        GUILayout.Label("SUPERPOSICION LINEAL", Header(13));
+        if (superposition == null)
+        {
+            GUILayout.Label("Controlador no disponible.", TextStyle(10));
+            return;
+        }
+
+        string[] cases = { "G", "Q", "EX", "EY" };
+        foreach (string c in cases)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(c, TextStyle(11), GUILayout.Width(24));
+            float oldValue = superposition.Get(c);
+            float newValue = GUILayout.HorizontalSlider(oldValue, -2f, 2f,
+                                                        GUILayout.Width(125));
+            GUILayout.Label(newValue.ToString("F2"), TextStyle(10),
+                            GUILayout.Width(42));
+            GUILayout.EndHorizontal();
+            if (Mathf.Abs(newValue - oldValue) > 1e-5f)
+                superposition.Set(c, newValue);
+        }
+
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("COMBO_R", GUILayout.Height(25)))
+            superposition.LoadComboR();
+        if (GUILayout.Button("CERO", GUILayout.Height(25)))
+            superposition.Zero();
+        GUILayout.EndHorizontal();
+        GUILayout.Label(superposition.Active
+            ? "<color=#58D8FF><b>ACTIVA:</b> deformada, esfuerzos y P-M actualizados al instante.</color>"
+            : "Mueva un slider para activar. Rango -2.00 a +2.00.",
+            TextStyle(10));
+        GUILayout.Label("Superposicion de resultados lineales existentes; no modifica el modelo.",
+                        TextStyle(9));
     }
 
     void DrawTopToolbar()
@@ -202,6 +260,8 @@ public class ViewerHUD : MonoBehaviour
         GUI.Box(new Rect(x, 8, RightW, h), "");
         GUILayout.BeginArea(new Rect(x + 10, 13, RightW - 20, h - 12));
         GUILayout.Label("ELEMENTO SELECCIONADO", Header(16));
+        DrawScenarioPanel();
+        DrawUserMovingLoadPanel();
         if (selection == null || selection.SelectedTag < 0)
         {
             GUILayout.Space(15);
@@ -235,9 +295,108 @@ public class ViewerHUD : MonoBehaviour
         GUILayout.EndArea();
     }
 
+    void DrawUserMovingLoadPanel()
+    {
+        GUILayout.Label("<b>SQ4 · CARGA MOVIL DEL USUARIO</b>", TextStyle(16));
+        if (userLoad == null)
+        {
+            GUILayout.Label("Controlador SQ4 no disponible.", TextStyle(13));
+            return;
+        }
+        GUILayout.BeginHorizontal();
+        Color oldColor = GUI.backgroundColor;
+        GUI.backgroundColor = userLoad.Active ? new Color(0.12f, 0.72f, 0.42f)
+                                              : new Color(0.28f, 0.32f, 0.40f);
+        if (GUILayout.Button(userLoad.Active ? "USUARIO ON" : "USUARIO OFF",
+                             Sq4ButtonStyle(), GUILayout.Height(34)))
+            userLoad.Toggle();
+        GUI.backgroundColor = oldColor;
+        GUILayout.Label("P [kN]", TextStyle(16), GUILayout.Width(62));
+        userLoad.MagnitudeText = GUILayout.TextField(
+            userLoad.MagnitudeText, Sq4FieldStyle(), GUILayout.Width(68), GUILayout.Height(34));
+        if (GUILayout.Button("OK", Sq4ButtonStyle(), GUILayout.Width(46), GUILayout.Height(34)))
+            userLoad.ApplyMagnitude();
+        GUILayout.EndHorizontal();
+        if (!userLoad.Active)
+        {
+            GUILayout.Label("Activa el usuario para identificar regiones y vigas receptoras.",
+                            TextStyle(16));
+            return;
+        }
+
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("NIVEL −", Sq4ButtonStyle(), GUILayout.Height(33))) userLoad.ChangeFloor(-1);
+        GUILayout.Label("N" + userLoad.Floor, Header(16), GUILayout.Width(38));
+        if (GUILayout.Button("NIVEL +", Sq4ButtonStyle(), GUILayout.Height(33))) userLoad.ChangeFloor(1);
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("←", Sq4ButtonStyle(), GUILayout.Height(33))) userLoad.MoveBy(-0.5f, 0f);
+        if (GUILayout.Button("↑", Sq4ButtonStyle(), GUILayout.Height(33))) userLoad.MoveBy(0f, 0.5f);
+        if (GUILayout.Button("↓", Sq4ButtonStyle(), GUILayout.Height(33))) userLoad.MoveBy(0f, -0.5f);
+        if (GUILayout.Button("→", Sq4ButtonStyle(), GUILayout.Height(33))) userLoad.MoveBy(0.5f, 0f);
+        GUILayout.EndHorizontal();
+        GUILayout.Label(userLoad.PositionLabel + " · WASD/flechas", TextStyle(16));
+        GUILayout.Label("<color=#FFD15C><b>REGION:</b> " + userLoad.RegionLabel + "</color>",
+                        TextStyle(17));
+        GUILayout.Label("<color=#FF6644><b>ASIGNACION:</b> " + userLoad.AssignmentLabel + "</color>",
+                        TextStyle(18));
+        GUILayout.Label("Prototipo visual; no recalcula diagramas.", TextStyle(14));
+        GUILayout.Space(4);
+    }
+
+    void DrawScenarioPanel()
+    {
+        GUILayout.Label("<b>LABORATORIO · MODIFICACIONES</b>", TextStyle(13));
+        if (scenario == null)
+        {
+            GUILayout.Label("Controlador de escenario no disponible.", TextStyle(11));
+            return;
+        }
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Factor carga " + (loader != null ? loader.activeCase : ""),
+                        TextStyle(11), GUILayout.Width(125));
+        scenario.LoadFactorText = GUILayout.TextField(
+            scenario.LoadFactorText, GUILayout.Width(75), GUILayout.Height(27));
+        if (GUILayout.Button("APLICAR", GUILayout.Height(27)))
+            scenario.ApplyLoadFactor();
+        GUILayout.EndHorizontal();
+
+        if (selection != null && selection.SelectedTag >= 0)
+        {
+            bool isActive = scenario.IsElementActive(selection.SelectedTag);
+            Color old = GUI.backgroundColor;
+            GUI.backgroundColor = isActive ? new Color(0.82f, 0.35f, 0.18f)
+                                           : new Color(0.12f, 0.72f, 0.42f);
+            if (GUILayout.Button(isActive ? "DESACTIVAR ELEMENTO SELECCIONADO"
+                                          : "REACTIVAR ELEMENTO SELECCIONADO",
+                                 GUILayout.Height(29)))
+                scenario.ToggleSelectedElement();
+            GUI.backgroundColor = old;
+        }
+
+        if (scenario.RequiresReanalysis)
+        {
+            GUILayout.Label("<color=#FF9B45><b>REQUIERE REANALISIS.</b> " +
+                "Deformadas, esfuerzos y D/C corresponden al modelo base y no son vigentes " +
+                "para este escenario.</color>", TextStyle(11));
+            GUILayout.Label($"Casos con intensidad modificada: {scenario.ModifiedLoadCaseCount} · " +
+                            $"elementos inactivos: {scenario.InactiveElementCount}", TextStyle(10));
+            if (GUILayout.Button("RESTAURAR ESCENARIO BASE", GUILayout.Height(27)))
+                scenario.RestoreBaseScenario();
+        }
+        else
+            GUILayout.Label("<color=#5CFF83>Escenario base · no requiere reanalisis.</color>",
+                            TextStyle(10));
+        GUILayout.Label(scenario.Status, TextStyle(10));
+        GUILayout.Space(4);
+    }
+
     void DrawForces(int tag)
     {
         GUILayout.Label("<b>RESULTADOS · " + (loader != null ? loader.activeCase : "") + "</b>", TextStyle(14));
+        if (scenario != null && scenario.RequiresReanalysis)
+            GUILayout.Label("<color=#FF9B45>RESULTADOS BASE · no actualizados para el escenario modificado.</color>", TextStyle(10));
         if (loader == null || !loader.elementForceI.TryGetValue(tag, out var fi) ||
             !loader.elementForceJ.TryGetValue(tag, out var fj) || fi.Length < 6 || fj.Length < 6)
         { GUILayout.Label("Sin resultados para este caso.", TextStyle()); return; }

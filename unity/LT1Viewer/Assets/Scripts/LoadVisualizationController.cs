@@ -7,11 +7,16 @@ using UnityEngine;
 public class LoadVisualizationController : MonoBehaviour
 {
     private ModelLoader loader;
+    private ScenarioModificationController scenario;
     private GameObject root;
     private bool active;
     public bool Active => active;
 
-    void Start() { loader = FindObjectOfType<ModelLoader>(); }
+    void Start()
+    {
+        loader = FindObjectOfType<ModelLoader>();
+        scenario = FindObjectOfType<ScenarioModificationController>();
+    }
     void OnEnable() { ModelLoader.CaseChanged += OnCaseChanged; }
     void OnDisable() { ModelLoader.CaseChanged -= OnCaseChanged; }
     void OnCaseChanged(string c) { if (active) Rebuild(); }
@@ -49,10 +54,13 @@ public class LoadVisualizationController : MonoBehaviour
         foreach (var v in totals.Values) max = Mathf.Max(max, v);
         Material mat = MakeMaterial(loader.activeCase == "Q"
             ? new Color(0.2f, 1f, 0.35f) : new Color(0.1f, 0.85f, 1f));
+        float factor = scenario != null ? scenario.CurrentLoadFactor : 1f;
+        float visualFactor = Mathf.Sqrt(Mathf.Max(0f, factor));
         foreach (var kv in totals)
         {
             if (!loader.beamObjects.TryGetValue(kv.Key, out var beam) || beam == null) continue;
-            float length = max > 0f ? Mathf.Lerp(0.55f, 2.6f, Mathf.Sqrt(kv.Value / max)) : 0.8f;
+            float length = (max > 0f ? Mathf.Lerp(0.55f, 2.6f, Mathf.Sqrt(kv.Value / max)) : 0.8f)
+                           * visualFactor;
             Vector3 tip = beam.transform.position + Vector3.up * 0.18f;
             DrawArrow(tip + Vector3.up * length, tip, mat, 0.055f);
         }
@@ -78,13 +86,16 @@ public class LoadVisualizationController : MonoBehaviour
         float max = 0f;
         foreach (var l in loads) max = Mathf.Max(max, Mathf.Sqrt(l.fx_kN*l.fx_kN + l.fy_kN*l.fy_kN));
         Material mat = MakeMaterial(new Color(1f, 0.18f, 0.12f));
+        float factor = scenario != null ? scenario.CurrentLoadFactor : 1f;
+        float visualFactor = Mathf.Sqrt(Mathf.Max(0f, factor));
         foreach (var l in loads)
         {
             if (!loader.nodeObjects.TryGetValue(l.node_tag, out var node) || node == null) continue;
             Vector3 d = ModelLoader.StructToUnity(l.fx_kN, l.fy_kN, 0f);
             float mag = d.magnitude;
             if (mag < 1e-8f) continue;
-            float length = max > 0f ? Mathf.Lerp(1.2f, 4.0f, mag / max) : 1.2f;
+            float length = (max > 0f ? Mathf.Lerp(1.2f, 4.0f, mag / max) : 1.2f)
+                           * visualFactor;
             DrawArrow(node.transform.position, node.transform.position + d.normalized * length, mat, 0.11f);
         }
     }

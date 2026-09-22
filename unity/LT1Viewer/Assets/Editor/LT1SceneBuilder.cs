@@ -49,6 +49,9 @@ public static class LT1SceneBuilder
         viewer.AddComponent<LoadVisualizationController>();
         viewer.AddComponent<TributaryAreaVisualizationController>();
         viewer.AddComponent<MovingLoadController>();
+        viewer.AddComponent<ScenarioModificationController>();
+        viewer.AddComponent<SuperpositionController>();
+        viewer.AddComponent<UserMovingLoadController>();
         viewer.AddComponent<ViewerHUD>();
 
         // --- Registrar escena en Build Settings ---

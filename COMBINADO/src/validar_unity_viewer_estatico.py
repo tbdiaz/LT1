@@ -619,7 +619,8 @@ class StaticValidator:
         for component in (
                 "CaseSelector", "LoadInspector", "LoadVisualizationController",
                 "TributaryAreaVisualizationController", "MovingLoadController",
-                "ViewerHUD"):
+                "ScenarioModificationController", "SuperpositionController",
+                "UserMovingLoadController", "ViewerHUD"):
             if f"AddComponent<{component}>" not in text:
                 self.fail.append(f"LT1SceneBuilder no registra {component}")
 
@@ -630,6 +631,16 @@ class StaticValidator:
             "TributaryAreaVisualizationController.cs": ("class TributaryAreaVisualizationController", "polygon"),
             "MovingLoadController.cs": ("class MovingLoadController",
                                         "Pi=P(1-xi)", "LoadI", "LoadJ"),
+            "ScenarioModificationController.cs": (
+                "class ScenarioModificationController", "ApplyLoadFactor",
+                "ToggleSelectedElement", "RequiresReanalysis",
+                "RestoreBaseScenario"),
+            "SuperpositionController.cs": (
+                "class SuperpositionController", "public void Set",
+                "LoadComboR", "ApplyLinearSuperposition"),
+            "UserMovingLoadController.cs": (
+                "class UserMovingLoadController", "PointInPolygon",
+                "DrawReceiver", "AssignmentLabel", "MoveBy"),
             "OrbitCamera.cs": ("Input.touchCount", "HandleTouch", "pinch"),
             "SelectionController.cs": ("HandleTouchSelection", "TouchPhase.Ended"),
         }
@@ -642,6 +653,16 @@ class StaticValidator:
             for token in tokens:
                 if token not in source_text:
                     self.fail.append(f"{filename} sin '{token}'")
+
+        for token in ("ApplyLinearSuperposition", "PrepareResultCaches",
+                      "AccumulateCase", "ResultRevision"):
+            if token not in (SCRIPTS / "ModelLoader.cs").read_text(encoding="utf-8"):
+                self.fail.append(f"ModelLoader.cs sin '{token}' para superposicion")
+        pm_text = PANEL.read_text(encoding="utf-8")
+        for token in ("DemandFor", "CapacityAt", "semilongitud",
+                      "IsLinearSuperposition"):
+            if token not in pm_text:
+                self.fail.append(f"PmPanelController.cs sin '{token}' para superposicion")
 
         android = EDITOR / "AndroidBuild.cs"
         if not android.exists():
