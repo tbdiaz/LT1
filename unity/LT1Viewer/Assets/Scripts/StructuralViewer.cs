@@ -41,6 +41,8 @@ public class StructuralViewer : MonoBehaviour
             gameObject.AddComponent<DeformedShapeController>();
         if (GetComponent<ForceDiagramController>() == null)
             gameObject.AddComponent<ForceDiagramController>();
+        if (GetComponent<MovingLoadController>() == null)
+            gameObject.AddComponent<MovingLoadController>();
     }
 
     void ConfigureCamera()

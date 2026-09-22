@@ -290,6 +290,7 @@ public class CombinedBeamLoad
     public string nivel;
     public float w_kN_m;
     public int tag_original;
+    public string estado;
 }
 
 [Serializable]

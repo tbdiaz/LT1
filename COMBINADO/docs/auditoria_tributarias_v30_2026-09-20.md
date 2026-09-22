@@ -35,14 +35,16 @@ pendientes de aplicación en los datos LT2. No se les asignó carga supuesta.
 
 ## Estado del modelo
 
-`COMBINADO/src/run_combined.py` todavía aplica las cargas originales a las
-vigas V40 y ninguna carga de losa a 9011–9018. Conserva el peso gravitacional
-global, pero **no** la distribución local que resultaría de la geometría
-conectada. Lo mismo afecta el reparto local de Q, que utiliza las áreas LT2
-anteriores. Antes de actualizar G/Q, los resultados de esfuerzos de esas
-vigas y sus adyacentes deben tratarse como preliminares. La auditoría se
-reproduce con `python COMBINADO/src/auditar_tributarias_v30.py`.
+La redistribución se cerró en el modelo COMBINADO mediante
+`COMBINADO/data/redistribucion_tributaria_v30_lt2.csv`. Para G y Q se agrega
+la carga equivalente a 9011–9018 y se descarga, con signo opuesto, de las V40
+2097–2112. La suma de `delta_area_m2` y de carga es cero en cada nivel; por
+ello no cambia el peso global. ROOF permanece sin carga de losa documentada.
 
-Para cerrar la carga hace falta confirmar los ocho paños pendientes y luego
-regenerar conjuntamente áreas tributarias, cargas G/Q, análisis y exportación
-Unity; cargar solo las V30 sin descontar de las V40 duplicaría carga.
+Las correcciones se aplican como `beamUniform` firmadas sobre la distribución
+LT2 preexistente. Unity exporta las 24 filas de corrección y agrega sus áreas
+por `elementTag`. Ocho paños conservan la marca histórica
+`PENDING_VISUAL_CONFIRMATION`; la redistribución usa la geometría de paños
+vigente y aprobada para cerrar esta entrega, sin afirmar una lectura
+independiente adicional del plano. La auditoría se reproduce con
+`python COMBINADO/src/auditar_tributarias_v30.py`.

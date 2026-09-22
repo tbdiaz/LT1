@@ -69,6 +69,7 @@ OUT_FIG = OUT / "vista_3d_combinado.png"
 OUT_LINKS = OUT / "conectores_v40_muro.csv"
 OUT_BOX = OUT / "verticales_cajas_pilastra.csv"
 V30_CONN_CSV = COMB / "data" / "conexiones_v30_lt2.csv"
+V30_REDIST_CSV = COMB / "data" / "redistribucion_tributaria_v30_lt2.csv"
 
 SHIFT_X = 31.250
 TOL = 1e-6
@@ -380,6 +381,7 @@ class CombinedBuilder:
         self.mat = pd.read_csv(LT2_MAT)
         self.loads = pd.read_csv(LT2_LOADS)
         self.v30_connection_data = pd.read_csv(V30_CONN_CSV)
+        self.v30_redistribution = pd.read_csv(V30_REDIST_CSV)
         with open(JSON_LT1, "r", encoding="utf-8") as f:
             self.json_lt1 = json.load(f)
         d = self.json_lt1
@@ -1348,6 +1350,59 @@ class CombinedBuilder:
                                          tag_original=link["nodo_muro"]))
 
     # ---- cargas ------------------------------------------------------------
+    def v30_redistribution_rows(self, intensity_kN_m2):
+        """Correcciones uniformes firmadas V40 -> V30 para G o Q.
+
+        `delta_area_m2` positivo agrega carga a las nuevas V30 y negativo la
+        retira de las V40 que la recibian antes. La suma por nivel debe ser
+        nula: se redistribuye carga, no se agrega peso al edificio.
+        """
+        df = self.v30_redistribution
+        required = {"nivel", "beam_id", "element_tag", "delta_area_m2",
+                    "longitud_m", "qG_kN_m2", "estado"}
+        if set(df.columns) < required or len(df) != 24:
+            raise RuntimeError("V30 tributaria: CSV incompleto (24 filas)")
+        if set(df["estado"]) != {"REDISTRIBUIDO_COMBINADO"}:
+            raise RuntimeError("V30 tributaria: estado no aprobado")
+        if df["element_tag"].duplicated().any():
+            raise RuntimeError("V30 tributaria: element_tag duplicado")
+        rows = []
+        existing = set(int(t) for t in ops.getEleTags())
+        for level, group in df.groupby("nivel"):
+            if abs(float(group["delta_area_m2"].sum())) > 1e-9:
+                raise RuntimeError(
+                    f"V30 tributaria {level}: no conserva area")
+        for r in df.itertuples(index=False):
+            tag = int(r.element_tag)
+            if tag not in existing:
+                raise RuntimeError(f"V30 tributaria: elemento {tag} ausente")
+            ns = list(ops.eleNodes(tag))
+            c1, c2 = ops.nodeCoord(ns[0]), ops.nodeCoord(ns[1])
+            length = math.sqrt(sum((c2[i] - c1[i]) ** 2 for i in range(3)))
+            if abs(length - float(r.longitud_m)) > 1e-6:
+                raise RuntimeError(
+                    f"V30 tributaria {tag}: longitud CSV/modelo distinta")
+            delta_area = float(r.delta_area_m2)
+            delta_load = float(intensity_kN_m2) * delta_area
+            rows.append(dict(
+                nivel=str(r.nivel), beam_id=str(r.beam_id), element_tag=tag,
+                delta_area_m2=delta_area, longitud_m=length,
+                intensity_kN_m2=float(intensity_kN_m2),
+                delta_load_kN=delta_load, delta_w_kN_m=delta_load / length,
+                estado=str(r.estado)))
+        if abs(sum(r["delta_load_kN"] for r in rows)) > 1e-8:
+            raise RuntimeError("V30 tributaria: no conserva carga global")
+        return rows
+
+    def _apply_v30_redistribution(self, intensity_kN_m2):
+        rows = self.v30_redistribution_rows(intensity_kN_m2)
+        for r in rows:
+            # Convencion existente: Wz local negativo = carga hacia abajo.
+            # Un delta firmado negativo aplica la descarga compensatoria.
+            ops.eleLoad("-ele", r["element_tag"], "-type", "-beamUniform",
+                        0.0, -r["delta_w_kN_m"])
+        return rows
+
     def apply_loads(self):
         ops.timeSeries("Linear", 1)
         ops.pattern("Plain", 1, 1)
@@ -1364,6 +1419,8 @@ class CombinedBuilder:
                         "-beamPoint", 0.0, -float(row.load_kN),
                         float(row.xloc))
             n_loads_lt2 += 1
+        self.v30_redistribution_g = self._apply_v30_redistribution(
+            float(self.v30_redistribution["qG_kN_m2"].iloc[0]))
         ops.timeSeries("Linear", 2)
         ops.pattern("Plain", 2, 2)
         n_loads_lt1 = 0
@@ -1987,10 +2044,11 @@ class CombinedBuilder:
             "L2, L3, L4 y ROOF. Cada tramo comparte un extremo con su "
             "viga original y el otro con la cadena V40 del mismo piso.")
         add("- Geometria: `COMBINADO/data/conexiones_v30_lt2.csv`, "
-            "contrastada con plantas LT2 2024_22-101/102. Se conservan "
-            "los tags y cargas puntuales de las vigas originales; los "
-            "tramos nuevos no reciben carga tributaria adicional hasta "
-            "recalcular esa tributacion de LT2.")
+            "contrastada con plantas LT2 2024_22-101/102. La tributacion "
+            "V30 usa 24 correcciones firmadas que trasladan area/carga "
+            "desde V40 hacia los tramos nuevos en L1-L4, conservando el "
+            "total por piso. ROOF no se corrige porque no tiene carga de "
+            "losa en la fuente.")
         add("")
         add("## 12. Salientes sur LT1 (geometria CAD verificada)")
         add("")
@@ -2174,11 +2232,24 @@ class CombinedBuilder:
         except Exception:
             pass
         fig.tight_layout()
-        fig.savefig(OUT_FIG, dpi=220)
-        plt.close(fig)
+        # OneDrive puede representar el PNG existente como reparse point y
+        # rechazar la apertura directa con "w+b". Escribir un archivo hermano
+        # y reemplazarlo mantiene la salida reproducible y atomica.
+        tmp_fig = OUT_FIG.with_name(OUT_FIG.stem + ".tmp" + OUT_FIG.suffix)
+        try:
+            fig.savefig(tmp_fig, dpi=220)
+            tmp_fig.replace(OUT_FIG)
+        finally:
+            plt.close(fig)
+            if tmp_fig.exists():
+                tmp_fig.unlink()
 
 
 def main():
+    # Evita que la consola Windows cp1252 falle al imprimir símbolos del
+    # reporte (por ejemplo Sigma) después de completar correctamente el modelo.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     b = CombinedBuilder()
     b.prepare()
     b.check_interface()

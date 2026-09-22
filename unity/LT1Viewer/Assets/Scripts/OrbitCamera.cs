@@ -27,10 +27,60 @@ public class OrbitCamera : MonoBehaviour
 
     void Update()
     {
+        if (Input.touchCount > 0)
+        {
+            HandleTouch();
+            return;
+        }
         HandleOrbit();
         HandlePan();
         HandleZoom();
         HandleReset();
+    }
+
+    void HandleTouch()
+    {
+        if (Input.touchCount == 1)
+        {
+            Touch touch = Input.GetTouch(0);
+            if (ViewerHUD.PointerOverHud(touch.position) ||
+                touch.phase != TouchPhase.Moved) return;
+
+            Vector2 delta = touch.deltaPosition;
+            float h = delta.x * orbitSpeed * 0.10f;
+            float v = delta.y * orbitSpeed * 0.10f;
+            Vector3 offset = transform.position - target;
+            Quaternion rotH = Quaternion.AngleAxis(h, Vector3.up);
+            Vector3 pitchAxis = Vector3.Cross(offset, Vector3.up).normalized;
+            if (pitchAxis.sqrMagnitude < 1e-6f) pitchAxis = transform.right;
+            offset = rotH * Quaternion.AngleAxis(v, pitchAxis) * offset;
+            if (offset.sqrMagnitude > 0.001f)
+            {
+                transform.position = target + offset;
+                transform.LookAt(target);
+            }
+            return;
+        }
+
+        Touch a = Input.GetTouch(0);
+        Touch b = Input.GetTouch(1);
+        if (ViewerHUD.PointerOverHud(a.position) ||
+            ViewerHUD.PointerOverHud(b.position)) return;
+
+        Vector2 previousA = a.position - a.deltaPosition;
+        Vector2 previousB = b.position - b.deltaPosition;
+        float previousDistance = Vector2.Distance(previousA, previousB);
+        float currentDistance = Vector2.Distance(a.position, b.position);
+        float pinch = currentDistance - previousDistance;
+        distance = Mathf.Clamp(distance - pinch * distance * 0.0025f,
+                               minDistance, maxDistance);
+
+        Vector2 averageDelta = (a.deltaPosition + b.deltaPosition) * 0.5f;
+        float scale = panSpeed * distance * 0.001f;
+        Vector3 pan = transform.right * (-averageDelta.x * scale) +
+                      transform.up * (-averageDelta.y * scale);
+        target += pan;
+        UpdatePosition();
     }
 
     void HandleOrbit()

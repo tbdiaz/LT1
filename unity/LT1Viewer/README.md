@@ -18,13 +18,24 @@ fue creada con una versión anterior del builder.
 
 - Panel izquierdo: capas de nodos, vigas, columnas, muros, apoyos,
   diafragmas, rigid links, IDs y ejes locales.
-- Barra superior: caso activo, deformada, diagrama, cargas y áreas
-  tributarias. Los botones verdes están activos.
+- Barra superior: caso activo, deformada, diagrama, cargas, áreas
+  tributarias y carga móvil. Los botones verdes están activos.
 - Panel derecho: al hacer clic en un elemento muestra tag, nodos, sección,
   material, restricciones, ejes locales y `N, Vy, Vz, T, My, Mz` en sus
   extremos i/j.
-- Cámara: botón derecho para orbitar, rueda para zoom, botón central para pan
-  y botón izquierdo para seleccionar.
+- Cámara de escritorio: botón derecho para orbitar, rueda para zoom, botón
+  central para pan y botón izquierdo para seleccionar.
+- Pantalla táctil: toque corto para seleccionar, arrastre con un dedo para
+  orbitar y gesto de dos dedos para pan/zoom.
+
+## Carga móvil
+
+Seleccione una viga, active `CARGA MOVIL`, escriba `P [kN]`, presione
+`APLICAR` y mueva `x/L`. La flecha roja sigue la posición. El panel muestra
+el reparto lineal equivalente `Pi=P(1-x/L)`, `Pj=P(x/L)` y los errores de
+conservación de fuerza y primer momento. No son las reacciones reales del
+marco. Es una ayuda visual de Semana 5: no modifica el JSON ni reanaliza
+OpenSees.
 
 ## Resultados y convenciones
 
@@ -54,6 +65,9 @@ amarillo sobre la forma original; no modifica el modelo ni los resultados.
 - Cargas G/Q/COMBO: flechas verticales agregadas por viga.
 - Cargas EX/EY: flechas laterales en nodos maestros.
 - Áreas LT2: contorno del polígono exacto exportado desde el CSV.
+- Redistribución V30: franja equivalente naranja para el área positiva
+  transferida a los tramos nuevos; la descarga compensatoria se aplica en
+  V40 y conserva el total por piso.
 - Áreas LT1: franja rectangular equivalente centrada, de área `A/L`, porque
   la fuente LT1 no contiene vértices de polígonos. Se declara como
   representación equivalente, no como geometría exacta.
@@ -98,6 +112,17 @@ python -m pytest -q
 | Y | -Z |
 | Z | Y |
 
-La compilación C# se verificó sin errores. La apertura visual final debe
-realizarse con una licencia Unity activa; el modo batch no pudo adquirir una
-licencia en el entorno usado para esta revisión.
+## APK Android
+
+Con Android Build Support instalado, use `LT1 > Build Android APK` o:
+
+```powershell
+& 'C:\Program Files\Unity\Hub\Editor\6000.5.0f1\Editor\Unity.exe' `
+  -batchmode -quit -projectPath '<ruta>\unity\LT1Viewer' `
+  -executeMethod AndroidBuild.BuildFromCommandLine
+```
+
+La salida es `Builds/Android/LT1Viewer-semana05.apk` (API 26+, ARM64,
+horizontal). En el equipo de revisión, la compilación final quedó bloqueada
+porque Unity no tenía licencia activa y AndroidPlayer no terminó de
+instalarse; no se declara un APK probado hasta resolver ambas condiciones.

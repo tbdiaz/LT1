@@ -119,7 +119,15 @@ def build_q_lt2(builder):
             level=r.level, beam_id=r.beam_id, element_tag=int(r.element_tag),
             L_m=float(r.L), xloc=float(r.xloc), s_m=float(r.s_m),
             q_kN=round(q_kN, 12),
-            area_m2=round(float(r.load_kN) / qg, 12)))
+            area_m2=round(float(r.load_kN) / qg, 12),
+            load_type="beamPoint", w_kN_m=0.0))
+    for r in builder.v30_redistribution_rows(Q_Q):
+        rows.append(dict(
+            level=r["nivel"], beam_id=r["beam_id"],
+            element_tag=r["element_tag"], L_m=r["longitud_m"],
+            xloc=0.0, s_m=0.0, q_kN=round(r["delta_load_kN"], 12),
+            area_m2=round(r["delta_area_m2"], 12),
+            load_type="beamUniform", w_kN_m=round(r["delta_w_kN_m"], 12)))
     return pd.DataFrame(rows)
 
 
@@ -185,8 +193,12 @@ def apply_q_patterns(lt2, lt1):
     ops.timeSeries("Linear", 3)
     ops.pattern("Plain", 3, 3)
     for r in lt2.itertuples(index=False):
-        ops.eleLoad("-ele", int(r.element_tag), "-type", "-beamPoint",
-                    0.0, -float(r.q_kN), float(r.xloc))
+        if r.load_type == "beamUniform":
+            ops.eleLoad("-ele", int(r.element_tag), "-type", "-beamUniform",
+                        0.0, -float(r.w_kN_m))
+        else:
+            ops.eleLoad("-ele", int(r.element_tag), "-type", "-beamPoint",
+                        0.0, -float(r.q_kN), float(r.xloc))
     ops.timeSeries("Linear", 4)
     ops.pattern("Plain", 4, 4)
     for r in lt1.itertuples(index=False):

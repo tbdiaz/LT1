@@ -75,3 +75,40 @@ def test_vigas_v30_del_extremo_conectadas_en_cinco_niveles():
         )
         for case in model["results"]["cases"]:
             assert str(connector["elementTag"]) in model["results"]["forces"][case]
+
+
+def test_redistribucion_v30_conserva_area_y_carga_por_nivel():
+    """V30 recibe la carga retirada de V40 sin cambiar el peso del piso."""
+    model = json.loads(OUT.read_text(encoding="utf-8"))
+    rows = [r for r in model["tributary_areas"]["LT2"]["filas"]
+            if r.get("status") == "REDISTRIBUIDO_COMBINADO"]
+    assert len(rows) == 24
+    for level in ("L1", "L2", "L3", "L4"):
+        floor = [r for r in rows if r["level"] == level]
+        assert len(floor) == 6
+        assert abs(sum(r["area_m2"] for r in floor)) < 1e-9
+        assert abs(sum(r["load_kN"] for r in floor)) < 1e-8
+        assert len([r for r in floor if r["element_tag"] >= 9011]) == 2
+
+    for case in ("G", "Q"):
+        loads = [r for r in model["loads"][case]
+                 if r.get("tipo") == "beamUniform_redist_V30"]
+        assert len(loads) == 24
+        assert abs(sum(r["q_kN"] for r in loads)) < 1e-8
+        assert all(abs(r["w_kN_m"]) > 0 for r in loads)
+
+
+def test_carga_movil_tactil_y_build_android_declarados():
+    scripts = ROOT / "unity" / "LT1Viewer" / "Assets" / "Scripts"
+    editor = ROOT / "unity" / "LT1Viewer" / "Assets" / "Editor"
+    moving = (scripts / "MovingLoadController.cs").read_text(encoding="utf-8")
+    orbit = (scripts / "OrbitCamera.cs").read_text(encoding="utf-8")
+    selection = (scripts / "SelectionController.cs").read_text(encoding="utf-8")
+    android = (editor / "AndroidBuild.cs").read_text(encoding="utf-8")
+    assert "magnitudeKn * (1f - xi)" in moving
+    assert "magnitudeKn * xi" in moving
+    assert "forceError" in moving and "momentError" in moving
+    assert "Input.touchCount" in orbit and "pinch" in orbit
+    assert "TouchPhase.Ended" in selection and "movement <= 22f" in selection
+    assert "AndroidApiLevel26" in android
+    assert "AndroidArchitecture.ARM64" in android

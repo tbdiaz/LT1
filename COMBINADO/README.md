@@ -10,6 +10,8 @@ se mantiene dentro de `COMBINADO/`.
 - [x] Modelo FE 3D combinado: 485 nodos y 694 elementos (incluye 10 tramos V30x80 de conexión al extremo oeste).
 - [x] Interfaz, apoyos, diafragmas y rigid links.
 - [x] Materiales, secciones, cargas G/Q/EX/EY y `COMBO_R`.
+- [x] Redistribución tributaria V30 en L1–L4, conservando área y carga total
+  por piso mediante 24 correcciones firmadas V40→V30.
 - [x] Resultados OpenSees verificados y exportados a Unity.
 - [x] Deformada, diagramas M/N/V/T, cargas, apoyos y áreas tributarias.
 - [x] Demanda–capacidad P–M para columna 113022 y muro M001.

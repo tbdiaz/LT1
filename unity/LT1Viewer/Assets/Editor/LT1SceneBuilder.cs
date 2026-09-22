@@ -48,6 +48,7 @@ public static class LT1SceneBuilder
         viewer.AddComponent<PmPanelController>();
         viewer.AddComponent<LoadVisualizationController>();
         viewer.AddComponent<TributaryAreaVisualizationController>();
+        viewer.AddComponent<MovingLoadController>();
         viewer.AddComponent<ViewerHUD>();
 
         // --- Registrar escena en Build Settings ---

@@ -80,10 +80,10 @@
 ### Analisis
 - analyze() rc = **0** (OK, convergio)
 - ΣRz = 31086.259667 kN
-- |ΣRz - P_total| = 1.086300e-08 kN (rel 3.494e-13)
-- Σ|Rx| = 8.559198e-11 kN, Σ|Ry| = 7.296914e-10 kN (equilibrio horizontal)
-- Max |U| = 0.008090760 m en nodo 178
-- Max |Uz| = 0.008089996 m en nodo 178
+- |ΣRz - P_total| = 1.084845e-08 kN (rel 3.490e-13)
+- Σ|Rx| = 8.206119e-11 kN, Σ|Ry| = 7.566191e-10 kN (equilibrio horizontal)
+- Max |U| = 0.008164673 m en nodo 178
+- Max |Uz| = 0.008163896 m en nodo 178
 
 ## 10. Sistema vertical de cajas de escalera y pilastra (COMBINADO, B1->ROOF)
 
@@ -132,7 +132,7 @@
 - Copia maquina: `conectores_v40_muro.csv`.
 ### Continuidad V30x80 en el extremo oeste
 - 10 tramos de 1.50 m (tags 9011-9020) completan las vigas V30x80 indicadas por el usuario en L1, L2, L3, L4 y ROOF. Cada tramo comparte un extremo con su viga original y el otro con la cadena V40 del mismo piso.
-- Geometria: `COMBINADO/data/conexiones_v30_lt2.csv`, contrastada con plantas LT2 2024_22-101/102. Se conservan los tags y cargas puntuales de las vigas originales; los tramos nuevos no reciben carga tributaria adicional hasta recalcular esa tributacion de LT2.
+- Geometria: `COMBINADO/data/conexiones_v30_lt2.csv`, contrastada con plantas LT2 2024_22-101/102. La tributacion V30 usa 24 correcciones firmadas que trasladan area/carga desde V40 hacia los tramos nuevos en L1-L4, conservando el total por piso. ROOF no se corrige porque no tiene carga de losa en la fuente.
 
 ## 12. Salientes sur LT1 (geometria CAD verificada)
 
@@ -184,7 +184,7 @@ Se documenta la existencia, NO se modela (requiere plano/dato explícito si se d
 - 7. Nodos saliente sin ruta a apoyos: **OK** (0: [])
 - 8. LT2 intacto: **237 vigas** (tags nativos, sin cambios)
 - 9. Eje I' en combinado = 45.0+31.25 = 76.25 m: **OK** (18 nodos I')
-- 10. Error de equilibrio |ΣRz-P_total|/P_total: **OK** (3.494e-13)
+- 10. Error de equilibrio |ΣRz-P_total|/P_total: **OK** (3.490e-13)
 - Resumen nodos: 0 sin conectividad, {'L1': [1001], 'L2': [1002], 'L3': [1003], 'L4': [1004], 'ROOF': [1005]} flotantes preexistentes, P_lt1=19817.597 kN, P_total=31086.260 kN.
 
 ## Archivos generados

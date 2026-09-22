@@ -18,6 +18,9 @@ public class SelectionController : MonoBehaviour
 
     private Material highlightMaterial;
     private Material originalMaterial;
+    private Vector2 touchStart;
+    private float touchStartTime;
+    private int trackedFinger = -1;
 
     void Start()
     {
@@ -27,16 +30,45 @@ public class SelectionController : MonoBehaviour
 
     void Update()
     {
+        if (Input.touchCount > 0)
+        {
+            HandleTouchSelection();
+            return;
+        }
         if (Input.GetMouseButtonDown(0) && !Input.GetKey(KeyCode.LeftAlt))
         {
             if (ViewerHUD.PointerOverHud(Input.mousePosition)) return;
-            HandleClick();
+            HandleClick(Input.mousePosition);
         }
     }
 
-    void HandleClick()
+    void HandleTouchSelection()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Input.touchCount != 1) return;
+        Touch touch = Input.GetTouch(0);
+        if (touch.phase == TouchPhase.Began)
+        {
+            trackedFinger = touch.fingerId;
+            touchStart = touch.position;
+            touchStartTime = Time.unscaledTime;
+        }
+        else if ((touch.phase == TouchPhase.Ended ||
+                  touch.phase == TouchPhase.Canceled) &&
+                 touch.fingerId == trackedFinger)
+        {
+            float movement = Vector2.Distance(touchStart, touch.position);
+            float duration = Time.unscaledTime - touchStartTime;
+            trackedFinger = -1;
+            if (touch.phase == TouchPhase.Ended && movement <= 22f &&
+                duration <= 0.55f && !ViewerHUD.PointerOverHud(touch.position))
+                HandleClick(touch.position);
+        }
+    }
+
+    void HandleClick(Vector3 screenPoint)
+    {
+        if (Camera.main == null) return;
+        Ray ray = Camera.main.ScreenPointToRay(screenPoint);
 
         if (!Physics.Raycast(ray, out RaycastHit hit))
         {

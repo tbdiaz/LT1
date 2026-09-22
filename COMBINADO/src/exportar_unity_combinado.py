@@ -481,6 +481,15 @@ class ExportadorCombinado:
                              level=r.level, beam_id=r.beam_id,
                              L_m=float(r.L), xloc=float(r.xloc),
                              q_kN=float(r.load_kN)))
+        for r in b.v30_redistribution_rows(Q_G_LT2):
+            rows.append(dict(
+                patron=1, origen="COMBINADO", tipo="beamUniform_redist_V30",
+                element_tag=int(r["element_tag"]), level=r["nivel"],
+                beam_id=r["beam_id"], L_m=float(r["longitud_m"]),
+                w_kN_m=float(r["delta_w_kN_m"]),
+                q_kN=float(r["delta_load_kN"]),
+                area_m2=float(r["delta_area_m2"]),
+                estado=r["estado"]))
         removed_tags = {rb["tag_original"] for rb in b.removed_beams_loads}
         for beam in b.json_lt1["beams"]:
             t = int(beam["elementTag"])
@@ -514,11 +523,16 @@ class ExportadorCombinado:
         lt1 = build_q_lt1(b)
         rows = []
         for r in lt2.itertuples(index=False):
-            rows.append(dict(patron=3, origen="LT2", tipo="beamPoint",
-                             element_tag=int(r.element_tag),
-                             level=r.level, beam_id=r.beam_id,
-                             L_m=float(r.L_m), xloc=float(r.xloc),
-                             q_kN=float(r.q_kN), area_m2=float(r.area_m2)))
+            rows.append(dict(
+                patron=3,
+                origen=("COMBINADO" if r.load_type == "beamUniform"
+                        else "LT2"),
+                tipo=("beamUniform_redist_V30" if
+                      r.load_type == "beamUniform" else "beamPoint"),
+                element_tag=int(r.element_tag), level=r.level,
+                beam_id=r.beam_id, L_m=float(r.L_m), xloc=float(r.xloc),
+                w_kN_m=float(r.w_kN_m), q_kN=float(r.q_kN),
+                area_m2=float(r.area_m2)))
         for r in lt1.itertuples(index=False):
             rows.append(dict(
                 patron=4, origen="LT1",
@@ -655,6 +669,23 @@ class ExportadorCombinado:
                 polygon=(str(r.polygon) if isinstance(r.polygon, str)
                          and r.polygon.strip() else None),
                 status=str(r.status), n_puntos_poligono=ngon))
+        # Filas de correccion firmadas: al agregarlas por elementTag, Unity
+        # muestra el area final de V40 y las nuevas V30. No se inventa un
+        # poligono: la geometria se presenta como franja equivalente.
+        redist = pd.read_csv(
+            ROOT / "COMBINADO" / "data" /
+            "redistribucion_tributaria_v30_lt2.csv")
+        for i, r in enumerate(redist.itertuples(index=False), start=1):
+            rows.append(dict(
+                tributary_id=f"V30_REDIST_{i:03d}", level=str(r.nivel),
+                panel_id="AUDITORIA_V30", receiver_type="BEAM",
+                receiver_id=str(r.beam_id), beam_id=str(r.beam_id),
+                element_tag=int(r.element_tag),
+                area_m2=float(r.delta_area_m2),
+                qG_kN_m2=float(r.qG_kN_m2),
+                load_kN=float(r.delta_area_m2) * float(r.qG_kN_m2),
+                polygon=None, status=str(r.estado),
+                n_puntos_poligono=0))
         return rows
 
     def _tributary_lt1(self):

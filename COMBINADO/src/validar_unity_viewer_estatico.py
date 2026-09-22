@@ -13,8 +13,8 @@ Etapa P1L4. Verifica, SIN abrir Unity solo este script:
      exportados; COMBO_R solo la superposicion existente).
   4. Inventario: 485 nodos, 694 elementos (399 viga + 175 columna + 120 muro
      por categoria del visor), 53 apoyos, 5 masters, 5 diafragmas,
-     24 constraint_links, cargas G/Q 27282 y EX/EY 4, tributarias LT1 108 y
-     LT2 320 (datos tal cual; no se recalcula).
+     24 constraint_links, cargas G/Q 27306 y EX/EY 4, tributarias LT1 108 y
+     LT2 344 (320 fuente + 24 correcciones V30 firmadas).
   5. Checks de fuente C#:
        - llaves/pararentesis balanceados en todos los .cs,
        - sin clases duplicadas entre Scripts y Editor,
@@ -54,12 +54,12 @@ EXPECTED = {
     "masters": 5,
     "diafragmas": 5,
     "constraint_links": 24,
-    "cargas_G": 27282,
-    "cargas_Q": 27282,
+    "cargas_G": 27306,
+    "cargas_Q": 27306,
     "cargas_EX": 4,
     "cargas_EY": 4,
     "tributarias_LT1": 108,
-    "tributarias_LT2": 320,
+    "tributarias_LT2": 344,
 }
 
 TIPOS = {
@@ -618,7 +618,8 @@ class StaticValidator:
         text = builder.read_text(encoding="utf-8")
         for component in (
                 "CaseSelector", "LoadInspector", "LoadVisualizationController",
-                "TributaryAreaVisualizationController", "ViewerHUD"):
+                "TributaryAreaVisualizationController", "MovingLoadController",
+                "ViewerHUD"):
             if f"AddComponent<{component}>" not in text:
                 self.fail.append(f"LT1SceneBuilder no registra {component}")
 
@@ -627,6 +628,10 @@ class StaticValidator:
             "ForceDiagramController.cs": ("class ForceDiagramController", "DiagramMode", "Mz", "N", "Vy", "T"),
             "LoadVisualizationController.cs": ("class LoadVisualizationController", "DrawArrow"),
             "TributaryAreaVisualizationController.cs": ("class TributaryAreaVisualizationController", "polygon"),
+            "MovingLoadController.cs": ("class MovingLoadController",
+                                        "Pi=P(1-xi)", "LoadI", "LoadJ"),
+            "OrbitCamera.cs": ("Input.touchCount", "HandleTouch", "pinch"),
+            "SelectionController.cs": ("HandleTouchSelection", "TouchPhase.Ended"),
         }
         for filename, tokens in required_sources.items():
             source = SCRIPTS / filename
@@ -637,6 +642,16 @@ class StaticValidator:
             for token in tokens:
                 if token not in source_text:
                     self.fail.append(f"{filename} sin '{token}'")
+
+        android = EDITOR / "AndroidBuild.cs"
+        if not android.exists():
+            self.fail.append("AndroidBuild.cs ausente")
+        else:
+            android_text = android.read_text(encoding="utf-8")
+            for token in ("BuildTarget.Android", "AndroidApiLevel26",
+                          "AndroidArchitecture.ARM64", "BuildFromCommandLine"):
+                if token not in android_text:
+                    self.fail.append(f"AndroidBuild.cs sin '{token}'")
 
         self.ok.append(f"{len(cs_files)} archivos .cs revisados")
 

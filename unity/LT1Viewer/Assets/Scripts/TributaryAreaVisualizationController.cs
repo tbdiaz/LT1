@@ -29,11 +29,23 @@ public class TributaryAreaVisualizationController : MonoBehaviour
         root = new GameObject("TributaryAreas");
         Material lt2 = MakeMaterial(new Color(0.05f, 1f, 0.85f, 0.75f));
         Material lt1 = MakeMaterial(new Color(0.55f, 1f, 0.15f, 0.72f));
+        Material v30 = MakeMaterial(new Color(1f, 0.55f, 0.08f, 0.90f));
         var t = loader.combinedRoot.tributary_areas;
         if (t.LT2 != null && t.LT2.filas != null)
-            foreach (var row in t.LT2.filas) DrawLt2(row, lt2);
+            foreach (var row in t.LT2.filas)
+            {
+                if (row.status == "REDISTRIBUIDO_COMBINADO")
+                {
+                    // Solo la parte positiva representa el area trasladada a
+                    // las V30 nuevas; las filas negativas corrigen las V40.
+                    if (row.area_m2 > 0f) DrawEquivalent(
+                        row, v30, "LT2_V30_redist_");
+                }
+                else DrawLt2(row, lt2);
+            }
         if (t.LT1 != null && t.LT1.filas != null)
-            foreach (var row in t.LT1.filas) DrawLt1Equivalent(row, lt1);
+            foreach (var row in t.LT1.filas) DrawEquivalent(
+                row, lt1, "LT1_equiv_");
     }
 
     void DrawLt2(CombinedTribRow row, Material mat)
@@ -55,9 +67,11 @@ public class TributaryAreaVisualizationController : MonoBehaviour
         DrawOutline("LT2_" + row.tributary_id, pts, mat);
     }
 
-    void DrawLt1Equivalent(CombinedTribRow row, Material mat)
+    void DrawEquivalent(CombinedTribRow row, Material mat, string prefix)
     {
-        if (row.element_tag <= 0 || row.A_tributaria_m2 <= 0f) return;
+        float area = row.A_tributaria_m2 > 0f
+            ? row.A_tributaria_m2 : row.area_m2;
+        if (row.element_tag <= 0 || area <= 0f) return;
         if (!loader.elementRefs.TryGetValue(row.element_tag, out var er)) return;
         if (!loader.nodeObjects.TryGetValue(er.nodeI, out var ni) ||
             !loader.nodeObjects.TryGetValue(er.nodeJ, out var nj)) return;
@@ -68,9 +82,9 @@ public class TributaryAreaVisualizationController : MonoBehaviour
         float len = d.magnitude;
         if (len < 1e-5f) return;
         Vector3 p = new Vector3(-d.z, 0f, d.x).normalized;
-        float halfWidth = row.A_tributaria_m2 / len * 0.5f;
+        float halfWidth = area / len * 0.5f;
         Vector3 up = Vector3.up * 0.10f;
-        DrawOutline("LT1_equiv_" + row.element_tag,
+        DrawOutline(prefix + row.element_tag,
             new List<Vector3> { a+p*halfWidth+up, b+p*halfWidth+up,
                                 b-p*halfWidth+up, a-p*halfWidth+up,
                                 a+p*halfWidth+up }, mat);

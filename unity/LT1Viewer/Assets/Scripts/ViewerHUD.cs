@@ -5,9 +5,10 @@ using UnityEngine;
 // IMGUI dispersos que se superponian y ocultaban resultados.
 public class ViewerHUD : MonoBehaviour
 {
-    const float LeftW = 255f;
-    const float RightW = 440f;
-    const float TopH = 158f;
+    static float LeftW => Application.isMobilePlatform ? 290f : 255f;
+    static float RightW => Application.isMobilePlatform ? 500f : 440f;
+    static float TopH => Application.isMobilePlatform ? 245f : 215f;
+    static float ButtonH => Application.isMobilePlatform ? 44f : 29f;
 
     ModelLoader loader;
     VisibilityController visibility;
@@ -18,12 +19,14 @@ public class ViewerHUD : MonoBehaviour
     ForceDiagramController diagrams;
     LoadVisualizationController loads;
     TributaryAreaVisualizationController tributary;
+    MovingLoadController movingLoad;
     Vector2 selectionScroll;
 
     public static bool PointerOverHud(Vector3 mouse)
     {
         float y = Screen.height - mouse.y;
-        return (mouse.x <= LeftW + 8f && y <= 455f) ||
+        float leftH = Application.isMobilePlatform ? Screen.height - 8f : 455f;
+        return (mouse.x <= LeftW + 8f && y <= leftH) ||
                mouse.x >= Screen.width - RightW - 8f ||
                (y <= TopH + 8f && mouse.x > LeftW && mouse.x < Screen.width - RightW);
     }
@@ -41,6 +44,7 @@ public class ViewerHUD : MonoBehaviour
         diagrams = FindObjectOfType<ForceDiagramController>();
         loads = FindObjectOfType<LoadVisualizationController>();
         tributary = FindObjectOfType<TributaryAreaVisualizationController>();
+        movingLoad = FindObjectOfType<MovingLoadController>();
     }
 
     void OnGUI()
@@ -70,7 +74,7 @@ public class ViewerHUD : MonoBehaviour
     {
         Color old = GUI.backgroundColor;
         GUI.backgroundColor = on ? new Color(0.12f, 0.72f, 0.42f) : new Color(0.28f, 0.32f, 0.40f);
-        bool pressed = GUILayout.Button(label + (on ? "  ON" : "  OFF"), GUILayout.Height(29));
+        bool pressed = GUILayout.Button(label + (on ? "  ON" : "  OFF"), GUILayout.Height(ButtonH));
         GUI.backgroundColor = old;
         if (pressed && action != null) action();
         return pressed;
@@ -78,8 +82,9 @@ public class ViewerHUD : MonoBehaviour
 
     void DrawLeftPanel()
     {
-        GUI.Box(new Rect(8, 8, LeftW, 444), "");
-        GUILayout.BeginArea(new Rect(16, 13, LeftW - 16, 432));
+        float panelH = Application.isMobilePlatform ? Screen.height - 16f : 444f;
+        GUI.Box(new Rect(8, 8, LeftW, panelH), "");
+        GUILayout.BeginArea(new Rect(16, 13, LeftW - 16, panelH - 12f));
         GUILayout.Label("LT1 + LT2  |  CAPAS", Header(16));
         GUILayout.Label("Colores: vigas azul · columnas verde · muros violeta", TextStyle(10));
         GUILayout.Space(5);
@@ -153,8 +158,41 @@ public class ViewerHUD : MonoBehaviour
             }
         }
         GUILayout.EndHorizontal();
-        GUILayout.Label("RMB orbitar · rueda zoom · MMB pan · LMB seleccionar elemento", TextStyle(10));
+        GUILayout.Space(3);
+        DrawMovingLoadControls();
+        GUILayout.Label(Application.isMobilePlatform
+            ? "1 dedo orbitar/seleccionar · 2 dedos pan/zoom"
+            : "RMB orbitar · rueda zoom · MMB pan · LMB seleccionar elemento",
+            TextStyle(10));
         GUILayout.EndArea();
+    }
+
+    void DrawMovingLoadControls()
+    {
+        if (movingLoad == null) return;
+        GUILayout.BeginHorizontal();
+        ToggleButton("CARGA MOVIL", movingLoad.Active, movingLoad.Toggle);
+        if (movingLoad.Active)
+        {
+            GUILayout.Label("P [kN]", TextStyle(11), GUILayout.Width(48));
+            movingLoad.MagnitudeText = GUILayout.TextField(
+                movingLoad.MagnitudeText, GUILayout.Width(68),
+                GUILayout.Height(ButtonH));
+            if (GUILayout.Button("APLICAR", GUILayout.Width(68),
+                                 GUILayout.Height(ButtonH)))
+                movingLoad.ApplyInput();
+            float next = GUILayout.HorizontalSlider(
+                movingLoad.Xi, 0f, 1f, GUILayout.Width(150));
+            if (Mathf.Abs(next - movingLoad.Xi) > 1e-5f)
+                movingLoad.SetPosition(next);
+            GUILayout.Label($"x/L={movingLoad.Xi:F2}", TextStyle(11),
+                            GUILayout.Width(66));
+        }
+        GUILayout.EndHorizontal();
+        if (movingLoad.Active)
+            GUILayout.Label(movingLoad.Status +
+                " · reparto Pi=P(1-x/L), Pj=P(x/L) · visual, sin reanalisis",
+                TextStyle(10));
     }
 
     void DrawSelectionPanel()
