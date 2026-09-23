@@ -27,9 +27,20 @@ public class LoadVisualizationController : MonoBehaviour
         if (active) Rebuild(); else Clear();
     }
 
+    public void Show()
+    {
+        active = true;
+        Rebuild();
+    }
+
     public void Rebuild()
     {
         Clear();
+        // En escenas antiguas los controladores se agregan en runtime y su
+        // orden de Start no esta garantizado. Recuperar referencias aqui
+        // asegura que el factor aplicado se use inmediatamente.
+        if (loader == null) loader = FindObjectOfType<ModelLoader>();
+        if (scenario == null) scenario = FindObjectOfType<ScenarioModificationController>();
         if (!active || loader == null || loader.combinedRoot == null ||
             loader.combinedRoot.loads == null) return;
         root = new GameObject("AppliedLoads_" + loader.activeCase);
@@ -55,7 +66,7 @@ public class LoadVisualizationController : MonoBehaviour
         Material mat = MakeMaterial(loader.activeCase == "Q"
             ? new Color(0.2f, 1f, 0.35f) : new Color(0.1f, 0.85f, 1f));
         float factor = scenario != null ? scenario.CurrentLoadFactor : 1f;
-        float visualFactor = Mathf.Sqrt(Mathf.Max(0f, factor));
+        float visualFactor = Mathf.Clamp(factor, 0f, 4f);
         foreach (var kv in totals)
         {
             if (!loader.beamObjects.TryGetValue(kv.Key, out var beam) || beam == null) continue;
@@ -87,7 +98,7 @@ public class LoadVisualizationController : MonoBehaviour
         foreach (var l in loads) max = Mathf.Max(max, Mathf.Sqrt(l.fx_kN*l.fx_kN + l.fy_kN*l.fy_kN));
         Material mat = MakeMaterial(new Color(1f, 0.18f, 0.12f));
         float factor = scenario != null ? scenario.CurrentLoadFactor : 1f;
-        float visualFactor = Mathf.Sqrt(Mathf.Max(0f, factor));
+        float visualFactor = Mathf.Clamp(factor, 0f, 4f);
         foreach (var l in loads)
         {
             if (!loader.nodeObjects.TryGetValue(l.node_tag, out var node) || node == null) continue;

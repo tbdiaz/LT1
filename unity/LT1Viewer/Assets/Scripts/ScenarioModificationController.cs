@@ -85,9 +85,10 @@ public class ScenarioModificationController : MonoBehaviour
 
         LoadFactorText = factor.ToString("0.###", CultureInfo.InvariantCulture);
         Status = $"Intensidad {loader.activeCase} = {factor:0.###} x base.";
-        if (loadVisualization == null) loadVisualization = FindObjectOfType<LoadVisualizationController>();
-        if (loadVisualization != null && loadVisualization.Active)
-            loadVisualization.Rebuild();
+        if (loadVisualization == null)
+            loadVisualization = FindObjectOfType<LoadVisualizationController>();
+        if (loadVisualization != null)
+            loadVisualization.Show();
     }
 
     public bool IsElementActive(int tag) { return !inactiveElements.Contains(tag); }

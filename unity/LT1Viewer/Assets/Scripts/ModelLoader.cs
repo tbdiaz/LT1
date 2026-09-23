@@ -122,13 +122,13 @@ public class ModelLoader : MonoBehaviour
     void CreateMaterials()
     {
         // Paleta de alto contraste para lectura tipo videojuego/visor BIM.
-        beamMaterial = CreateMaterial(new Color(0.10f, 0.55f, 0.95f));
-        columnMaterial = CreateMaterial(new Color(0.12f, 0.78f, 0.28f));
+        beamMaterial = CreateMaterial(new Color(1.00f, 0.45f, 0.05f));
+        columnMaterial = CreateMaterial(new Color(0.55f, 0.55f, 0.55f));
         supportMaterial = CreateMaterial(new Color(0.95f, 0.12f, 0.18f));
         nodeMaterial = CreateMaterial(new Color(0.20f, 0.85f, 1.00f));
         masterMaterial = CreateMaterial(new Color(1.0f, 0.84f, 0.0f));
         diaphragmMaterial = CreateTransparentMaterial(new Color(0.5f, 0.8f, 0.5f, 0.25f));
-        wallMaterial = CreateMaterial(new Color(0.75f, 0.18f, 0.85f));
+        wallMaterial = CreateMaterial(new Color(0.88f, 0.10f, 0.12f));
         constraintLinkMaterial = new Material(Shader.Find("Sprites/Default"));
         constraintLinkMaterial.color = new Color(0.0f, 0.85f, 0.90f);
     }

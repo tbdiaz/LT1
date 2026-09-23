@@ -65,7 +65,9 @@ El panel derecho incorpora un flujo reproducible para dos modificaciones:
    `DESACTIVAR ELEMENTO SELECCIONADO` (el mismo botón permite reactivarlo).
 
 Estas acciones crean un escenario local y no modifican el JSON fuente. Las
-flechas de carga reflejan gráficamente el factor, y el elemento desactivado
+flechas de carga se activan automáticamente y reflejan gráficamente el factor
+con escala lineal (la visualización se limita a 4× para evitar flechas fuera
+de pantalla), y el elemento desactivado
 se oculta, pero las deformadas, esfuerzos, reacciones y comprobaciones P–M
 siguen siendo los resultados del modelo base. Por eso la interfaz muestra
 **REQUIERE REANÁLISIS** mientras exista cualquier modificación y etiqueta los
@@ -114,9 +116,9 @@ amarillo sobre la forma original; no modifica el modelo ni los resultados.
 
 ## Capas gráficas
 
-- Vigas: azul, espesor gráfico 0.55 m.
-- Columnas: verde, espesor gráfico 0.70 m (amarillo solo mientras están seleccionadas).
-- Muros: violeta, espesor gráfico 0.72 m.
+- Vigas: naranjo, espesor gráfico 0.55 m (amarillo solo mientras están seleccionadas).
+- Columnas: gris, espesor gráfico 0.70 m (amarillo solo mientras están seleccionadas).
+- Muros: rojo, espesor gráfico 0.72 m (amarillo solo mientras están seleccionados).
 - Apoyos: rojo; nodos: cian.
 - Cargas G/Q/COMBO: flechas verticales agregadas por viga.
 - Cargas EX/EY: flechas laterales en nodos maestros.
