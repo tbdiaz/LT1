@@ -1,8 +1,9 @@
 using UnityEngine;
+using System.Collections.Generic;
 
-// Diagramas con signo del elemento seleccionado. La fuerza de seccion se
-// obtiene de las fuerzas resistentes de extremo de OpenSees mediante
-// q_i=-F_i y q_j=+F_j. No se mezclan kN con kN-m ni se elimina el signo.
+// Diagramas con signo del elemento seleccionado. Las fuerzas de extremo usan
+// q_i=-F_i y q_j=+F_j; My/Mz se reconstruyen por equilibrio seccional con las
+// cargas exportadas. No se mezclan kN con kN-m ni se elimina el signo.
 public class ForceDiagramController : MonoBehaviour
 {
     public enum DiagramMode { Mz, My, N, Vy, Vz, T }
@@ -20,6 +21,13 @@ public class ForceDiagramController : MonoBehaviour
     private float chartValueI;
     private float chartValueJ;
     private string status = "Diagrama apagado";
+
+    struct MemberLoad
+    {
+        public bool uniform;
+        public float magnitude;
+        public float x;
+    }
 
     public bool Active => active;
     public DiagramMode Mode => mode;
@@ -106,39 +114,175 @@ public class ForceDiagramController : MonoBehaviour
         int idx = ComponentIndex(mode);
         float valueI = -fi[idx];
         float valueJ = fj[idx];
-        float maxAbs = Mathf.Max(Mathf.Abs(valueI), Mathf.Abs(valueJ));
         Vector3 dir = b - a;
         float len = dir.magnitude;
         if (len < 0.001f) { status = "Elemento de longitud nula"; return; }
         dir /= len;
         GetLocalFrame(tag, dir, out var localY, out var localZ);
         Vector3 normal = DiagramNormal(mode, localY, localZ);
+
+        List<float> stations;
+        List<float> values;
+        float closureError;
+        BuildSectionDiagram(tag, len, valueI, valueJ, fi, out stations,
+                            out values, out closureError);
+        float maxAbs = 0f;
+        for (int i = 0; i < values.Count; i++)
+            maxAbs = Mathf.Max(maxAbs, Mathf.Abs(values[i]));
         float peak = Mathf.Clamp(len * 0.38f, 0.9f, 5.0f);
         float scale = maxAbs > 1e-7f ? peak / maxAbs : 0f;
 
         diagramsRoot = new GameObject("Diagram_" + mode + "_" + tag);
         DrawLine("Base", new[] { a, b }, baseMaterial, 0.025f);
-        const int samples = 21;
-        var curve = new Vector3[samples];
-        for (int i = 0; i < samples; i++)
+        var curve = new Vector3[stations.Count];
+        for (int i = 0; i < stations.Count; i++)
         {
-            float t = i / (samples - 1f);
-            float value = Mathf.Lerp(valueI, valueJ, t);
-            curve[i] = Vector3.Lerp(a, b, t) + normal * value * scale;
+            float t = stations[i] / len;
+            curve[i] = Vector3.Lerp(a, b, t) + normal * values[i] * scale;
         }
         DrawLine(mode.ToString(), curve, lineMaterial, 0.16f);
-        for (int i = 0; i < samples; i += 2)
+        int ordinateStep = Mathf.Max(1, stations.Count / 10);
+        for (int i = 0; i < stations.Count; i += ordinateStep)
             DrawLine("Ordinate_" + i,
-                     new[] { Vector3.Lerp(a, b, i / (samples - 1f)), curve[i] },
+                     new[] { Vector3.Lerp(a, b, stations[i] / len), curve[i] },
                      lineMaterial, 0.035f);
+        if ((stations.Count - 1) % ordinateStep != 0)
+            DrawLine("Ordinate_end", new[] { b, curve[curve.Length - 1] },
+                     lineMaterial, 0.035f);
+        int mid = ClosestStation(stations, len * 0.5f);
         AddLabel($"{mode}: {valueI:F1} -> {valueJ:F1} {Units(mode)}",
-                 curve[samples / 2] + Vector3.up * 0.22f);
+                 curve[mid] + Vector3.up * 0.22f);
         drawnTag = tag;
         drawnCase = loader.activeCase;
         chartValueI = valueI;
         chartValueJ = valueJ;
-        BuildChart(valueI, valueJ);
-        status = "OK";
+        BuildChart(stations, values);
+        status = mode == DiagramMode.My || mode == DiagramMode.Mz
+            ? $"OK · equilibrio seccional · cierre ΔM={closureError:E1} kN-m"
+            : "OK · fuerzas de extremo";
+    }
+
+    // Reconstruccion exacta para las cargas actualmente exportadas:
+    // Wz=-w (beamUniform) y Pz=-P (beamPoint). Con la convencion de
+    // seccion q_i=-F_i de OpenSees:
+    //   My(x) = My_i + Vz_i*x + sum(w*x^2/2) + sum(P*max(0,x-a)).
+    // Esto produce una parabola para beamUniform y tramos rectos con quiebres
+    // exactamente en cada beamPoint. Mz se obtiene de dMz/dx=-Vy; el JSON no
+    // contiene cargas internas en y. Los restantes esfuerzos se mantienen
+    // entre extremos porque esta entrega no reconstruye sus leyes internas.
+    void BuildSectionDiagram(int tag, float len, float valueI, float valueJ,
+                             float[] fi, out List<float> stations,
+                             out List<float> values, out float closureError)
+    {
+        const int parabolaSubdivisions = 80;
+        stations = new List<float>(parabolaSubdivisions + 16);
+        values = new List<float>(parabolaSubdivisions + 16);
+        var loads = CollectMemberLoads(tag, len);
+
+        for (int i = 0; i <= parabolaSubdivisions; i++)
+            stations.Add(len * i / parabolaSubdivisions);
+        if (mode == DiagramMode.My)
+            foreach (var load in loads)
+                if (!load.uniform) stations.Add(load.x);
+        stations.Sort();
+        RemoveDuplicateStations(stations, len);
+
+        if (mode == DiagramMode.My)
+        {
+            float shearI = -fi[2]; // Vz de seccion en i
+            foreach (float x in stations)
+            {
+                float value = valueI + shearI * x;
+                foreach (var load in loads)
+                {
+                    if (load.uniform)
+                        value += 0.5f * load.magnitude * x * x;
+                    else if (x >= load.x)
+                        value += load.magnitude * (x - load.x);
+                }
+                values.Add(value);
+            }
+            closureError = values[values.Count - 1] - valueJ;
+        }
+        else if (mode == DiagramMode.Mz)
+        {
+            float shearI = -fi[1]; // Vy de seccion en i; dMz/dx=-Vy
+            foreach (float x in stations)
+                values.Add(valueI - shearI * x);
+            closureError = values[values.Count - 1] - valueJ;
+        }
+        else
+        {
+            foreach (float x in stations)
+                values.Add(Mathf.Lerp(valueI, valueJ, x / len));
+            closureError = 0f;
+        }
+    }
+
+    List<MemberLoad> CollectMemberLoads(int tag, float len)
+    {
+        var result = new List<MemberLoad>();
+        if (loader == null || loader.combinedRoot == null ||
+            loader.combinedRoot.loads == null) return result;
+
+        float g = 0f, q = 0f;
+        if (loader.IsLinearSuperposition)
+        {
+            float[] c = loader.SuperpositionCoefficients;
+            if (c != null && c.Length >= 2) { g = c[0]; q = c[1]; }
+        }
+        else if (loader.activeCase == "G") g = 1f;
+        else if (loader.activeCase == "Q") q = 1f;
+        else if (loader.activeCase == "COMBO_R")
+        {
+            CombinedCaseInfo info = loader.GetCaseInfo("COMBO_R");
+            if (info != null && info.coef != null)
+            { g = info.coef.G; q = info.coef.Q; }
+        }
+
+        AddMemberLoads(result, loader.combinedRoot.loads.G, tag, len, g);
+        AddMemberLoads(result, loader.combinedRoot.loads.Q, tag, len, q);
+        return result;
+    }
+
+    static void AddMemberLoads(List<MemberLoad> target,
+                               CombinedBeamLoad[] source, int tag,
+                               float len, float factor)
+    {
+        if (source == null || Mathf.Abs(factor) <= 1e-8f) return;
+        foreach (var row in source)
+        {
+            if (row == null || row.element_tag != tag) continue;
+            bool uniform = !string.IsNullOrEmpty(row.tipo) &&
+                           row.tipo.StartsWith("beamUniform");
+            if (uniform)
+                target.Add(new MemberLoad {
+                    uniform = true, magnitude = factor * row.w_kN_m, x = 0f });
+            else if (row.tipo == "beamPoint")
+                target.Add(new MemberLoad {
+                    uniform = false, magnitude = factor * row.q_kN,
+                    x = Mathf.Clamp01(row.xloc) * len });
+        }
+    }
+
+    static void RemoveDuplicateStations(List<float> stations, float len)
+    {
+        float tolerance = Mathf.Max(1e-6f, len * 1e-6f);
+        for (int i = stations.Count - 1; i > 0; i--)
+            if (Mathf.Abs(stations[i] - stations[i - 1]) <= tolerance)
+                stations.RemoveAt(i);
+    }
+
+    static int ClosestStation(List<float> stations, float target)
+    {
+        int best = 0;
+        float distance = float.MaxValue;
+        for (int i = 0; i < stations.Count; i++)
+        {
+            float next = Mathf.Abs(stations[i] - target);
+            if (next < distance) { distance = next; best = i; }
+        }
+        return best;
     }
 
     int ComponentIndex(DiagramMode m)
@@ -229,7 +373,7 @@ public class ForceDiagramController : MonoBehaviour
         drawnTag = -1;
     }
 
-    void BuildChart(float valueI, float valueJ)
+    void BuildChart(List<float> stations, List<float> values)
     {
         const int w = 500, h = 150;
         const int left = 42, right = 486, top = 12, bottom = 126;
@@ -246,19 +390,22 @@ public class ForceDiagramController : MonoBehaviour
             int y = top + Mathf.RoundToInt(i / 4f * (bottom - top));
             ChartLine(px, w, h, left, y, right, y, grid, 1);
         }
-        float min = Mathf.Min(0f, valueI, valueJ);
-        float max = Mathf.Max(0f, valueI, valueJ);
+        float min = 0f, max = 0f;
+        foreach (float value in values)
+        { min = Mathf.Min(min, value); max = Mathf.Max(max, value); }
         float pad = Mathf.Max((max - min) * 0.15f, 1e-3f);
         min -= pad; max += pad;
         int zeroY = Mathf.RoundToInt(bottom - (0f - min) / (max - min) * (bottom - top));
         ChartLine(px, w, h, left, zeroY, right, zeroY, axis, 2);
         ChartLine(px, w, h, left, top, left, bottom, axis, 2);
         int lastX = left;
-        int lastY = Mathf.RoundToInt(bottom - (valueI - min) / (max - min) * (bottom - top));
-        for (int i = 1; i <= 40; i++)
+        int lastY = Mathf.RoundToInt(bottom - (values[0] - min) / (max - min) * (bottom - top));
+        for (int i = 1; i < values.Count; i++)
         {
-            float t = i / 40f;
-            float value = Mathf.Lerp(valueI, valueJ, t);
+            float t = stations[stations.Count - 1] > 1e-8f
+                ? stations[i] / stations[stations.Count - 1]
+                : 0f;
+            float value = values[i];
             int x = Mathf.RoundToInt(Mathf.Lerp(left, right, t));
             int y = Mathf.RoundToInt(bottom - (value - min) / (max - min) * (bottom - top));
             ChartLine(px, w, h, lastX, lastY, x, y, curve, 3);

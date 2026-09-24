@@ -37,16 +37,24 @@ def test_visor_estatico_correcto():
     assert len(v.ok) >= 10, "demasiado pocas comprobaciones"
 
 
-def test_columnas_verdes_en_visor():
-    """La paleta de las columnas no debe volver al naranja anterior."""
+def test_paleta_solicitada_en_visor():
+    """Vigas naranjas, columnas grises y muros rojos."""
     loader = (ROOT / "unity" / "LT1Viewer" / "Assets" / "Scripts"
               / "ModelLoader.cs").read_text(encoding="utf-8")
-    match = re.search(
-        r"columnMaterial\s*=\s*CreateMaterial\(new Color\("
-        r"([0-9.]+)f,\s*([0-9.]+)f,\s*([0-9.]+)f\)\)", loader)
-    assert match, "No se encontró el material visual de columnas"
-    red, green, blue = map(float, match.groups())
-    assert green > red and green > blue, "Las columnas no están en verde"
+
+    def color(material):
+        match = re.search(
+            rf"{material}\s*=\s*CreateMaterial\(new Color\("
+            r"([0-9.]+)f,\s*([0-9.]+)f,\s*([0-9.]+)f\)\)", loader)
+        assert match, f"No se encontró el material visual {material}"
+        return tuple(map(float, match.groups()))
+
+    beam = color("beamMaterial")
+    column = color("columnMaterial")
+    wall = color("wallMaterial")
+    assert beam[0] > beam[1] > beam[2], "Las vigas no están en naranjo"
+    assert max(column) - min(column) < 1e-9, "Las columnas no están en gris"
+    assert wall[0] > wall[1] and wall[0] > wall[2], "Los muros no están en rojo"
 
 
 def test_vigas_v30_del_extremo_conectadas_en_cinco_niveles():

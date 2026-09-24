@@ -81,7 +81,8 @@ El panel izquierdo contiene sliders independientes para `G`, `Q`, `EX` y
 combina inmediatamente los resultados base ya analizados:
 
 - la deformada usa la suma de desplazamientos nodales;
-- el inspector y los diagramas usan la suma de fuerzas de extremo;
+- el inspector usa la suma de fuerzas de extremo y los diagramas recomponen
+  además las cargas internas `G/Q` con los mismos coeficientes;
 - el punto de demanda P–M se reconstruye desde las fuerzas combinadas.
 
 Para M001 se conserva la recomposición documentada de los elementos 4001 y
@@ -105,10 +106,13 @@ El inspector presenta fuerzas internas de sección con la convención
 `i = -F_i` y `j = +F_j`, conservando el signo de cada componente. Los
 diagramas permiten elegir directamente `Mz`, `My`, `N`, `Vy`, `Vz` y `T`.
 Se muestran como trazo 3D de alto contraste y como gráfica 2D dentro del
-inspector derecho del elemento seleccionado; se
-representan linealmente entre las fuerzas de extremo exportadas. Esto es exacto para un
-elemento sin carga distribuida en el claro y una aproximación de extremos
-para vigas cargadas.
+inspector derecho del elemento seleccionado. `My` se reconstruye por
+equilibrio seccional desde `My_i`, `Vz_i` y las cargas exportadas: las cargas
+`beamUniform` producen parábolas y cada `beamPoint` introduce un quiebre en
+su posición `xloc` exacta. Para combinaciones y sliders se combinan también
+las cargas `G/Q` con sus coeficientes. Los otros momentos permanecen lineales
+cuando no existe una carga interna en su eje; en ese caso la línea entre
+extremos es la solución exacta, no una aproximación.
 
 La deformada usa los desplazamientos nodales reales del caso activo y un
 factor gráfico ajustable con los botones `−` y `+`. Se superpone en rojo y

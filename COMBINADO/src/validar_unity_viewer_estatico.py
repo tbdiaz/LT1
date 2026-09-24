@@ -218,6 +218,7 @@ class StaticValidator:
         self._inventory(data)
         self._schema_consistency(data)
         self._results_consistency(data)
+        self._diagram_equilibrium_checks(data)
         self._pm_checks(data)
         self._cs_checks()
         self._scene_checks()
@@ -226,6 +227,70 @@ class StaticValidator:
     @property
     def valid(self):
         return len(self.fail) == 0
+
+    def _diagram_equilibrium_checks(self, data):
+        """Comprueba la reconstruccion My/Vz contra ambos extremos OpenSees."""
+        elements = {int(e["elementTag"]): e for e in data.get("elements", [])}
+        loads = data.get("loads", {})
+        forces = data.get("results", {}).get("forces", {})
+        combo = (data.get("metadata", {}).get("casos", {})
+                 .get("COMBO_R", {}).get("coef", {}))
+        coefficients = {
+            "G": (1.0, 0.0), "Q": (0.0, 1.0),
+            "EX": (0.0, 0.0), "EY": (0.0, 0.0),
+            "COMBO_R": (float(combo.get("G", 0.0)),
+                        float(combo.get("Q", 0.0))),
+        }
+
+        grouped = {"G": {}, "Q": {}}
+        for base in ("G", "Q"):
+            for row in loads.get(base, []):
+                grouped[base].setdefault(int(row["element_tag"]), []).append(row)
+
+        max_m = max_mz = max_v = 0.0
+        checked = 0
+        for case, (coef_g, coef_q) in coefficients.items():
+            case_forces = forces.get(case, {})
+            for tag_text, f in case_forces.items():
+                tag = int(tag_text)
+                element = elements.get(tag)
+                if element is None:
+                    self.fail.append(f"diagrama {case}: elemento {tag} ausente")
+                    continue
+                length = float(element["longitud_m"])
+                moment = -float(f["My1"]) - float(f["Vz1"]) * length
+                shear = -float(f["Vz1"])
+                for base, factor in (("G", coef_g), ("Q", coef_q)):
+                    if abs(factor) <= 1e-15:
+                        continue
+                    for row in grouped[base].get(tag, []):
+                        kind = row.get("tipo", "")
+                        if kind.startswith("beamUniform"):
+                            w = factor * float(row.get("w_kN_m", 0.0))
+                            moment += 0.5 * w * length * length
+                            shear += w * length
+                        elif kind == "beamPoint":
+                            p = factor * float(row.get("q_kN", 0.0))
+                            a = float(row.get("xloc", 0.0)) * length
+                            moment += p * (length - a)
+                            shear += p
+                err_m = abs(moment - float(f["My2"]))
+                moment_z = -float(f["Mz1"]) + float(f["Vy1"]) * length
+                err_mz = abs(moment_z - float(f["Mz2"]))
+                err_v = abs(shear - float(f["Vz2"]))
+                max_m = max(max_m, err_m)
+                max_mz = max(max_mz, err_mz)
+                max_v = max(max_v, err_v)
+                checked += 1
+                if err_m > 1e-7 or err_mz > 1e-7 or err_v > 1e-7:
+                    self.fail.append(
+                        f"diagrama {case} tag {tag}: cierre My={err_m:.3e}, "
+                        f"Mz={err_mz:.3e}, Vz={err_v:.3e}")
+        if max_m <= 1e-7 and max_mz <= 1e-7 and max_v <= 1e-7:
+            self.ok.append(
+                f"diagramas seccionales = {checked} cierres, "
+                f"max dMy={max_m:.2e}, max dMz={max_mz:.2e}, "
+                f"max dVz={max_v:.2e}")
 
     # ---------------------------------------------------------------- inventario
     def _inventory(self, data):
@@ -626,7 +691,10 @@ class StaticValidator:
 
         required_sources = {
             "ViewerHUD.cs": ("class ViewerHUD", "DrawForces", "DrawTributaryData"),
-            "ForceDiagramController.cs": ("class ForceDiagramController", "DiagramMode", "Mz", "N", "Vy", "T"),
+            "ForceDiagramController.cs": (
+                "class ForceDiagramController", "DiagramMode", "Mz", "N",
+                "Vy", "T", "BuildSectionDiagram", "CollectMemberLoads",
+                "beamUniform", "beamPoint", "shearI"),
             "LoadVisualizationController.cs": ("class LoadVisualizationController", "DrawArrow"),
             "TributaryAreaVisualizationController.cs": ("class TributaryAreaVisualizationController", "polygon"),
             "MovingLoadController.cs": ("class MovingLoadController",
