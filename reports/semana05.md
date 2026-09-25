@@ -1,95 +1,80 @@
-# Semana 5 — Viewer estructural, modificación y QA
+# Semana 5 — Laboratorio estructural interactivo
 
-Fecha de revisión: 22-09-2026  
-Modelo evaluado: `COMBINADO_LT1_LT2`  
+Fecha de revisión: 25-09-2026
+
+Modelo evaluado: `COMBINADO_LT1_LT2`
+
 Visor: `unity/LT1Viewer`, Unity 6000.5.0f1
 
-Este informe registra el estado que puede reproducirse desde el repositorio.
-No se considera implementada una función solamente por estar prevista en la
-interfaz. El modelo exportado contiene 485 nodos, 694 elementos, 53 apoyos,
-cinco diafragmas y cinco casos: `G`, `Q`, `EX`, `EY` y `COMBO_R`.
+Versión evaluada: rama `p1l4`, commit `a38463c`
 
-Versión estructural y del visor evaluada: rama `p1l4`, commit `ea7e4d8`
-(`Close Week 5 mobile viewer features`), publicado en `origin/p1l4`. Este
-informe se incorpora al repositorio en un commit posterior sin modificar el
-modelo evaluado.
+Este informe registra únicamente funciones y datos reproducibles desde el
+repositorio. El modelo combinado contiene 485 nodos, 694 elementos, 53
+apoyos, cinco masters, cinco diafragmas, 24 `constraint_links` y los casos
+`G`, `Q`, `EX`, `EY` y `COMBO_R`. La fuente de ejecución del visor es
+`unity/LT1Viewer/Assets/StreamingAssets/modelo_combinado.json`, copia
+sincronizada del maestro `COMBINADO/outputs/unity/modelo_combinado.json`.
 
 ## 1. Funciones implementadas
 
-| Función | Estado | Evidencia y limitación |
+| Función | Estado | Evidencia, uso y alcance |
 | --- | --- | --- |
-| Navegación | **Implementada en escritorio y táctil** | Mouse: órbita, zoom y pan. Pantalla táctil: un dedo orbita; dos dedos trasladan y hacen zoom por pinza. |
-| Selección | **Implementada** | Raycast por clic o toque corto sobre vigas, columnas y muros; el panel derecho muestra `elementTag`, nodos, longitud, sección, material, restricciones y resultados del caso activo. |
-| Apoyos | **Implementada** | Capa con 53 apoyos B1. Las restricciones relevantes también aparecen al seleccionar un elemento conectado. |
-| Ejes | **Implementada** | Conmutador de ejes locales; prioriza los ejes exportados y usa `vecxz` como respaldo. |
-| Cargas | **Implementada** | Flechas verticales para G/Q/COMBO y laterales para EX/EY. La corrección firmada V30 redistribuye G y Q desde V40 sin cambiar la carga total del piso. |
-| Áreas tributarias | **Implementada** | LT2 dibuja los polígonos fuente y, en naranja, las franjas equivalentes positivas transferidas a V30. LT1 dibuja una franja rectangular equivalente `A/L`; estas franjas equivalentes no se presentan como polígonos originales. |
-| Deformada | **Implementada** | Superposición sobre la geometría original, por caso activo y con factor gráfico ajustable. Usa desplazamientos nodales, por lo que una barra recta se representa por sus dos extremos. |
-| Diagramas | **Implementada** | `Mz`, `My`, `N`, `Vy`, `Vz` y `T`, en 3D y como gráfica 2D en el panel del elemento. Interpola linealmente los valores de extremo; en vigas con carga distribuida no reconstruye la curva interior exacta. |
-| Superposición | **Parcial** | El usuario cambia interactivamente entre resultados ya calculados. Existe `COMBO_R = 1G + 1Q + 1EX + 0EY`, pero no hay editor de coeficientes ni superposición arbitraria en tiempo real. |
-| P–M | **Implementada con supuestos declarados** | Columna 113022 y muro físico M001 (objetos 4001+4002). Muestra curva, demanda, caso y DENTRO/FUERA. El muro M001 resulta fuera en EY con la capacidad provisional. |
-| Modificación del modelo | **Manual reproducible** | Unity no edita el modelo ni ejecuta OpenSees. Se modifica el dato fuente, se regenera con Python, se valida y se sincroniza el JSON a Unity. |
+| Navegación | **Implementada** | Escritorio: RMB órbita, rueda zoom, MMB pan. Táctil: un dedo órbita o selecciona mediante toque corto; dos dedos hacen pan/zoom. |
+| Selección | **Implementada** | Raycast sobre vigas, columnas y muros. El panel informa `elementTag`, origen LT1/LT2, nodos I/J, nivel, longitud, sección, material, ejes, restricciones y resultados del caso activo. |
+| Apoyos | **Implementada** | Capa con 53 apoyos B1 y visualización de restricciones. El inspector relaciona el elemento con restricciones en sus nodos, masters, diafragmas y vínculos rígidos cuando corresponde. |
+| Ejes | **Implementada** | Capa de ejes locales X/Y/Z. Prioriza `ejes_locales` exportados y usa `vecxz` como respaldo, corrigiendo el signo respecto de la orientación física I→J. |
+| Cargas | **Implementada con limitación de fuente** | Flechas verticales para G/Q/COMBO y laterales para EX/EY. Las vigas `ROOF` de LT2 no tienen cargas G/Q exportadas, por lo que no se inventan flechas en ese nivel. |
+| Áreas tributarias | **Implementada** | LT2 usa polígonos exportados; LT1 muestra franjas equivalentes de ancho `A/L` porque su fuente no contiene vértices. La redistribución V30 conserva área y carga total por piso. |
+| Deformada | **Implementada** | Usa desplazamientos nodales del caso activo o de la superposición. Se dibuja sobre la forma original con factor gráfico ajustable; dicho factor no modifica el resultado numérico. |
+| Diagramas | **Implementada y reconstruida por equilibrio** | `Mz`, `My`, `N`, `Vy`, `Vz` y `T` en 3D y gráfica 2D. `My` usa cargas `beamUniform/beamPoint`; `Mz` usa `dMz/dx=-Vy`. Ya no se aproxima el momento cargado uniendo solamente los extremos. |
+| Superposición | **Implementada e interactiva** | Sliders independientes G/Q/EX/EY en el rango −2…+2. Actualizan desplazamientos, deformada, fuerzas, diagramas, reacciones y punto P–M sin recargar geometría. |
+| P–M | **Implementada con alcance acotado** | Disponible para columna 113022 y muro físico M001, agrupando 4001+4002. Presenta demanda, capacidad y condición DENTRO/FUERA. Curvas, fuentes y supuestos están declarados en `results.pm`. |
+| Modificación del modelo | **Implementada como escenario; reanálisis no automático** | Permite cambiar intensidad del caso activo y activar/desactivar un elemento. Unity conserva los resultados base y muestra `REQUIERE REANÁLISIS`; no existe aún un puente de escritura Unity→OpenSees. |
 
-Los espesores y colores de Unity son solo gráficos: vigas azules de 0,55,
-columnas verdes de 0,70 y muros violetas de 0,72 unidades. No sustituyen las
-propiedades de sección guardadas en el JSON/OpenSees.
+Paleta actual: vigas naranjas, columnas grises y muros rojos. El elemento
+seleccionado se resalta en amarillo. Colores y espesores son recursos
+gráficos y no alteran secciones, rigideces ni geometría de OpenSees.
 
 ## 2. Modificación
 
-No hay modificación estructural automática desde el viewer. Los dos flujos
-siguientes recorren la cadena completa de forma manual y reproducible.
+Se implementaron dos modificaciones desde la interfaz. Ambas son completas
+como definición de escenario y señalización de vigencia, pero **no ejecutan
+automáticamente OpenSees**. El flujo estructural completo debe cerrarse de
+forma manual y reproducible como se documenta a continuación.
 
-### 2.1 Corrección del eje I′ de LT1
+### 2.1 Intensidad del caso de carga activo
 
-**Interfaz/dato.** En `COMBINADO/src/run_combined.py`, la entrada explícita
-`_X_IP_ANTES = 42.5` y `_X_IP_CORRIGE = 45.0` registra la corrección del eje
-I′. Es una entrada manual en código, no un formulario Unity. Debe trasladarse
-a un CSV si se generaliza la edición.
+#### Estado en Unity
 
-**Modelo.** Se desplazan 18 nodos del eje I′. Las doce vigas I–I′ pasan de
-2,50 a 5,00 m y su área tributaria equivalente aumenta en 6,25 m² por piso.
-La geometría LT1 original no se sobrescribe: el cambio solo existe en
-`COMBINADO`.
+1. **Interfaz/dato.** Se elige `G`, `Q`, `EX`, `EY` o una combinación, se
+   ingresa un factor `α ≥ 0` y se presiona `APLICAR`.
+2. `ScenarioModificationController` guarda `caso → α` en un diccionario de
+   escenario, separado del JSON.
+3. Las flechas se activan y escalan linealmente con `α` —con límite gráfico
+   4× para evitar flechas fuera de pantalla—.
+4. Deformada, esfuerzos, reacciones y P–M permanecen asociados al análisis
+   base. La interfaz muestra `REQUIERE REANÁLISIS` y “resultados no
+   actualizados”.
 
-**OpenSees.** `CombinedBuilder` crea nuevamente los nodos y
-`elasticBeamColumn`, aplica las cargas sobre la longitud corregida y ejecuta
-un análisis limpio por caso.
+#### Flujo manual reproducible hasta resultados nuevos
 
-**Resultados.** Se vuelven a calcular fuerzas locales, desplazamientos,
-reacciones y equilibrio. No se reutilizan resultados anteriores después de
-la modificación.
+`interfaz/dato → modelo → OpenSees → resultados → Unity`:
 
-**Unity.** `exportar_unity_combinado.py` escribe la geometría y los cinco
-casos en `COMBINADO/outputs/unity/modelo_combinado.json`;
-`integrar_p1l4_unity.py` copia la fuente a `StreamingAssets`.
-
-### 2.2 Salientes y partición de vigas de fachada LT1
-
-**Interfaz/dato.** `_SALIENTES_DATA` contiene por nivel las coordenadas,
-puntos de partición y conexiones respaldadas por la geometría CAD. Es un
-flujo manual y actualmente el dato está dentro de `run_combined.py`.
-
-**Modelo.** Se incorporan 30 `viga_saliente` (tags 800101–800130) y 25
-`segmento_fachada` (rango 800201–800228). Once vigas originales de fachada
-se retiran del dominio y se sustituyen por tramos conectados; no se crean
-diagonales ni elementos sin respaldo.
-
-**OpenSees.** Cada segmento se crea como `elasticBeamColumn`. La carga
-uniforme de cada viga retirada se aplica con la misma densidad `qG` a todos
-sus segmentos finales. Por tanto,
-`qG·ΣL_segmentos = qG·L_original`: no se pierde ni se duplica carga.
-
-**Resultados.** El builder comprueba longitud conservada, conectividad hacia
-apoyos, convergencia y equilibrio. El exportador vuelve a obtener fuerzas y
-desplazamientos para G, Q, EX, EY y COMBO_R.
-
-**Unity.** Los nuevos tags se exportan con tipo, nodos, sección, ejes y
-resultados. El visor los clasifica como vigas y permite seleccionarlos y
-dibujar sus diagramas.
-
-### 2.3 Ejecución común
-
-Desde la raíz del repositorio:
+1. Registrar el caso y `α` mostrado por Unity.
+2. En una copia controlada del generador, aplicar `α` al patrón
+   correspondiente antes del análisis:
+   - G: cargas de `CombinedBuilder.apply_loads()` en
+     `COMBINADO/src/run_combined.py`;
+   - Q: filas de `build_q_lt2/build_q_lt1` antes de `apply_q_patterns()` en
+     `COMBINADO/src/semana03_live_load.py`;
+   - EX/EY: fuerzas de piso antes de `apply_lateral()` en
+     `COMBINADO/src/semana03_seismic.py`.
+3. Construir un modelo OpenSees limpio y ejecutar el caso modificado. No se
+   deben escalar únicamente los dibujos de Unity y presentarlos como un nuevo
+   análisis.
+4. Exportar fuerzas, desplazamientos, reacciones y equilibrio como un caso
+   identificado con su factor.
+5. Ejecutar la cadena común:
 
 ```powershell
 python COMBINADO/src/exportar_unity_combinado.py
@@ -99,125 +84,196 @@ python COMBINADO/src/validar_unity_viewer_estatico.py
 python -m pytest -q
 ```
 
-Después se abre `Assets/Scenes/LT1Viewer.unity`, se presiona Play y se
-comprueba el elemento modificado por `elementTag`.
+6. Abrir Unity, seleccionar el caso regenerado y comprobar equilibrio,
+   deformada, diagramas y P–M. Finalmente usar `RESTAURAR ESCENARIO BASE` para
+   limpiar el estado local del laboratorio.
 
-La incorporación posterior de las V30 9011–9020 también llega hasta
-OpenSees/resultados/Unity. Para L1–L4 se aplican 24 correcciones uniformes
-firmadas: ocho aportes positivos a V30 y dieciséis descargas compensatorias
-en V40. En cada piso `ΣΔA=0`, por lo que `ΣΔG=ΣΔQ=0`. ROOF no recibe
-corrección porque la fuente no le asigna carga de losa.
+En el modelo lineal, escalar un único caso produce una respuesta proporcional,
+pero el reanálisis sigue siendo obligatorio en la interfaz porque el cambio
+no ha sido escrito al modelo ni auditado por el pipeline.
+
+### 2.2 Activación/desactivación de un elemento
+
+#### Estado en Unity
+
+1. **Interfaz/dato.** Se selecciona una viga, columna o muro y se presiona
+   `DESACTIVAR ELEMENTO SELECCIONADO`.
+2. El tag se guarda en `inactiveElements` y el `GameObject` se oculta.
+3. No se modifica la conectividad, la rigidez global ni el JSON; por tanto,
+   los resultados anteriores dejan de ser representativos y se activa
+   `REQUIERE REANÁLISIS`.
+4. El mismo botón reactiva el objeto. `RESTAURAR ESCENARIO BASE` reactiva
+   todos los tags y recupera la vigencia de los resultados originales.
+
+#### Flujo manual reproducible hasta resultados nuevos
+
+`interfaz/dato → modelo → OpenSees → resultados → Unity`:
+
+1. Registrar el `elementTag` y su origen mediante el inspector.
+2. Crear una configuración de análisis que excluya ese tag al construir el
+   dominio OpenSees —o que use `ops.remove('element', tag)` antes de aplicar
+   cargas—, manteniendo la fuente original sin sobrescribir.
+3. Auditar las consecuencias antes de analizar:
+   - conectividad de sus nodos;
+   - estabilidad global y aparición de mecanismos;
+   - cargas aplicadas directamente al elemento;
+   - ruta o redistribución de dichas cargas.
+4. Si el elemento es una viga cargada, la carga **no se reasigna por
+   suposición**. Se requiere una regla tributaria explícita. Para una prueba
+   sin redistribución se debe escoger un elemento sin carga directa y dejar
+   documentado el alcance.
+5. Ejecutar G/Q/EX/EY y combinaciones en un modelo limpio, verificar
+   convergencia y equilibrio y exportar los nuevos resultados.
+6. Ejecutar la cadena común de exportación, integración, validación y pruebas
+   indicada en 2.1; después inspeccionar el tag y los elementos vecinos en
+   Unity.
+
+El flujo es reproducible para un operador, pero no está automatizado desde la
+interfaz. Esta separación evita presentar como resultado estructural lo que
+por ahora es solo una hipótesis visual.
 
 ## 3. Superposición interactiva
 
-El selector del HUD recarga fuerzas, desplazamientos, reacciones y equilibrio
-del caso seleccionado. No suma estados en C#; `COMBO_R` fue resuelto y
-exportado desde un modelo OpenSees limpio con los patrones G+Q+EX.
+El modelo de esta etapa es lineal elástico. Para cada magnitud de respuesta
+`R`, Unity calcula:
 
-Se comprobaron tres estados directamente en el JSON maestro:
+`R = aG·RG + aQ·RQ + aEX·REX + aEY·REY`.
 
-| Estado mostrado | Comprobación numérica | Resultado |
-| --- | --- | --- |
-| **G** | `ΣRz = 31.086,259667 kN` frente a `P = 31.086,259667 kN` | Error `1,09×10⁻⁸ kN`; equilibrio vertical correcto. |
-| **EX** | `|ΣRx| = 8.021,852135 kN` frente a fuerza lateral `8.021,852135 kN` | Error `6,82×10⁻⁹ kN`; corte basal correcto. |
-| **COMBO_R** | Para columna 113022, `N1`: 1063,734766 (G) + 598,277610 (Q) + 1,569045 (EX) = **1663,581421 kN** | Coincide con COMBO_R con diferencia `2,05×10⁻¹² kN`. |
+La misma combinación se aplica a desplazamientos, fuerzas de extremo,
+reacciones y cargas internas G/Q usadas para reconstruir los diagramas. El
+punto de demanda P–M se vuelve a calcular desde las fuerzas combinadas. La
+curva de capacidad no cambia porque no se modifica la sección.
 
-Comprobación adicional de la superposición visual: en el nodo maestro 1004,
-`Ux(G)+Ux(Q)+Ux(EX) = 0,004373838380 m`, igual a `Ux(COMBO_R)` con diferencia
-`4,34×10⁻¹⁸ m`. En la viga 2081, `My2` suma
-`−134,222338 − 88,275563 + 27,197963 = −195,299938 kN·m`, igual al valor
-exportado para COMBO_R.
+Se verificaron tres estados usando la columna 113022 (`N1`, `My1`) y el
+desplazamiento `Ux` del master 1004:
 
-La superposición disponible no cubre `G+Q+EY`, sentidos sísmicos negativos ni
-combinaciones normativas envolventes. Por ello COMBO_R no debe presentarse
-como combinación crítica universal.
+| Estado de sliders `(G,Q,EX,EY)` | `N1` columna 113022 [kN] | `My1` [kN·m] | `Ux` nodo 1004 [m] | Verificación |
+| --- | ---: | ---: | ---: | --- |
+| `(1,0,0,0)` | 1063,720949 | −0,615171 | −8,650908×10⁻⁵ | Coincide exactamente con el caso OpenSees G. |
+| `(0,0,1,0)` | 1,569045 | 177,961584 | 4,516590×10⁻³ | Coincide exactamente con el caso OpenSees EX. |
+| `(1,1,1,0)` | 1663,558517 | 176,860049 | 4,373433×10⁻³ | Coincide con `COMBO_R`; diferencias respecto del resultado exportado: `3×10⁻¹³ kN`, `3×10⁻¹³ kN·m` y `6×10⁻¹⁸ m`. |
+
+Comprobación adicional de un estado no predefinido: para
+`(1,2; 0,5; −0,3; 0,4)`, la suma numérica entrega
+`N1=1574,912347 kN`, `My1=−50,843278 kN·m` y
+`Ux1004=−1,493941×10⁻³ m`, valores que debe mostrar el laboratorio dentro de
+la precisión `float` de Unity.
+
+La superposición no sustituye un análisis cuando cambian geometría, apoyo,
+material, sección o activación. Tampoco constituye por sí sola una envolvente
+normativa: los coeficientes deben ser definidos y justificados por el grupo.
 
 ## 4. Sidequest carga móvil
 
-**Implementada como sidequest visual y de reparto, sin reanálisis.** El usuario
-selecciona una viga, activa `CARGA MOVIL`, ingresa `P [kN]` y mueve el control
-`x/L` entre 0 y 1. La magnitud inicial es cero para no inventar una carga.
+Se implementaron dos visualizaciones relacionadas, ambas sin reanálisis.
 
-La regla es un reparto lineal equivalente entre los nodos extremos:
-`Pi=P(1-x/L)` y `Pj=P(x/L)`. El panel muestra ambas cargas y comprueba en cada
-posición la conservación de fuerza `Pi+Pj=P` y del primer momento
-`Pj·L=P·x`. Una flecha roja se desplaza sobre el elemento seleccionado y el
-panel identifica su tag. El alcance queda explícito en pantalla: no modifica
-el JSON, no crea un nuevo caso y no vuelve a ejecutar OpenSees; por tanto, no
-debe confundirse con las reacciones reales del marco, una línea de influencia
-ni una envolvente móvil.
+### 4.1 Carga puntual sobre una viga seleccionada
+
+- **Regla física de reparto equivalente:** para una carga `P` ubicada en
+  `ξ=x/L`, `Pi=P(1−ξ)` y `Pj=Pξ`.
+- **Panel:** permite ingresar `P [kN]`, aplicar y desplazar `x/L` entre 0 y 1.
+- **Reparto:** informa las contribuciones equivalentes en los extremos I/J.
+- **Conservación:** comprueba `Pi+Pj=P` y `Pj·L=P·x`; muestra errores de fuerza
+  y primer momento.
+- **Respuesta visual:** una flecha roja recorre la viga seleccionada.
+
+Este reparto no son las reacciones reales del marco, una línea de influencia
+ni una envolvente móvil. No modifica el JSON ni los diagramas.
+
+### 4.2 SQ4 — carga móvil asociada al usuario
+
+Al activar `USUARIO` aparece una persona esquemática. Puede desplazarse con
+WASD, flechas o botones y cambiar entre niveles 1–4. La posición se contrasta
+con los polígonos LT2 y con las franjas equivalentes LT1; el panel informa la
+región, resalta en rojo las vigas receptoras y muestra la carga asignada. En
+una zona compartida, la carga del usuario se divide en partes iguales entre
+las vigas receptoras únicas, conservando la magnitud total ingresada.
+
+SQ4 es una asignación visual de panel/receptor. No cambia los patrones
+OpenSees, la deformada, los esfuerzos ni P–M.
 
 ## 5. UX estructural
 
-| Pregunta | ¿La responde? | Evaluación |
+| Pregunta | ¿La responde? | Evaluación actual |
 | --- | --- | --- |
-| ¿Dónde está el elemento? | **Sí** | Selección 3D, resaltado amarillo, ID, origen, nivel, nodos y capas. Falta búsqueda directa por tag y botón de encuadre. |
-| ¿Cómo está apoyado? | **Parcialmente** | Se muestran apoyos, diafragmas, rigid links y restricciones del elemento. No existe una vista aislada de la ruta completa de carga hasta fundación. |
-| ¿Qué lo carga? | **Sí, con alcance indicado** | Flechas, área tributaria, carga agregada y redistribución V30 aplicada. LT1 y las correcciones V30 usan geometría equivalente claramente identificada. |
-| ¿Cómo se deforma? | **Sí** | Deformada superpuesta, caso activo y escala ajustable. No presenta una escala métrica/leyenda ni curvatura interna del elemento. |
-| ¿Qué fuerzas tiene? | **Sí** | N, Vy, Vz, T, My y Mz por extremo, diagramas 3D y gráfica del seleccionado. La gráfica interior es una interpolación de extremos. |
-| ¿Cuánta capacidad tiene? | **Solo para dos objetos de estudio** | P–M para columna 113022 y muro M001. No hay capacidad para el resto y existen supuestos de recubrimiento/disposición de acero. |
+| ¿Dónde está el elemento? | **Sí** | Selección 3D, resaltado amarillo, tag, origen, nivel y nodos. Faltan búsqueda directa por tag y botón de encuadre/aislamiento. |
+| ¿Cómo está apoyado? | **Parcialmente** | Capas de apoyos, masters, diafragmas y rigid links; inspector de restricciones nodales. No dibuja automáticamente la ruta completa hasta fundación. |
+| ¿Qué lo carga? | **Sí, con limitaciones visibles** | Flechas, caso activo, áreas tributarias y asignación móvil. LT1 usa franja equivalente y ROOF LT2 no muestra carga porque no existe en la fuente exportada. |
+| ¿Cómo se deforma? | **Sí** | Deformada por caso o superposición y escala gráfica ajustable. Las barras se representan por sus nodos extremos, no mediante una curva de desplazamiento interno. |
+| ¿Qué fuerzas tiene? | **Sí** | Inspector N/V/T/M en I/J y diagramas. My es parabólico bajo `beamUniform` y por tramos bajo `beamPoint`; Mz se reconstruye por equilibrio. |
+| ¿Cuánta capacidad tiene? | **Parcialmente** | P–M para columna 113022 y muro M001. No existe chequeo de capacidad para todos los elementos y los supuestos del bloque P–M deben exponerse. |
 
-El viewer cumple bien como postprocesador de inspección y trazabilidad. Aún no
-es una herramienta de edición/diseño ni una comprobación normativa general.
+El viewer sí ayuda a localizar, relacionar cargas y observar respuesta. Sigue
+siendo un postprocesador/laboratorio y no un editor estructural ni un sistema
+general de diseño normativo.
 
 ## 6. Preparación móvil
 
-**Teléfono objetivo identificado:** Samsung Galaxy A54 5G como dispositivo de
-prueba propuesto, no ensayado. Su ficha oficial declara Android 13, procesador
-Exynos 1380 de ocho núcleos, 6 GB de RAM y pantalla 1080×2340. Supera los
-requisitos generales de Unity 6 para Android (Android 6/API 23+, ARM con Neon
-o ARM64, OpenGL ES 3.0+/Vulkan y al menos 1 GB de RAM):
-[requisitos Unity 6](https://docs.unity3d.com/6000.0/Documentation/Manual/system-requirements.html)
-y [ficha Samsung](https://image-us.samsung.com/SamsungUS/samsungbusiness/pdf/spec-sheets/a54/HHP_A545G_DATA_USCC.pdf).
+**Teléfono compatible identificado:** Samsung Galaxy A54 5G como equipo de
+prueba propuesto, todavía no ensayado. Su configuración documentada —Android
+13 de fábrica, arquitectura de 64 bits, 6 GB de RAM y pantalla 1080×2340— es
+compatible con el objetivo del proyecto: Android API 26+, ARM64 y gráficos
+móviles compatibles con Unity 6.
 
-El proyecto tiene escena registrada, API mínima 26, ARM64, orientación
-horizontal y un build reproducible mediante `LT1/Build Android APK` o
-`AndroidBuild.BuildFromCommandLine`; la salida prevista es
-`Builds/Android/LT1Viewer-semana05.apk`. El HUD aumenta botones y dimensiones
-en plataforma móvil; un dedo permite toque/órbita y dos dedos pan/zoom.
+Se creó el build móvil inicial reproducible en
+`unity/LT1Viewer/Assets/Editor/AndroidBuild.cs`:
 
-**Estado del APK:** pendiente por entorno local. Unity 6000.5.0f1 informó que
-no existe una licencia activa para el editor batch y AndroidPlayer aún no está
-instalado. Se inició la instalación por Unity Hub, pero el Hub la interrumpió
-por un error de E/S en su base local de cuenta. Por ello todavía no se afirma
-que exista ni que se haya probado un APK. Deben activarse la licencia en Unity
-Hub, completar Android Build Support + SDK/NDK + OpenJDK y ejecutar el método
-de build; la prueba real en el A54 continúa pendiente.
+- escena `Assets/Scenes/LT1Viewer.unity`;
+- identificador `cl.p0mcoc.lt1viewer`;
+- API mínima 26;
+- arquitectura ARM64;
+- orientación horizontal;
+- APK, no App Bundle;
+- salida `Builds/Android/LT1Viewer-semana05.apk`;
+- menú `LT1 > Build Android APK` y método batch
+  `AndroidBuild.BuildFromCommandLine`.
+
+La interfaz adapta tamaños en plataforma móvil y soporta toque corto,
+órbita, pan y pinza de zoom.
+
+**Estado verificable:** el script y la configuración inicial compilan, pero
+no se declara un APK generado ni probado. El entorno local no tenía licencia
+Unity activa para batch y AndroidPlayer/Android Build Support no terminó de
+instalarse. Para cerrar esta parte se debe activar la licencia, instalar
+Android Build Support + SDK/NDK + OpenJDK para Unity 6000.5.0f1, ejecutar el
+build e instalarlo en el A54.
 
 ## 7. IA
 
-Una funcionalidad compleja desarrollada con apoyo de agente fue la cadena de
-postproceso estructural de Semana 4: lectura del JSON combinado, cambio de caso
-sin recargar geometría, deformada, seis diagramas de fuerzas y trazabilidad
-`elementTag → GameObject → fuerzas/desplazamientos → sección → P–M`.
+La funcionalidad compleja desarrollada con apoyo de agente fue la
+reconstrucción exacta de los diagramas de momento a partir de resultados de
+OpenSees y cargas internas exportadas.
 
-La verificación no se basó solo en observar la escena:
+Antes, el visor interpolaba `Mi→Mj`. El agente identificó que esto era
+incorrecto para elementos cargados y formuló:
 
-- `validar_unity_combinado.py`: **62.012 comprobaciones, 0 problemas** el
-  21-09-2026.
-- Las identidades de la sección 3 verifican equilibrio y linealidad de
-  COMBO_R con los números exportados.
-- Las pruebas P–M verifican cinco casos, recomposición del muro M001 y el
-  estado fuera de capacidad del muro bajo EY.
-- `validar_unity_viewer_estatico.py`: **27 comprobaciones, 0 problemas**.
-  La escena temporal `Assets/_Recovery/0.unity` se conserva como trabajo
-  recuperable y el validador la excluye explícitamente; la única escena fuente
-  evaluada continúa siendo `Assets/Scenes/LT1Viewer.unity`.
-- Compilación independiente de `Assembly-CSharp` y
-  `Assembly-CSharp-Editor`: **0 errores**. El ensamblado de editor que contiene
-  `AndroidBuild` terminó además con 0 advertencias; el runtime conserva avisos
-  legacy de API/serialización que no impiden compilar.
-- Ejecución actual de `pytest`: **162 aprobadas**, con dos avisos
-  `PytestUnknownMarkWarning` por la marca `slow`. Los avisos no alteran el
-  resultado de las pruebas.
+`My(x)=My_i+Vz_i·x+Σ(w·x²/2)+Σ(P·max(0,x−a))`,
 
-## Conclusión frente a la rúbrica
+donde `w` representa `beamUniform` y `P,a` cada `beamPoint`. Para el otro eje
+se usa `dMz/dx=−Vy`. La reconstrucción también combina las cargas G/Q con los
+coeficientes de los sliders y coloca estaciones exactamente en cada `xloc`.
 
-El viewer, la redistribución V30, la interacción táctil y la carga móvil visual
-quedan implementados y verificados estáticamente. La modificación/reanálisis
-estructural continúa como flujo manual reproducible; COMBO_R y P–M mantienen
-su alcance y supuestos explícitos. El único cierre que no puede declararse
-logrado es generar e instalar/probar el APK: depende de activar la licencia y
-completar los módulos Android del editor local. El código estructural y del
-visor usado para esta evaluación queda trazado en el commit `ea7e4d8`.
+La verificación no se limitó a una inspección visual:
+
+- 3.470 cierres seccionales entre los extremos I/J de los cinco casos;
+- error máximo My: `1,48×10⁻¹² kN·m`;
+- error máximo Mz: `4,55×10⁻¹³ kN·m`;
+- error máximo Vz: `1,02×10⁻¹² kN`;
+- `validar_unity_combinado.py`: 62.012 comprobaciones, 0 problemas;
+- `validar_unity_viewer_estatico.py`: 28 comprobaciones, 0 problemas;
+- compilación `Assembly-CSharp`: 0 errores;
+- `pytest`: 162 pruebas aprobadas; dos avisos por la marca `slow`, sin fallos.
+
+El agente también actualizó la documentación y las pruebas de la paleta para
+evitar que una expectativa antigua —columnas verdes— contradijera la interfaz
+solicitada —columnas grises, vigas naranjas y muros rojos—.
+
+## Conclusión
+
+El viewer cumple la interacción obligatoria, la superposición instantánea,
+la inspección P–M acotada, dos modificaciones con aviso explícito de
+reanálisis y el sidequest de carga móvil. Las modificaciones no cierran aún
+el ciclo Unity→OpenSees automáticamente; el procedimiento manual queda
+documentado y protege la trazabilidad. La preparación móvil dispone de código
+de build y teléfono objetivo, pero la generación e instalación del APK sigue
+pendiente por el entorno de Unity.
