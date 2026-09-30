@@ -28,12 +28,12 @@ public sealed class ARStructuralDemo : MonoBehaviour
 
     [Header("Fuente OpenSees")]
     public string jsonFileName = "modelo_combinado.json";
-    public int elementTag = 113011;
+    public int elementTag = 800205;
     public string loadCase = "COMBO_R";
     [Tooltip("Componente exportada por OpenSees: N1, Vy1, Vz1, T1, My1 o Mz1.")]
-    public string resultComponent = "N1";
-    public string displayResultName = "P";
-    public string resultUnits = "kN";
+    public string resultComponent = "My1";
+    public string displayResultName = "M";
+    public string resultUnits = "kN·m";
 
     [Header("Unity local -> AR (respecto de la imagen)")]
     [Min(0.0001f)] public float arScale = 0.035f;

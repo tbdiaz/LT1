@@ -68,11 +68,11 @@ public static class ARStructuralDemoBuilder
         demo.trackedImageManager = imageManager;
         demo.arCamera = camera;
         demo.referenceImageName = "LT1_AR_REFERENCE";
-        demo.elementTag = 113011;
+        demo.elementTag = 800205;
         demo.loadCase = "COMBO_R";
-        demo.resultComponent = "N1";
-        demo.displayResultName = "P";
-        demo.resultUnits = "kN";
+        demo.resultComponent = "My1";
+        demo.displayResultName = "M";
+        demo.resultUnits = "kN·m";
         demo.arScale = 0.035f;
         demo.arEulerDegrees = Vector3.zero;
         demo.arTranslationMetres = new Vector3(0f, 0.015f, 0f);

@@ -6,10 +6,11 @@ modifica `modelo_combinado.json`, la geometria, las cargas ni los resultados.
 ## Dato estructural demostrado
 
 - Fuente unica: `Assets/StreamingAssets/modelo_combinado.json`.
-- Elemento: columna LT1, `elementTag = 113011`, nodos `100303 -> 110303`.
+- Elemento: segmento de fachada LT1, `elementTag = 800205`, nodos
+  `130305 -> 800008`, nivel `L3`, longitud `7.49 m`.
 - Caso: `COMBO_R`.
-- Resultado: `P = N1 = 3557.16 kN` (el valor en pantalla se lee en runtime
-  desde `results.forces.COMBO_R.113011.N1`; no esta copiado en el script).
+- Resultado: `M = My1 = -186.46 kN·m` (el valor en pantalla se lee en runtime
+  desde `results.forces.COMBO_R.800205.My1`; no esta copiado en el script).
 - Imagen de referencia: `Assets/StreamingAssets/pm_column_113022.png`, nombre
   AR `LT1_AR_REFERENCE`, ancho fisico configurado de `0.20 m`.
 
@@ -29,7 +30,7 @@ Para un punto OpenSees `pOS = (X,Y,Z)` en metros:
    pose (posicion y rotacion) actualizada por ARKit para `ARTrackedImage`.
 
 El `ARTrackedImage` detectado se usa como **image anchor**: el objeto
-`ARContent_ElementTag_113011` se hace hijo de su `Transform`. Por eso el
+`ARContent_ElementTag_800205` se hace hijo de su `Transform`. Por eso el
 elemento sigue la pose de la imagen y se oculta si el estado deja de ser
 `Tracking`.
 
@@ -88,8 +89,9 @@ un iPhone compatible con ARKit.
    deje `Automatically manage signing` activo.
 7. Conecte el iPhone, confie en el Mac, seleccione el dispositivo como destino
    y pulse Run. En el iPhone autorice la camara.
-8. Apunte a la impresion completa. Al entrar en `Tracking` aparece la columna
-   naranja con la etiqueta `elementTag 113011`, `COMBO_R` y `P (N1)` en kN.
+8. Apunte a la impresion completa. Al entrar en `Tracking` aparece el segmento
+   de fachada naranja con la etiqueta `elementTag 800205`, `COMBO_R` y
+   `M (My1)` en kN·m.
    Mueva el telefono: el contenido debe permanecer registrado con la pose de
    la imagen.
 

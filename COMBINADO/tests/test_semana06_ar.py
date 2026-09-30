@@ -9,15 +9,15 @@ JSON_PATH = UNITY / "Assets" / "StreamingAssets" / "modelo_combinado.json"
 
 def test_ar_demo_uses_existing_combined_element_and_result():
     data = json.loads(JSON_PATH.read_text(encoding="utf-8"))
-    element = next(e for e in data["elements"] if e["elementTag"] == 113011)
+    element = next(e for e in data["elements"] if e["elementTag"] == 800205)
     node_tags = {n["nodeTag"] for n in data["nodes"]}
 
     assert element["origen"] == "LT1"
-    assert element["tipo"] == "columna"
+    assert element["tipo"] == "segmento_fachada"
     assert element["nodeI"] in node_tags
     assert element["nodeJ"] in node_tags
-    assert "113011" in data["results"]["forces"]["COMBO_R"]
-    assert isinstance(data["results"]["forces"]["COMBO_R"]["113011"]["N1"], (int, float))
+    assert "800205" in data["results"]["forces"]["COMBO_R"]
+    assert isinstance(data["results"]["forces"]["COMBO_R"]["800205"]["My1"], (int, float))
 
 
 def test_ar_coordinate_chain_and_traceability_are_explicit():
@@ -30,6 +30,8 @@ def test_ar_coordinate_chain_and_traceability_are_explicit():
     assert "Vector3.one * arScale" in source
     assert "elementTag" in source and "loadCase" in source and "resultUnits" in source
     assert "TrackingState.Tracking" in source
+    assert "public int elementTag = 800205;" in source
+    assert 'public string resultComponent = "My1";' in source
 
 
 def test_ar_packages_and_ios_builder_are_present():

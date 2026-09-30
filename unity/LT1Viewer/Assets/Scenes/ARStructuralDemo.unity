@@ -238,11 +238,11 @@ MonoBehaviour:
   arCamera: {fileID: 2030383510}
   referenceImageName: LT1_AR_REFERENCE
   jsonFileName: modelo_combinado.json
-  elementTag: 113011
+  elementTag: 800205
   loadCase: COMBO_R
-  resultComponent: N1
-  displayResultName: P
-  resultUnits: kN
+  resultComponent: My1
+  displayResultName: M
+  resultUnits: kN·m
   arScale: 0.035
   arEulerDegrees: {x: 0, y: 0, z: 0}
   arTranslationMetres: {x: 0, y: 0.015, z: 0}
