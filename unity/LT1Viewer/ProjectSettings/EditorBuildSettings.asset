@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/ARStructuralDemo.unity
+    guid: 33a5bd893d35a914f8ed05e540e3f3f6
+  - enabled: 1
     path: Assets/Scenes/LT1Viewer.unity
-    guid: 00000000000000000000000000000000
+    guid: 44ad4867b9f07084f890d97540f06d9b
   m_configObjects: {}

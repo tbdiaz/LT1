@@ -4,6 +4,14 @@ Visor de resultados OpenSees para LT1+LT2, preparado para la entrega P1L4.
 La fuente en tiempo de ejecución es
 `Assets/StreamingAssets/modelo_combinado.json`.
 
+## Semana 6 — AR basica para iPhone
+
+Se agrego una escena independiente con AR Foundation + ARKit que detecta una
+imagen de referencia, usa su pose como image anchor y registra sobre ella un
+elemento real del modelo combinado con su `elementTag`, caso y resultado
+OpenSees. La instalacion, la cadena `OpenSees -> Unity -> AR`, la prueba y el
+flujo iPhone/Xcode estan documentados en `SEMANA06_AR.md`.
+
 ## Abrir y ejecutar
 
 1. Abrir `unity/LT1Viewer` con Unity 6000.5.0f1.
