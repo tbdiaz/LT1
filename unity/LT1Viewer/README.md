@@ -1,16 +1,17 @@
 # LT1 Viewer — postprocesador Unity del modelo COMBINADO
 
 Visor de resultados OpenSees para LT1+LT2, preparado para la entrega P1L4.
-La fuente en tiempo de ejecución es
-`Assets/StreamingAssets/modelo_combinado.json`.
+El visor general usa `Assets/StreamingAssets/modelo_combinado.json`. La demo
+Android de Semana 6 carga solamente el extracto trazable
+`semana06_element_800205.json`.
 
-## Semana 6 — AR basica para iPhone
+## Semana 6 — detección visual de viga para Galaxy A05
 
-Se agrego una escena independiente con AR Foundation + ARKit que detecta una
-imagen de referencia, usa su pose como image anchor y registra sobre ella un
-elemento real del modelo combinado con su `elementTag`, caso y resultado
-OpenSees. La instalacion, la cadena `OpenSees -> Unity -> AR`, la prueba y el
-flujo iPhone/Xcode estan documentados en `SEMANA06_AR.md`.
+La escena `MarkerStructuralDemo.unity` usa `WebCamTexture` y detecta una viga
+real de hormigón como una banda estructural horizontal. Su centro, longitud,
+espesor y ángulo forman un anchor visual equivalente sobre el que se registra
+el elemento `800205`, sin ARCore. Instalación, coordenadas, resultados y prueba
+en el A05 están documentados en `SEMANA06_AR.md`.
 
 ## Abrir y ejecutar
 
@@ -182,9 +183,10 @@ python -m pytest -q
 | Y | -Z |
 | Z | Y |
 
-## APK Android
+## APK Android Semana 6 A05
 
-Con Android Build Support instalado, use `LT1 > Build Android APK` o:
+Con Android Build Support instalado para Unity 6000.5.0f1, use
+`LT1 > Semana 6 A05 > Compilar APK` o:
 
 ```powershell
 & 'C:\Program Files\Unity\Hub\Editor\6000.5.0f1\Editor\Unity.exe' `
@@ -192,7 +194,5 @@ Con Android Build Support instalado, use `LT1 > Build Android APK` o:
   -executeMethod AndroidBuild.BuildFromCommandLine
 ```
 
-La salida es `Builds/Android/LT1Viewer-semana05.apk` (API 26+, ARM64,
-horizontal). En el equipo de revisión, la compilación final quedó bloqueada
-porque Unity no tenía licencia activa y AndroidPlayer no terminó de
-instalarse; no se declara un APK probado hasta resolver ambas condiciones.
+La salida es `Builds/Android/LT1-Semana06-A05.apk` (API 26+, ARM64, IL2CPP),
+sin dependencia de ARCore.

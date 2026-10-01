@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/MarkerStructuralDemo.unity
+    guid: 0a3358bc26303fb498a2ea2d61ea745b
+  - enabled: 1
     path: Assets/Scenes/ARStructuralDemo.unity
     guid: 33a5bd893d35a914f8ed05e540e3f3f6
   - enabled: 1

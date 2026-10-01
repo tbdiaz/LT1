@@ -1,103 +1,150 @@
-# Semana 6 — LAB de AR basica (AR Foundation + ARKit)
+# Semana 6 — AR visual para Samsung Galaxy A05
 
-Esta etapa agrega una demostracion AR independiente al visor existente. No
-modifica `modelo_combinado.json`, la geometria, las cargas ni los resultados.
+Esta demostración reconoce una viga real de hormigón con la cámara y registra
+sobre ella el elemento estructural `800205`. No usa ARCore, marcador SVG,
+giroscopio ni servicios externos.
 
-## Dato estructural demostrado
+## Tecnología
 
-- Fuente unica: `Assets/StreamingAssets/modelo_combinado.json`.
-- Elemento: segmento de fachada LT1, `elementTag = 800205`, nodos
-  `130305 -> 800008`, nivel `L3`, longitud `7.49 m`.
-- Caso: `COMBO_R`.
-- Resultado: `M = My1 = -186.46 kN·m` (el valor en pantalla se lee en runtime
-  desde `results.forces.COMBO_R.800205.My1`; no esta copiado en el script).
-- Imagen de referencia: `Assets/StreamingAssets/pm_column_113022.png`, nombre
-  AR `LT1_AR_REFERENCE`, ancho fisico configurado de `0.20 m`.
+`MarkerStructuralDemo` abre la cámara trasera mediante `WebCamTexture`, conserva
+su relación de aspecto y procesa continuamente el mismo frame que se muestra en
+pantalla. El detector busca una banda con:
 
-## Relacion de coordenadas
+- dos bordes longitudinales aproximadamente paralelos;
+- espesor relativamente constante;
+- longitud claramente mayor que el espesor;
+- región interior continua;
+- orientación predominantemente horizontal, permitiendo perspectiva;
+- tamaño significativo en la imagen.
 
-Para un punto OpenSees `pOS = (X,Y,Z)` en metros:
+Los candidatos pequeños y delgados, como cables, tuberías, luminarias y
+bandejas, se penalizan. La detección se confirma tras seis frames compatibles,
+se suaviza y conserva durante un segundo si existe una oclusión breve.
 
-1. **OpenSees -> Unity:** `u = (X, Z, -Y)`. Conserva `X`, convierte la
-   vertical estructural `Z` en `Y` de Unity y lleva `Y` estructural a `-Z`.
-2. **Origen local del elemento:** `q = u - uI`, donde `uI` es el nodo I. Esto
-   no cambia longitud ni orientacion; solo evita usar coordenadas globales
-   grandes sobre la imagen.
-3. **Escala/rotacion/traslacion local:**
-   `qRegistrado = t + R * (s * q)`. La escena usa inicialmente
-   `s = 0.035`, `R = (0,0,0) grados` y `t = (0,0.015,0) m`.
-4. **Unity -> AR:** `pAR = TImagen * qRegistrado`. `TImagen` es la matriz de
-   pose (posicion y rotacion) actualizada por ARKit para `ARTrackedImage`.
+## Anchor visual y coordenadas
 
-El `ARTrackedImage` detectado se usa como **image anchor**: el objeto
-`ARContent_ElementTag_800205` se hace hijo de su `Transform`. Por eso el
-elemento sigue la pose de la imagen y se oculta si el estado deja de ser
-`Tracking`.
+El objeto `DetectedBeamAnchor_ElementTag_800205` es una referencia espacial
+equivalente a un anchor. Guarda el centro, dirección y longitud visual de la
+viga confirmada. Es un registro monocular relativo a la imagen, no una pose 3D
+global ni una localización del teléfono dentro del edificio.
 
-## Crear la escena en Unity
+La cadena de transformación es:
 
-1. Abra `unity/LT1Viewer` con Unity `6000.5.0f1` y espere a que Package
-   Manager instale AR Foundation, Apple ARKit, XR Plug-in Management, XR Core
-   Utilities e Input System.
-2. Inicie sesion/active la licencia de Unity si el editor lo solicita.
-3. Ejecute `LT1 > Semana 6 > Crear o actualizar escena AR`.
-4. El comando crea:
-   - `Assets/Scenes/ARStructuralDemo.unity`;
-   - `Assets/AR/LT1ARReferenceLibrary.asset`;
-   - `AR Session`, `XR Origin (AR)`, camara AR, image manager, anchor manager
-     y el controlador de demostracion;
-   - la escena AR como primera escena de Build Settings, conservando la
-     escena anterior.
-5. Abra `ARStructuralDemo.unity` y seleccione `Semana6_AR_OpenSees`. En el
-   Inspector se pueden explicar y ajustar `Ar Scale`, `Ar Euler Degrees` y
-   `Ar Translation Metres`. No cambie el tag/caso/componente salvo que primero
-   verifique que existen en el JSON.
-6. Para una comprobacion de escritorio, presione Play y confirme que la
-   interfaz indique que espera la imagen y que Console registre los nodos,
-   la conversion Unity y el resultado. La deteccion real se comprueba en el
-   iPhone (o con XR Simulation si se configura un entorno simulado).
+1. OpenSees expresa los nodos como `(X,Y,Z)` en metros.
+2. Unity usa `u = (X,Z,-Y)`.
+3. Se resta el nodo I para obtener coordenadas locales del elemento.
+4. El centro detectado produce la traslación del anchor.
+5. La dirección longitudinal produce su rotación.
+6. La longitud visible dividida por `7.49 m` produce la escala dinámica.
+7. Se aplica la traslación local configurada `(0,0,0.015) m` para evitar
+   solapamiento visual.
 
-## Preparar la imagen fisica
+Conceptualmente:
 
-1. Abra `Assets/StreamingAssets/pm_column_113022.png`.
-2. Imprimala **sin recortar, deformar ni ajustar al papel**, a `20.0 cm` de
-   ancho. La altura debe mantener la proporcion original.
-3. Pegue la impresion sobre una superficie plana, rigida, mate y bien
-   iluminada. Los reflejos y dobleces reducen el tracking.
+`pAR = Tanchor + Ranchor * Sanchor * pLocal`
 
-Si se imprime a otro ancho, cambie `widthMetres` en
-`ARStructuralDemoBuilder.cs`, vuelva a ejecutar el constructor y recompile.
+El anchor se actualiza mediante suavizado. Si la viga desaparece durante más
+de un segundo se invalida, se ocultan el elemento y sus resultados, y la app
+vuelve a `Buscando viga...`.
 
-## Configurar y ejecutar en iPhone
+## Datos estructurales
 
-La compilacion iOS final requiere macOS, Xcode, una cuenta Apple Developer y
-un iPhone compatible con ARKit.
+La app no carga el modelo completo en Android. El script
+`COMBINADO/scripts/export_semana06_element.py` extrae desde
+`modelo_combinado.json` solamente los datos reales de `800205` y genera:
 
-1. En el Mac, instale desde Unity Hub la misma version del editor y el modulo
-   `iOS Build Support`; copie o clone el proyecto completo.
-2. Abra el proyecto y ejecute primero el constructor de escena.
-3. Ejecute `LT1 > Semana 6 > Configurar proyecto para iPhone`. Configura
-   identificador `cl.p0mcoc.lt1.ar`, descripcion de uso de camara, iOS 13+,
-   ARM64 e intenta asignar el ARKit Loader.
-4. Verifique en `Edit > Project Settings > XR Plug-in Management > iOS` que
-   **Apple ARKit** este marcado y `Initialize XR on Startup` este activo.
-5. En `File > Build Profiles`, seleccione iOS. Confirme que
-   `Assets/Scenes/ARStructuralDemo.unity` sea la escena 0 y pulse
-   `Switch Platform` y luego `Build` para generar el proyecto Xcode.
-6. Abra el `.xcodeproj` generado en Xcode. En `Signing & Capabilities`, elija
-   el `Team`, use un Bundle Identifier unico si el propuesto ya existe y
-   deje `Automatically manage signing` activo.
-7. Conecte el iPhone, confie en el Mac, seleccione el dispositivo como destino
-   y pulse Run. En el iPhone autorice la camara.
-8. Apunte a la impresion completa. Al entrar en `Tracking` aparece el segmento
-   de fachada naranja con la etiqueta `elementTag 800205`, `COMBO_R` y
-   `M (My1)` en kN·m.
-   Mueva el telefono: el contenido debe permanecer registrado con la pose de
-   la imagen.
+`Assets/StreamingAssets/semana06_element_800205.json`
 
-## Archivos de implementacion
+Trazabilidad principal:
 
-- `Assets/Scripts/ARStructuralDemo.cs`: lectura del JSON, conversion de
-  coordenadas, pose/anchor, geometria y rotulos.
-- `Assets/Editor/ARStructuralDemoBuilder.cs`: escena y reference image library.
-- `Assets/Editor/IOSARBuild.cs`: ajustes reproducibles de iOS y ARKit.
+- origen: LT1 dentro del modelo combinado LT1 + LT2;
+- elemento: `800205`, tipo `segmento_fachada`;
+- sección: `V. 60/80`;
+- nodos: `130305 -> 800008`;
+- longitud: `7.49 m`;
+- caso mostrado: `COMBO_R`, extremo I.
+
+El panel aparece solamente después de confirmar la viga y presenta:
+
+| Subtítulo | Valor |
+|---|---:|
+| Fuerza axial | `0.000 kN` |
+| Fuerza de corte | `123.110 kN` |
+| Momento flector | `-186.462 kN·m` |
+| Ux | `+4.217 mm` |
+| Uy | `-0.056 mm` |
+| Uz | `-1.340 mm` |
+| Área tributaria | `17.309 m²` |
+| G | `16.770 kN/m` |
+| Q | `9.244 kN/m` |
+| Demanda / Capacidad | `PENDIENTE` |
+
+No se inventa una curva P-M: el modelo exportado no contiene una verificación
+demanda-capacidad para `800205`.
+
+## Cumplimiento de Semana 6
+
+| # | Requisito | Implementación |
+|---|---|---|
+| 1 | Iniciar experiencia AR | abre la cámara trasera con `WebCamTexture` |
+| 2 | Detectar referencia | detecta la región rectangular de la viga real |
+| 3 | Obtener pose | obtiene centro, dirección, tamaño y ángulo visual |
+| 4 | Usar anchor equivalente | crea `DetectedBeamAnchor_ElementTag_800205` |
+| 5 | Transformar coordenadas | aplica escala, rotación y traslación |
+| 6 | Mostrar elemento real | superpone el elemento `800205` |
+| 7 | Mantener `elementTag` | conserva y muestra `800205` |
+| 8 | Mostrar resultado OpenSees | presenta fuerzas, desplazamientos y cargas reales de `COMBO_R` |
+
+En el teléfono se ejecutan la cámara, detección, confirmación temporal,
+suavizado, transformación y render. La geometría, cargas y resultados fueron
+calculados previamente; OpenSees no se ejecuta en Android.
+
+## Crear y revisar la escena
+
+1. Abra `unity/LT1Viewer` con Unity `6000.5.0f1`.
+2. Ejecute `LT1 > Semana 6 A05 > Crear escena viga horizontal` si necesita
+   regenerarla.
+3. Abra `Assets/Scenes/MarkerStructuralDemo.unity`.
+4. Verifique `elementTag = 800205`, `loadCase = COMBO_R`, seis frames de
+   confirmación y un segundo de retención.
+5. No active ARCore para este APK.
+
+## Generar el APK
+
+Instale desde Unity Hub Android Build Support, SDK/NDK y OpenJDK para Unity
+`6000.5.0f1`. Luego ejecute `LT1 > Semana 6 A05 > Compilar APK` o:
+
+```powershell
+& 'C:\Program Files\Unity\Hub\Editor\6000.5.0f1\Editor\Unity.exe' `
+  -batchmode -quit -projectPath '<ruta>\unity\LT1Viewer' `
+  -executeMethod AndroidBuild.BuildFromCommandLine `
+  -logFile '<ruta>\unity\LT1Viewer\Logs\Semana06-A05-Build.log'
+```
+
+Salida: `Builds/Android/LT1-Semana06-A05.apk`.
+
+La compilación usa Android API 26+, ARM64, IL2CPP y orientación vertical. El
+APK se considera un artefacto generado y no se versiona en Git.
+
+## Instalación y prueba
+
+Con depuración USB habilitada:
+
+```powershell
+adb devices
+adb install -r LT1-Semana06-A05.apk
+```
+
+Para probar:
+
+1. conceda permiso de cámara;
+2. apunte a una viga horizontal de hormigón bien iluminada;
+3. encuadre una longitud y un espesor significativos;
+4. compruebe que aumenten `frames procesados` y `candidatos encontrados`;
+5. espere seis detecciones compatibles;
+6. verifique el contorno, `VIGA DETECTADA`, el elemento `800205` y el panel;
+7. cubra brevemente una parte de la viga para demostrar la retención del
+   anchor.
+
+No se debe imprimir ni mostrar el antiguo marcador SVG: la versión actual usa
+la viga real como referencia visual.

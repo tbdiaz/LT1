@@ -16,8 +16,14 @@ venv/
 **/[Bb]uilds/
 **/[Ll]ogs/
 **/[Uu]ser[Ss]ettings/
+**/.utmp/
+**/Assets/_Recovery/
+**/Assets/_Recovery.meta
+**/Assets/XR/Temp/
+**/Assets/XR/Temp.meta
 *.csproj
 *.sln
+*.slnx
 *.user
 *.pidb
 *.booproj

@@ -22,8 +22,8 @@ Etapa P1L4. Verifica, SIN abrir Unity solo este script:
          ningun script apunta a modelo_lt1.json como fuente),
        - ModelLoader usa el nombre de archivo correcto,
        - LT1SceneBuilder registra los componentes nuevos.
-  6. La unica escena fuente permitida es Assets/Scenes/LT1Viewer.unity;
-     se ignoran artefactos internos de Library.
+  6. Las escenas fuente permitidas son LT1Viewer.unity y las demostraciones
+     de Semana 6; se ignoran artefactos internos de Library.
 
 Uso:
     cd COMBINADO/src && python3 validar_unity_viewer_estatico.py
@@ -659,7 +659,10 @@ class StaticValidator:
                     self.fail.append(
                         f"{path.name}:{lineno}: uso obsoleto de "
                         f"'pending_geometry' ({line.strip()[:60]})")
-            if "modelo_lt1.json" in text:
+            # AndroidBuild lo nombra exclusivamente en ExcludedAssets para
+            # impedir que el JSON obsoleto entre al APK liviano de Semana 6.
+            # Eso no constituye una fuente de datos en tiempo de ejecucion.
+            if "modelo_lt1.json" in text and path.name != "AndroidBuild.cs":
                 self.fail.append(f"{path.name}: referencia a modelo_lt1.json "
                                  "como fuente (ya no aplica)")
 
@@ -752,14 +755,19 @@ class StaticValidator:
         # recuperable, por lo que se ignora sin borrarla.
         unity_files = [p for p in assets.rglob("*.unity")
                        if "_Recovery" not in p.parts]
-        allowed = {assets / "Scenes" / "LT1Viewer.unity"}
+        allowed = {
+            assets / "Scenes" / "LT1Viewer.unity",
+            assets / "Scenes" / "ARStructuralDemo.unity",
+            assets / "Scenes" / "MarkerStructuralDemo.unity",
+        }
         unexpected = [p for p in unity_files if p not in allowed]
         if unexpected:
             self.fail.append(
                 "Se encontraron escenas Unity no previstas: "
                 f"{[p.relative_to(ROOT) for p in unexpected]}")
         elif unity_files:
-            self.ok.append("escena fuente Assets/Scenes/LT1Viewer.unity OK")
+            self.ok.append(
+                "escenas fuente Unity previstas OK")
         else:
             self.ok.append("escena reproducible mediante LT1SceneBuilder")
 
