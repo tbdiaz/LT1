@@ -117,6 +117,10 @@ def test_carga_movil_tactil_y_build_android_declarados():
     assert "magnitudeKn * xi" in moving
     assert "forceError" in moving and "momentError" in moving
     assert "Input.touchCount" in orbit and "pinch" in orbit
-    assert "TouchPhase.Ended" in selection and "movement <= 22f" in selection
+    assert "TouchPhase.Ended" in selection and "tapTolerance" in selection
+    assert "Physics.RaycastAll" in selection
+    assert "GetComponentInParent<ElementRef>" in selection
+    assert "ResolveSelectionCamera" in selection
+    assert "GetComponent<OrbitCamera>()" in selection
     assert "AndroidApiLevel26" in android
     assert "AndroidArchitecture.ARM64" in android

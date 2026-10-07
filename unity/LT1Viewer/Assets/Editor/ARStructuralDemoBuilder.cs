@@ -37,7 +37,7 @@ public static class ARStructuralDemoBuilder
         GameObject originObject = new GameObject("XR Origin (AR)");
         XROrigin origin = originObject.AddComponent<XROrigin>();
         ARTrackedImageManager imageManager = originObject.AddComponent<ARTrackedImageManager>();
-        originObject.AddComponent<ARAnchorManager>();
+        ARAnchorManager anchorManager = originObject.AddComponent<ARAnchorManager>();
         imageManager.referenceLibrary = library;
         imageManager.requestedMaxNumberOfMovingImages = 1;
 
@@ -66,6 +66,7 @@ public static class ARStructuralDemoBuilder
         GameObject demoObject = new GameObject("Semana6_AR_OpenSees");
         ARStructuralDemo demo = demoObject.AddComponent<ARStructuralDemo>();
         demo.trackedImageManager = imageManager;
+        demo.anchorManager = anchorManager;
         demo.arCamera = camera;
         demo.referenceImageName = "LT1_AR_REFERENCE";
         demo.elementTag = 800205;

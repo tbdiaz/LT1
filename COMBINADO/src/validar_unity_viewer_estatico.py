@@ -662,9 +662,17 @@ class StaticValidator:
             # AndroidBuild lo nombra exclusivamente en ExcludedAssets para
             # impedir que el JSON obsoleto entre al APK liviano de Semana 6.
             # Eso no constituye una fuente de datos en tiempo de ejecucion.
-            if "modelo_lt1.json" in text and path.name != "AndroidBuild.cs":
+            # El visor estructural debe usar exclusivamente modelo_combinado.
+            # ModelLoader puede leer modelo_lt1 solo como suplemento visual de
+            # losas/vigas sin rigidez, carga ni resultados; esa excepción está
+            # declarada con un campo específico y no reemplaza jsonFileName.
+            visual_lt1_only = (path.name == "ModelLoader.cs" and
+                'aestheticSlabJsonFileName = "modelo_lt1.json"' in text and
+                'jsonFileName = "modelo_combinado.json"' in text)
+            if ("modelo_lt1.json" in text and path.name != "AndroidBuild.cs"
+                    and not visual_lt1_only):
                 self.fail.append(f"{path.name}: referencia a modelo_lt1.json "
-                                 "como fuente (ya no aplica)")
+                                 "como fuente estructural (ya no aplica)")
 
         loader = SCRIPTS / "ModelLoader.cs"
         text = loader.read_text(encoding="utf-8")

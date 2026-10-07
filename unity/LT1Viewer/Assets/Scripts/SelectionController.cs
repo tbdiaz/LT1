@@ -17,7 +17,8 @@ public class SelectionController : MonoBehaviour
     [HideInInspector] public GameObject SelectedObject;
 
     private Material highlightMaterial;
-    private Material originalMaterial;
+    private Renderer[] selectedRenderers = new Renderer[0];
+    private Material[] originalMaterials = new Material[0];
     private Vector2 touchStart;
     private float touchStartTime;
     private int trackedFinger = -1;
@@ -59,68 +60,91 @@ public class SelectionController : MonoBehaviour
             float movement = Vector2.Distance(touchStart, touch.position);
             float duration = Time.unscaledTime - touchStartTime;
             trackedFinger = -1;
-            if (touch.phase == TouchPhase.Ended && movement <= 22f &&
-                duration <= 0.55f && !ViewerHUD.PointerOverHud(touch.position))
+            float tapTolerance = Mathf.Max(22f, Screen.dpi > 0f
+                ? Screen.dpi * 0.10f : 22f);
+            if (touch.phase == TouchPhase.Ended && movement <= tapTolerance &&
+                duration <= 0.80f && !ViewerHUD.PointerOverHud(touch.position))
                 HandleClick(touch.position);
         }
     }
 
     void HandleClick(Vector3 screenPoint)
     {
-        if (Camera.main == null) return;
-        Ray ray = Camera.main.ScreenPointToRay(screenPoint);
+        Camera selectionCamera = ResolveSelectionCamera();
+        if (selectionCamera == null) return;
+        Ray ray = selectionCamera.ScreenPointToRay(screenPoint);
 
-        if (!Physics.Raycast(ray, out RaycastHit hit))
+        // Un nodo o apoyo puede estar delante de la barra. Raycast() devolvia
+        // solo ese primer collider y cancelaba la seleccion. Se recorren todos
+        // los impactos ordenados y se toma el primero con trazabilidad real.
+        RaycastHit[] hits = Physics.RaycastAll(
+            ray, Mathf.Infinity, ~0, QueryTriggerInteraction.Ignore);
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+        foreach (RaycastHit hit in hits)
         {
-            Deselect();
+            ElementRef element = hit.collider.GetComponent<ElementRef>();
+            if (element == null)
+                element = hit.collider.GetComponentInParent<ElementRef>();
+            if (element == null) continue;
+            SelectElement(element);
             return;
         }
-
-        string objName = hit.collider.gameObject.name;
-
-        if (objName.StartsWith("Beam_") || objName.StartsWith("Column_") ||
-            objName.StartsWith("Wall_"))
-        {
-            SelectElement(hit.collider.gameObject, objName);
-        }
-        else
-        {
-            Deselect();
-        }
+        Deselect();
     }
 
-    void SelectElement(GameObject go, string objName)
+    static Camera ResolveSelectionCamera()
+    {
+        Camera[] cameras = FindObjectsOfType<Camera>();
+        Camera best = null;
+        foreach (Camera candidate in cameras)
+        {
+            if (candidate == null || !candidate.enabled
+                || !candidate.gameObject.activeInHierarchy) continue;
+            bool candidateOrbits = candidate.GetComponent<OrbitCamera>() != null;
+            bool bestOrbits = best != null
+                && best.GetComponent<OrbitCamera>() != null;
+            if (best == null || (candidateOrbits && !bestOrbits)
+                || (candidateOrbits == bestOrbits && candidate.depth > best.depth))
+                best = candidate;
+        }
+        return best != null ? best : Camera.main;
+    }
+
+    void SelectElement(ElementRef element)
     {
         Deselect();
 
-        SelectedObject = go;
-        originalMaterial = go.GetComponent<Renderer>().material;
-        go.GetComponent<Renderer>().material = highlightMaterial;
+        SelectedObject = element.gameObject;
+        SelectedTag = element.elementTag;
+        if (element.tipo == "columna") SelectedType = "Columna";
+        else if (element.tipo == "muro" || element.tipo == "muro_corner"
+                 || element.tipo == "vertical_caja"
+                 || element.tipo == "conector_v40_muro")
+            SelectedType = "Muro";
+        else SelectedType = "Viga";
 
-        SelectedTag = ParseTag(objName);
-        if (objName.StartsWith("Beam_")) SelectedType = "Viga";
-        else if (objName.StartsWith("Column_")) SelectedType = "Columna";
-        else if (objName.StartsWith("Wall_")) SelectedType = "Muro";
+        selectedRenderers = SelectedObject.GetComponentsInChildren<Renderer>();
+        originalMaterials = new Material[selectedRenderers.Length];
+        for (int i = 0; i < selectedRenderers.Length; i++)
+        {
+            originalMaterials[i] = selectedRenderers[i].material;
+            selectedRenderers[i].material = highlightMaterial;
+        }
     }
 
     public void Deselect()
     {
-        if (SelectedObject != null && originalMaterial != null)
+        int count = Mathf.Min(selectedRenderers.Length, originalMaterials.Length);
+        for (int i = 0; i < count; i++)
         {
-            SelectedObject.GetComponent<Renderer>().material = originalMaterial;
+            if (selectedRenderers[i] != null && originalMaterials[i] != null)
+                selectedRenderers[i].material = originalMaterials[i];
         }
         SelectedObject = null;
-        originalMaterial = null;
+        selectedRenderers = new Renderer[0];
+        originalMaterials = new Material[0];
         SelectedTag = -1;
         SelectedType = "";
-    }
-
-    int ParseTag(string name)
-    {
-        int idx = name.LastIndexOf('_');
-        if (idx >= 0 && int.TryParse(name.Substring(idx + 1), out int tag))
-            return tag;
-        return -1;
     }
 
     public ElementRef GetElementRef()

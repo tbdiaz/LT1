@@ -53,7 +53,7 @@ public class StructuralViewer : MonoBehaviour
 
     void ConfigureCamera()
     {
-        Camera cam = Camera.main;
+        Camera cam = ResolveViewerCamera();
         if (cam == null) return;
 
         if (cam.GetComponent<OrbitCamera>() == null)
@@ -73,6 +73,38 @@ public class StructuralViewer : MonoBehaviour
         orbit.distance = Mathf.Max(maxExtent * 1.5f, 5f);
         orbit.minDistance = Mathf.Max(maxExtent * 0.05f, 0.1f);
         orbit.maxDistance = Mathf.Max(maxExtent * 5f, 50f);
+    }
+
+    Camera ResolveViewerCamera()
+    {
+        Camera[] cameras = FindObjectsOfType<Camera>();
+        Camera chosen = null;
+        foreach (Camera candidate in cameras)
+        {
+            if (candidate == null || !candidate.gameObject.activeInHierarchy)
+                continue;
+            bool candidateOrbits = candidate.GetComponent<OrbitCamera>() != null;
+            bool chosenOrbits = chosen != null
+                && chosen.GetComponent<OrbitCamera>() != null;
+            if (chosen == null || (candidateOrbits && !chosenOrbits)
+                || (candidateOrbits == chosenOrbits
+                    && candidate.depth > chosen.depth))
+                chosen = candidate;
+        }
+        if (chosen == null) return null;
+
+        // Escenas antiguas fueron creadas con DefaultGameObjects y luego
+        // recibieron una segunda Main Camera. Solo la camara del visor debe
+        // renderizar y originar rayos de seleccion.
+        foreach (Camera candidate in cameras)
+        {
+            if (candidate == null || candidate == chosen) continue;
+            candidate.enabled = false;
+            AudioListener listener = candidate.GetComponent<AudioListener>();
+            if (listener != null) listener.enabled = false;
+        }
+        chosen.tag = "MainCamera";
+        return chosen;
     }
 
     void LogSummary()

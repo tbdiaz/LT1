@@ -8,7 +8,7 @@
    "presion": "kPa",
    "modulo": "kPa"
   },
-  "fecha_generacion": "2026-09-22T02:06:31.032088+00:00",
+  "fecha_generacion": "2026-10-07T15:02:20.050367+00:00",
   "generado_por": "exportar_unity_combinado.py",
   "origen_fuente": "COMBINADO/src/run_combined.py (CombinedBuilder: prepare/check_interface/build/apply_loads/run_analysis)",
   "transformacion_lt1": "X'=X+31.250 ; Y'=-Y ; Z'=Z ; tags LT1 no-interfaz = tag+100000 ; eje I' corregido 42.5->45.0 m",

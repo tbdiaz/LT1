@@ -10,7 +10,7 @@ public static class LT1SceneBuilder
     [MenuItem("LT1/Build LT1Viewer Scene")]
     public static void Build()
     {
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects,
+        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,
                                                 NewSceneMode.Single);
 
         // --- Cámara principal ---

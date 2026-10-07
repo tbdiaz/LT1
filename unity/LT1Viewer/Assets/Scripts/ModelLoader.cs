@@ -43,7 +43,20 @@ public class ModelLoader : MonoBehaviour
     [HideInInspector] public Dictionary<int, GameObject> constraintLinkObjects = new Dictionary<int, GameObject>();
     [HideInInspector] public Dictionary<int, GameObject> supportObjects = new Dictionary<int, GameObject>();
     [HideInInspector] public Dictionary<int, GameObject> masterNodeObjects = new Dictionary<int, GameObject>();
+    [HideInInspector] public List<GameObject> aestheticSlabObjects = new List<GameObject>();
     [HideInInspector] public Vector3 modelCenter;
+
+    [Header("Losas esteticas LT1 + LT2 (no estructurales)")]
+    public string aestheticSlabJsonFileName = "modelo_lt1.json";
+    public string aestheticSlabLt2JsonFileName = "edificio_lt2.json";
+    [Min(0.01f)] public float aestheticSlabThickness = 0.10f;
+    public Color aestheticSlabColor = new Color(0.32f, 0.35f, 0.39f);
+    [Tooltip("Desfase grafico del cielo subterraneo para evitar que se pierda por z-fighting. No modifica la cota estructural.")]
+    [Min(0f)] public float basementSlabVisibilityOffset = 0.03f;
+    [Tooltip("Agrega el cielo estetico del 1er subterraneo LT1 en PISO_1S (-4.01 m), usando la reticula documentada. No altera el modelo estructural.")]
+    public bool fillLt1BasementRoofForDesign = true;
+    [Tooltip("Completa visualmente la cubierta LT2 con los contornos exteriores documentados. No altera el modelo estructural.")]
+    public bool fillLt2RoofForDesign = true;
 
     // --- trazabilidad elementTag <-> JSON <-> GameObject ---------------------
     [HideInInspector] public Dictionary<int, ElementRef> elementRefs = new Dictionary<int, ElementRef>();
@@ -65,6 +78,7 @@ public class ModelLoader : MonoBehaviour
     private Material diaphragmMaterial;
     private Material wallMaterial;
     private Material constraintLinkMaterial;
+    private Material aestheticSlabMaterial;
 
     private Dictionary<int, int> elementJsonIndex = new Dictionary<int, int>();
     private Dictionary<int, int[]> elementNodePair = new Dictionary<int, int[]>();
@@ -129,6 +143,7 @@ public class ModelLoader : MonoBehaviour
         masterMaterial = CreateMaterial(new Color(1.0f, 0.84f, 0.0f));
         diaphragmMaterial = CreateTransparentMaterial(new Color(0.5f, 0.8f, 0.5f, 0.25f));
         wallMaterial = CreateMaterial(new Color(0.88f, 0.10f, 0.12f));
+        aestheticSlabMaterial = CreateMaterial(aestheticSlabColor);
         constraintLinkMaterial = new Material(Shader.Find("Sprites/Default"));
         constraintLinkMaterial.color = new Color(0.0f, 0.85f, 0.90f);
     }
@@ -730,6 +745,7 @@ public class ModelLoader : MonoBehaviour
         GameObject constraintLinksParent = new GameObject("ConstraintLinks");
         GameObject supportsParent = new GameObject("Supports");
         GameObject diaphragmsParent = new GameObject("Diaphragms");
+        GameObject aestheticSlabsParent = new GameObject("AestheticSlabs");
 
         nodesParent.transform.SetParent(structure.transform);
         beamsParent.transform.SetParent(structure.transform);
@@ -738,15 +754,405 @@ public class ModelLoader : MonoBehaviour
         constraintLinksParent.transform.SetParent(structure.transform);
         supportsParent.transform.SetParent(structure.transform);
         diaphragmsParent.transform.SetParent(structure.transform);
+        aestheticSlabsParent.transform.SetParent(structure.transform);
 
         BuildNodes(nodesParent.transform);
         BuildBeams(beamsParent.transform);
+        BuildLt1PendingVisualBeams(beamsParent.transform);
+        BuildLt2VisualBeamClosures(beamsParent.transform);
         BuildColumns(columnsParent.transform);
         BuildWalls(wallsParent.transform);
         BuildConstraintLinks(constraintLinksParent.transform);
         BuildSupports(supportsParent.transform);
         BuildDiaphragms(diaphragmsParent.transform);
+        BuildAestheticSlabs(aestheticSlabsParent.transform);
         ComputeModelCenter();
+    }
+
+    void BuildAestheticSlabs(Transform parent)
+    {
+        string sourcePath = Path.Combine(Application.streamingAssetsPath, aestheticSlabJsonFileName);
+        if (!File.Exists(sourcePath))
+        {
+            Debug.LogWarning($"[LT1Viewer] No se encontro la fuente de losas esteticas: {sourcePath}");
+            return;
+        }
+
+        string sourceJson = File.ReadAllText(sourcePath);
+        ModelRoot source = JsonUtility.FromJson<ModelRoot>(sourceJson);
+        Lt1VisualSupplementRoot supplement = JsonUtility.FromJson<Lt1VisualSupplementRoot>(sourceJson);
+        if (source == null || source.nodes == null || source.panos == null || source.diaphragms == null)
+        {
+            Debug.LogWarning("[LT1Viewer] Fuente LT1 incompleta; no se generan losas esteticas");
+            return;
+        }
+
+        float offsetX;
+        bool invertY;
+        if (!TryGetDocumentedLt1Transform(out offsetX, out invertY))
+        {
+            Debug.LogWarning("[LT1Viewer] Transformacion LT1 no verificable; no se generan losas esteticas");
+            return;
+        }
+
+        Dictionary<string, float> axisX = BuildAxisCoordinateMap(source.nodes, true);
+        Dictionary<string, float> axisY = BuildAxisCoordinateMap(source.nodes, false);
+        ApplyDocumentedAxisCorrection(axisX);
+
+        Dictionary<string, float> levelZ = new Dictionary<string, float>();
+        foreach (var diaphragm in source.diaphragms)
+        {
+            if (diaphragm != null && !string.IsNullOrEmpty(diaphragm.nivel))
+                levelZ[diaphragm.nivel] = diaphragm.z;
+        }
+
+        aestheticSlabObjects.Clear();
+        int regularPanelsBuilt = 0;
+        foreach (var pano in source.panos)
+        {
+            float z;
+            if (!levelZ.TryGetValue(pano.nivel, out z))
+            {
+                Debug.LogWarning($"[LT1Viewer] Losa estetica {pano.id}: falta cota de nivel verificada; se omite");
+                continue;
+            }
+
+            if (CreateLt1AestheticSlab(parent, pano, pano.id, z, offsetX, invertY, axisX, axisY))
+                regularPanelsBuilt++;
+        }
+
+        int basementRoofPanelsBuilt = 0;
+        if (fillLt1BasementRoofForDesign && supplement != null &&
+            supplement.basement_slabs != null)
+        {
+            // Contorno exterior digitalizado de la planta de cielo del primer
+            // subterraneo. No se reutiliza la planta superior ni se cierran
+            // huecos interiores cuyas cotas no estan verificadas.
+            foreach (var slabData in supplement.basement_slabs)
+            {
+                if (slabData == null || slabData.nivel != "PISO_1S") continue;
+                if (CreateLt1AestheticSlabRectangle(parent, slabData, offsetX, invertY))
+                    basementRoofPanelsBuilt++;
+            }
+        }
+        else if (fillLt1BasementRoofForDesign)
+        {
+            Debug.LogWarning("[LT1Viewer] Contorno PISO_1S no disponible; no se genera su techo estetico");
+        }
+
+        Debug.Log($"[LT1Viewer] Losas esteticas LT1: {regularPanelsBuilt} panos regulares + " +
+                  $"{basementRoofPanelsBuilt} panos techo PISO_1S, " +
+                  $"espesor grafico={aestheticSlabThickness:F2} m (sin funcion estructural)");
+
+        BuildAestheticSlabsLt2(parent);
+    }
+
+    bool CreateLt1AestheticSlab(Transform parent, PanosData pano, string visualId,
+                                float z, float offsetX, bool invertY,
+                                Dictionary<string, float> axisX,
+                                Dictionary<string, float> axisY)
+    {
+        float x0, x1, y0, y1;
+        if (!axisX.TryGetValue(pano.eje_x0, out x0) ||
+            !axisX.TryGetValue(pano.eje_x1, out x1) ||
+            !axisY.TryGetValue(pano.eje_y0, out y0) ||
+            !axisY.TryGetValue(pano.eje_y1, out y1))
+        {
+            Debug.LogWarning($"[LT1Viewer] Losa estetica {visualId}: faltan coordenadas verificadas; se omite");
+            return false;
+        }
+
+        float combinedX0 = x0 + offsetX;
+        float combinedX1 = x1 + offsetX;
+        float combinedY0 = invertY ? -y0 : y0;
+        float combinedY1 = invertY ? -y1 : y1;
+        float sizeX = Mathf.Abs(combinedX1 - combinedX0);
+        float sizeY = Mathf.Abs(combinedY1 - combinedY0);
+        if (sizeX < 0.001f || sizeY < 0.001f) return false;
+
+        GameObject slab = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        slab.name = $"AestheticSlab_LT1_{visualId}";
+        slab.transform.position = StructToUnity(
+            (combinedX0 + combinedX1) * 0.5f,
+            (combinedY0 + combinedY1) * 0.5f,
+            z - aestheticSlabThickness * 0.5f
+        );
+        slab.transform.localScale = new Vector3(sizeX, aestheticSlabThickness, sizeY);
+        slab.GetComponent<Renderer>().material = aestheticSlabMaterial;
+
+        Collider collider = slab.GetComponent<Collider>();
+        if (collider != null) Destroy(collider);
+
+        slab.transform.SetParent(parent);
+        aestheticSlabObjects.Add(slab);
+        return true;
+    }
+
+    bool CreateLt1AestheticSlabRectangle(Transform parent, Lt1BasementSlabData data,
+                                         float offsetX, bool invertY)
+    {
+        float combinedX0 = data.x0 + offsetX;
+        float combinedX1 = data.x1 + offsetX;
+        float combinedY0 = invertY ? -data.y0 : data.y0;
+        float combinedY1 = invertY ? -data.y1 : data.y1;
+        float sizeX = Mathf.Abs(combinedX1 - combinedX0);
+        float sizeY = Mathf.Abs(combinedY1 - combinedY0);
+        if (sizeX < 0.001f || sizeY < 0.001f) return false;
+
+        GameObject slab = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        slab.name = $"AestheticSlab_LT1_{data.id}";
+        slab.transform.position = StructToUnity(
+            (combinedX0 + combinedX1) * 0.5f,
+            (combinedY0 + combinedY1) * 0.5f,
+            data.z - aestheticSlabThickness * 0.5f + basementSlabVisibilityOffset
+        );
+        slab.transform.localScale = new Vector3(sizeX, aestheticSlabThickness, sizeY);
+        slab.GetComponent<Renderer>().material = aestheticSlabMaterial;
+
+        Collider collider = slab.GetComponent<Collider>();
+        if (collider != null) Destroy(collider);
+
+        slab.transform.SetParent(parent);
+        aestheticSlabObjects.Add(slab);
+        return true;
+    }
+
+    bool TryGetDocumentedLevelZ(NodeData[] nodes, string level, out float z)
+    {
+        z = 0f;
+        bool found = false;
+        foreach (var node in nodes)
+        {
+            if (node == null || node.nivel != level) continue;
+            if (!found)
+            {
+                z = node.z;
+                found = true;
+            }
+            else if (!Mathf.Approximately(z, node.z))
+            {
+                Debug.LogWarning($"[LT1Viewer] Nivel {level}: cotas inconsistentes");
+                return false;
+            }
+        }
+        return found;
+    }
+
+    void BuildAestheticSlabsLt2(Transform parent)
+    {
+        string sourcePath = Path.Combine(Application.streamingAssetsPath, aestheticSlabLt2JsonFileName);
+        if (!File.Exists(sourcePath))
+        {
+            Debug.LogWarning($"[LT1Viewer] No se encontro la fuente de losas LT2: {sourcePath}");
+            return;
+        }
+
+        Lt2VisualRoot source = JsonUtility.FromJson<Lt2VisualRoot>(File.ReadAllText(sourcePath));
+        if (source == null || source.slabs == null)
+        {
+            Debug.LogWarning("[LT1Viewer] Fuente LT2 incompleta; no se generan sus losas esteticas");
+            return;
+        }
+
+        int panelsBuilt = 0;
+        int piecesBuilt = 0;
+        foreach (var panel in source.slabs)
+        {
+            Rect outer;
+            if (panel == null || !TryParseDocumentedRectangle(panel.polygon, out outer))
+            {
+                Debug.LogWarning($"[LT1Viewer] Pano LT2 {panel?.panel_id}: poligono no verificable; se omite");
+                continue;
+            }
+
+            List<Rect> pieces = new List<Rect> { outer };
+            // En L1-L4 se conservan los huecos documentados. En ROOF, la vista
+            // de diseno solicitada completa la cubierta usando exclusivamente
+            // el contorno exterior ya registrado de cada pano. Es estetico:
+            // no modifica masa, rigidez, cargas ni la geometria de OpenSees.
+            bool fillRoof = fillLt2RoofForDesign && panel.level == "ROOF";
+            if (!fillRoof && panel.holes != null)
+            {
+                foreach (string holePolygon in panel.holes)
+                {
+                    Rect hole;
+                    if (!TryParseDocumentedRectangle(holePolygon, out hole))
+                    {
+                        Debug.LogWarning($"[LT1Viewer] Pano LT2 {panel.panel_id}: hueco no verificable; se omite el pano");
+                        pieces.Clear();
+                        break;
+                    }
+                    pieces = SubtractRectangle(pieces, hole);
+                }
+            }
+
+            int panelPieces = 0;
+            foreach (Rect piece in pieces)
+            {
+                if (piece.width < 0.001f || piece.height < 0.001f) continue;
+
+                GameObject slab = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                slab.name = $"AestheticSlab_LT2_{panel.panel_id}_S{panelPieces + 1}";
+                slab.transform.position = StructToUnity(
+                    piece.center.x,
+                    piece.center.y,
+                    panel.z - aestheticSlabThickness * 0.5f
+                );
+                slab.transform.localScale = new Vector3(
+                    piece.width,
+                    aestheticSlabThickness,
+                    piece.height
+                );
+                slab.GetComponent<Renderer>().material = aestheticSlabMaterial;
+
+                Collider collider = slab.GetComponent<Collider>();
+                if (collider != null) Destroy(collider);
+
+                slab.transform.SetParent(parent);
+                aestheticSlabObjects.Add(slab);
+                panelPieces++;
+                piecesBuilt++;
+            }
+
+            if (panelPieces > 0) panelsBuilt++;
+        }
+
+        Debug.Log($"[LT1Viewer] Losas esteticas LT2: {panelsBuilt} panos / {piecesBuilt} piezas, " +
+                  $"cubierta visual completa={(fillLt2RoofForDesign ? "SI" : "NO")}, " +
+                  $"espesor grafico={aestheticSlabThickness:F2} m (sin funcion estructural)");
+    }
+
+    bool TryParseDocumentedRectangle(string polygon, out Rect rectangle)
+    {
+        rectangle = new Rect();
+        if (string.IsNullOrEmpty(polygon)) return false;
+
+        string[] pointTexts = polygon.Split(';');
+        if (pointTexts.Length != 4) return false;
+
+        float minX = float.MaxValue;
+        float maxX = float.MinValue;
+        float minY = float.MaxValue;
+        float maxY = float.MinValue;
+        var points = new List<Vector2>();
+
+        foreach (string pointText in pointTexts)
+        {
+            string[] coordinates = pointText.Split(',');
+            float x, y;
+            if (coordinates.Length != 2 ||
+                !TryInvariantFloat(coordinates[0].Trim(), out x) ||
+                !TryInvariantFloat(coordinates[1].Trim(), out y))
+                return false;
+
+            points.Add(new Vector2(x, y));
+            minX = Mathf.Min(minX, x);
+            maxX = Mathf.Max(maxX, x);
+            minY = Mathf.Min(minY, y);
+            maxY = Mathf.Max(maxY, y);
+        }
+
+        foreach (Vector2 point in points)
+        {
+            bool onX = Mathf.Approximately(point.x, minX) || Mathf.Approximately(point.x, maxX);
+            bool onY = Mathf.Approximately(point.y, minY) || Mathf.Approximately(point.y, maxY);
+            if (!onX || !onY) return false;
+        }
+
+        rectangle = Rect.MinMaxRect(minX, minY, maxX, maxY);
+        return rectangle.width > 0.001f && rectangle.height > 0.001f;
+    }
+
+    List<Rect> SubtractRectangle(List<Rect> source, Rect hole)
+    {
+        var result = new List<Rect>();
+        foreach (Rect piece in source)
+        {
+            float ix0 = Mathf.Max(piece.xMin, hole.xMin);
+            float ix1 = Mathf.Min(piece.xMax, hole.xMax);
+            float iy0 = Mathf.Max(piece.yMin, hole.yMin);
+            float iy1 = Mathf.Min(piece.yMax, hole.yMax);
+
+            if (ix1 <= ix0 || iy1 <= iy0)
+            {
+                result.Add(piece);
+                continue;
+            }
+
+            AddRectangleIfVisible(result, piece.xMin, piece.yMin, ix0, piece.yMax);
+            AddRectangleIfVisible(result, ix1, piece.yMin, piece.xMax, piece.yMax);
+            AddRectangleIfVisible(result, ix0, piece.yMin, ix1, iy0);
+            AddRectangleIfVisible(result, ix0, iy1, ix1, piece.yMax);
+        }
+        return result;
+    }
+
+    void AddRectangleIfVisible(List<Rect> rectangles, float x0, float y0, float x1, float y1)
+    {
+        if (x1 - x0 > 0.001f && y1 - y0 > 0.001f)
+            rectangles.Add(Rect.MinMaxRect(x0, y0, x1, y1));
+    }
+
+    bool TryGetDocumentedLt1Transform(out float offsetX, out bool invertY)
+    {
+        offsetX = 0f;
+        invertY = false;
+        string transform = combinedRoot != null && combinedRoot.metadata != null
+            ? combinedRoot.metadata.transformacion_lt1 : "";
+        if (string.IsNullOrEmpty(transform)) return false;
+
+        Match xMatch = Regex.Match(transform,
+            @"X'\s*=\s*X\s*([+-])\s*(\d+(?:\.\d+)?)",
+            RegexOptions.IgnoreCase);
+        if (!xMatch.Success || !TryInvariantFloat(xMatch.Groups[2].Value, out offsetX))
+            return false;
+
+        if (xMatch.Groups[1].Value == "-") offsetX = -offsetX;
+        invertY = Regex.IsMatch(transform, @"Y'\s*=\s*-\s*Y", RegexOptions.IgnoreCase);
+        bool preserveZ = Regex.IsMatch(transform, @"Z'\s*=\s*Z", RegexOptions.IgnoreCase);
+        return invertY && preserveZ;
+    }
+
+    void ApplyDocumentedAxisCorrection(Dictionary<string, float> axisX)
+    {
+        string transform = combinedRoot != null && combinedRoot.metadata != null
+            ? combinedRoot.metadata.transformacion_lt1 : "";
+        Match correction = Regex.Match(transform,
+            @"eje\s+(.+?)\s+corregido\s+(-?\d+(?:\.\d+)?)\s*->\s*(-?\d+(?:\.\d+)?)",
+            RegexOptions.IgnoreCase);
+        float corrected;
+        if (correction.Success &&
+            TryInvariantFloat(correction.Groups[3].Value, out corrected))
+        {
+            axisX[correction.Groups[1].Value.Trim()] = corrected;
+        }
+    }
+
+    Dictionary<string, float> BuildAxisCoordinateMap(NodeData[] nodes, bool xAxis)
+    {
+        Dictionary<string, float> coordinates = new Dictionary<string, float>();
+        HashSet<string> inconsistentAxes = new HashSet<string>();
+
+        foreach (var node in nodes)
+        {
+            string axis = xAxis ? node.eje_x : node.eje_y;
+            if (string.IsNullOrEmpty(axis) || inconsistentAxes.Contains(axis)) continue;
+
+            float coordinate = xAxis ? node.x : node.y;
+            float existing;
+            if (coordinates.TryGetValue(axis, out existing) && !Mathf.Approximately(existing, coordinate))
+            {
+                coordinates.Remove(axis);
+                inconsistentAxes.Add(axis);
+                Debug.LogWarning($"[LT1Viewer] Eje {axis}: coordenada inconsistente; se omiten sus losas");
+            }
+            else
+            {
+                coordinates[axis] = coordinate;
+            }
+        }
+
+        return coordinates;
     }
 
     void BuildNodes(Transform parent)
@@ -792,6 +1198,218 @@ public class ModelLoader : MonoBehaviour
                 AttachRef(go, beam.elementTag);
             }
         }
+    }
+
+    // Vigas del cielo del primer subterraneo cuya posicion y rotulo se leen
+    // en el plano, pero cuyo canto variable o encuentro vertical aun no esta
+    // completamente acotado. Se dibujan para revisar la digitalizacion y no
+    // reciben elementTag, rigidez, masa, cargas ni resultados analiticos.
+    void BuildLt1PendingVisualBeams(Transform parent)
+    {
+        string sourcePath = Path.Combine(Application.streamingAssetsPath, aestheticSlabJsonFileName);
+        if (!File.Exists(sourcePath)) return;
+
+        string sourceJson = File.ReadAllText(sourcePath);
+        ModelRoot modelSource = JsonUtility.FromJson<ModelRoot>(sourceJson);
+        Lt1VisualSupplementRoot source =
+            JsonUtility.FromJson<Lt1VisualSupplementRoot>(sourceJson);
+
+        float offsetX;
+        bool invertY;
+        if (!TryGetDocumentedLt1Transform(out offsetX, out invertY)) return;
+
+        int analyticalCreated = 0;
+        if (modelSource != null && modelSource.nodes != null && modelSource.beams != null)
+        {
+            var sourceNodes = new Dictionary<int, NodeData>();
+            foreach (var node in modelSource.nodes)
+                if (node != null) sourceNodes[node.tag] = node;
+
+            foreach (var beam in modelSource.beams)
+            {
+                if (beam == null || beam.nivel != "PISO_1S" ||
+                    beamObjects.ContainsKey(beam.elementTag) ||
+                    !sourceNodes.ContainsKey(beam.node_i) ||
+                    !sourceNodes.ContainsKey(beam.node_j)) continue;
+
+                NodeData ni = sourceNodes[beam.node_i];
+                NodeData nj = sourceNodes[beam.node_j];
+                Vector3 a = StructToUnity(ni.x + offsetX, invertY ? -ni.y : ni.y, ni.z);
+                Vector3 b = StructToUnity(nj.x + offsetX, invertY ? -nj.y : nj.y, nj.z);
+                if (CreateLt1SourceBeamVisual(parent, $"Analytical_{beam.elementTag}", a, b))
+                    analyticalCreated++;
+            }
+        }
+
+        int pendingCreated = 0;
+        if (source != null && source.visual_beams != null)
+        {
+            foreach (var beam in source.visual_beams)
+            {
+                if (beam == null || beam.nivel != "PISO_1S") continue;
+                float x1 = beam.x1 + offsetX;
+                float x2 = beam.x2 + offsetX;
+                float y1 = invertY ? -beam.y1 : beam.y1;
+                float y2 = invertY ? -beam.y2 : beam.y2;
+                Vector3 a = StructToUnity(x1, y1, beam.z1);
+                Vector3 b = StructToUnity(x2, y2, beam.z2);
+                if (CreateLt1SourceBeamVisual(parent, $"Pending_{beam.id}", a, b))
+                    pendingCreated++;
+            }
+        }
+
+        Debug.Log($"[LT1Viewer] Vigas subterraneo LT1: {analyticalCreated} analiticas incorporadas " +
+                  $"desde modelo_lt1 + {pendingCreated} pendientes visuales");
+
+        int supportWallsCreated = 0;
+        if (source != null && source.visual_support_walls != null)
+        {
+            foreach (var wall in source.visual_support_walls)
+            {
+                if (wall == null || wall.nivel != "PISO_1S") continue;
+                float x1 = wall.x1 + offsetX;
+                float x2 = wall.x2 + offsetX;
+                float y1 = invertY ? -wall.y1 : wall.y1;
+                float y2 = invertY ? -wall.y2 : wall.y2;
+                if (CreateLt1VisualSupportWall(parent, wall, x1, y1, x2, y2))
+                    supportWallsCreated++;
+            }
+        }
+        Debug.Log($"[LT1Viewer] Apoyos visuales subterraneo LT1: {supportWallsCreated} muros del plano 101");
+    }
+
+    bool CreateLt1SourceBeamVisual(Transform parent, string id, Vector3 a, Vector3 b)
+    {
+        Vector3 direction = b - a;
+        float length = direction.magnitude;
+        if (length < 0.001f) return false;
+
+        GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        visual.name = $"BeamVisual_LT1_{id}";
+        visual.transform.position = (a + b) * 0.5f;
+        visual.transform.localScale = new Vector3(0.55f, 0.55f, length);
+        visual.transform.rotation = Quaternion.FromToRotation(Vector3.forward, direction);
+        visual.GetComponent<Renderer>().material = beamMaterial;
+        Collider collider = visual.GetComponent<Collider>();
+        if (collider != null) Destroy(collider);
+        visual.transform.SetParent(parent);
+        return true;
+    }
+
+    bool CreateLt1VisualSupportWall(Transform parent, Lt1VisualSupportWallData data,
+                                    float x1, float y1, float x2, float y2)
+    {
+        float dx = x2 - x1;
+        float dy = y2 - y1;
+        float length = Mathf.Sqrt(dx * dx + dy * dy);
+        float height = data.z_superior - data.z_inferior;
+        if (length < 0.001f || height < 0.001f || data.espesor_m <= 0f) return false;
+
+        GameObject wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall.name = $"WallVisual_LT1_{data.id}";
+        wall.transform.position = StructToUnity(
+            (x1 + x2) * 0.5f,
+            (y1 + y2) * 0.5f,
+            (data.z_inferior + data.z_superior) * 0.5f
+        );
+        wall.transform.localScale = new Vector3(data.espesor_m, height, length);
+        wall.transform.rotation = Quaternion.Euler(
+            0f, Mathf.Atan2(dx, -dy) * Mathf.Rad2Deg, 0f);
+        wall.GetComponent<Renderer>().material = wallMaterial;
+        Collider collider = wall.GetComponent<Collider>();
+        if (collider != null) Destroy(collider);
+        wall.transform.SetParent(parent);
+        return true;
+    }
+
+    // Cierres exclusivamente graficos para tres vigas LT2 cuya conectividad
+    // analitica termina en apoyos verticales, pero que en la vista quedan con
+    // una separacion respecto de la viga vecina. No se modifican nodos,
+    // elementos, rigidez, cargas ni resultados del modelo OpenSees.
+    void BuildLt2VisualBeamClosures(Transform parent)
+    {
+        int created = 0;
+
+        // VI-02 y VI-04: cerrar el claro visual hacia sus tramos occidentales.
+        if (CreateVisualBridgeBetweenBeamEnds(parent, 2232, true, 2231, false)) created++;
+        if (CreateVisualBridgeBetweenBeamEnds(parent, 2234, true, 2233, false)) created++;
+
+        // VI-07: cerrar ambos extremos; al oeste hacia VI-06 y al este hacia
+        // la viga de borde existente.
+        if (CreateVisualBridgeBetweenBeamEnds(parent, 2237, true, 2236, false)) created++;
+        if (CreateVisualBridgeToBeam(parent, 2237, false, 2227)) created++;
+
+        Debug.Log($"[LT1Viewer] Cierres visuales LT2: {created}/4 (tags 2232, 2234 y 2237; sin efecto estructural)");
+    }
+
+    bool CreateVisualBridgeBetweenBeamEnds(Transform parent, int sourceTag,
+                                           bool sourceUseI, int targetTag,
+                                           bool targetUseI)
+    {
+        Vector3 sourceI, sourceJ, targetI, targetJ;
+        if (!TryGetElementPositions(sourceTag, out sourceI, out sourceJ) ||
+            !TryGetElementPositions(targetTag, out targetI, out targetJ))
+            return false;
+
+        Vector3 a = sourceUseI ? sourceI : sourceJ;
+        Vector3 b = targetUseI ? targetI : targetJ;
+        return CreateVisualBeamBridge(parent, sourceTag, a, b);
+    }
+
+    bool CreateVisualBridgeToBeam(Transform parent, int sourceTag,
+                                  bool sourceUseI, int targetTag)
+    {
+        Vector3 sourceI, sourceJ, targetI, targetJ;
+        if (!TryGetElementPositions(sourceTag, out sourceI, out sourceJ) ||
+            !TryGetElementPositions(targetTag, out targetI, out targetJ))
+            return false;
+
+        Vector3 a = sourceUseI ? sourceI : sourceJ;
+        Vector3 targetDirection = targetJ - targetI;
+        float denominator = Vector3.Dot(targetDirection, targetDirection);
+        if (denominator < 0.000001f) return false;
+
+        float t = Mathf.Clamp01(Vector3.Dot(a - targetI, targetDirection) / denominator);
+        Vector3 b = targetI + targetDirection * t;
+        return CreateVisualBeamBridge(parent, sourceTag, a, b);
+    }
+
+    bool TryGetElementPositions(int elementTag, out Vector3 posI, out Vector3 posJ)
+    {
+        posI = Vector3.zero;
+        posJ = Vector3.zero;
+
+        int[] pair;
+        if (!elementNodePair.TryGetValue(elementTag, out pair) || pair.Length < 2 ||
+            !nodeObjects.ContainsKey(pair[0]) || !nodeObjects.ContainsKey(pair[1]))
+        {
+            Debug.LogWarning($"[LT1Viewer] No se pudo crear el cierre visual de la viga {elementTag}");
+            return false;
+        }
+
+        posI = nodeObjects[pair[0]].transform.position;
+        posJ = nodeObjects[pair[1]].transform.position;
+        return true;
+    }
+
+    bool CreateVisualBeamBridge(Transform parent, int sourceTag, Vector3 a, Vector3 b)
+    {
+        Vector3 direction = b - a;
+        float length = direction.magnitude;
+        if (length < 0.001f) return false;
+
+        GameObject bridge = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        bridge.name = $"BeamVisualClosure_{sourceTag}";
+        bridge.transform.position = (a + b) * 0.5f;
+        bridge.transform.localScale = new Vector3(0.55f, 0.55f, length);
+        bridge.transform.rotation = Quaternion.FromToRotation(Vector3.forward, direction);
+        bridge.GetComponent<Renderer>().material = beamMaterial;
+
+        Collider collider = bridge.GetComponent<Collider>();
+        if (collider != null) Destroy(collider);
+
+        bridge.transform.SetParent(parent);
+        return true;
     }
 
     void BuildColumns(Transform parent)
@@ -1281,4 +1899,74 @@ public class ActiveEquilibrium
     public float err_rel_vertical;
     public float err_abs_lateral_kN;
     public float err_rel_lateral;
+}
+
+[Serializable]
+public class Lt2VisualRoot
+{
+    public Lt2VisualSlab[] slabs;
+}
+
+[Serializable]
+public class Lt1VisualSupplementRoot
+{
+    public Lt1VisualBeamData[] visual_beams;
+    public Lt1VisualSupportWallData[] visual_support_walls;
+    public Lt1BasementSlabData[] basement_slabs;
+}
+
+[Serializable]
+public class Lt1VisualBeamData
+{
+    public string id;
+    public string nivel;
+    public string seccion;
+    public string estado;
+    public float x1;
+    public float y1;
+    public float x2;
+    public float y2;
+    public float z1;
+    public float z2;
+}
+
+[Serializable]
+public class Lt1BasementSlabData
+{
+    public string id;
+    public string nivel;
+    public string estado;
+    public float x0;
+    public float x1;
+    public float y0;
+    public float y1;
+    public float z;
+}
+
+[Serializable]
+public class Lt1VisualSupportWallData
+{
+    public string id;
+    public string nivel;
+    public string seccion;
+    public string estado;
+    public float espesor_m;
+    public float x1;
+    public float y1;
+    public float x2;
+    public float y2;
+    public float z_inferior;
+    public float z_superior;
+}
+
+[Serializable]
+public class Lt2VisualSlab
+{
+    public string panel_id;
+    public string level;
+    public float z;
+    public string polygon;
+    public string[] holes;
+    public string status;
+    public string hole_status;
 }

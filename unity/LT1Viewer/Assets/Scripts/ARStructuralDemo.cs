@@ -1,8 +1,10 @@
 using System;
+using System.Collections;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
@@ -13,9 +15,9 @@ using UnityEngine.XR.ARSubsystems;
 ///   1) OpenSees -> Unity: u = (X, Z, -Y).
 ///   2) Unity local -> AR: pAR = TImagen * (traslacion + R * escala * (u-uOrigen)).
 ///
-/// TImagen es la pose que ARKit entrega para ARTrackedImage. El propio
-/// ARTrackedImage es un trackable espacial persistente y se utiliza como el
-/// anchor asociado a la imagen: ARContent se hace hijo de su Transform.
+/// TImagen es la pose que ARCore/ARKit entrega para ARTrackedImage. Al detectar
+/// la imagen se crea un ARAnchor en esa pose y ARContent se hace hijo suyo.
+/// Si el proveedor no permite crearlo, el ARTrackedImage se usa como respaldo.
 /// La geometria y el resultado se leen, sin modificarlos, del JSON combinado.
 /// </summary>
 [DisallowMultipleComponent]
@@ -23,6 +25,7 @@ public sealed class ARStructuralDemo : MonoBehaviour
 {
     [Header("AR")]
     public ARTrackedImageManager trackedImageManager;
+    public ARAnchorManager anchorManager;
     public Camera arCamera;
     public string referenceImageName = "LT1_AR_REFERENCE";
 
@@ -43,6 +46,7 @@ public sealed class ARStructuralDemo : MonoBehaviour
 
     GameObject contentRoot;
     GameObject elementObject;
+    ARAnchor spatialAnchor;
     TextMesh worldLabel;
     Vector3 unityI;
     Vector3 unityJ;
@@ -51,20 +55,59 @@ public sealed class ARStructuralDemo : MonoBehaviour
     string elementOrigin;
     string status = "Iniciando sesion AR...";
     bool dataReady;
+    bool anchorRequestPending;
 
     void Awake()
     {
         if (trackedImageManager == null)
             trackedImageManager = FindFirstObjectByType<ARTrackedImageManager>();
+        if (anchorManager == null)
+            anchorManager = FindFirstObjectByType<ARAnchorManager>();
         if (arCamera == null)
             arCamera = Camera.main;
+    }
 
-        dataReady = TryLoadElementAndResult(out string error);
-        if (!dataReady)
+    IEnumerator Start()
+    {
+        string path = Path.Combine(Application.streamingAssetsPath, jsonFileName);
+        string json;
+
+        // En Android StreamingAssets vive dentro del APK (jar:file://...) y no
+        // puede leerse con File.ReadAllText. UnityWebRequest funciona tanto ahi
+        // como en una URL; en Editor/iOS se conserva la lectura directa.
+        if (path.Contains("://"))
         {
-            status = error;
-            Debug.LogError("[Semana6 AR] " + error);
+            using UnityWebRequest request = UnityWebRequest.Get(path);
+            yield return request.SendWebRequest();
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                SetDataError("No se pudo leer " + jsonFileName + ": " + request.error);
+                yield break;
+            }
+            json = request.downloadHandler.text;
         }
+        else
+        {
+            if (!File.Exists(path))
+            {
+                SetDataError("No se encontro " + path);
+                yield break;
+            }
+            json = File.ReadAllText(path);
+        }
+
+        dataReady = TryLoadElementAndResult(json, out string error);
+        if (!dataReady)
+            SetDataError(error);
+        else
+            status = "Sesion AR iniciada | apunte a la imagen de referencia.";
+    }
+
+    void SetDataError(string error)
+    {
+        dataReady = false;
+        status = error;
+        Debug.LogError("[Semana6 AR] " + error);
     }
 
     void Update()
@@ -84,28 +127,71 @@ public sealed class ARStructuralDemo : MonoBehaviour
 
         if (selected == null)
         {
-            SetContentVisible(false);
-            status = "Apunte la camara a la imagen de referencia.";
+            bool anchorTracking = spatialAnchor != null &&
+                                  spatialAnchor.trackingState == TrackingState.Tracking;
+            SetContentVisible(anchorTracking);
+            status = anchorTracking
+                ? "Imagen fuera de cuadro | anchor AR activo"
+                : "Apunte la camara a la imagen de referencia.";
+            FaceLabelToCamera(anchorTracking);
             return;
         }
 
         bool tracking = selected.trackingState == TrackingState.Tracking;
-        if (contentRoot == null)
-            BuildContent(selected.transform);
-        else if (contentRoot.transform.parent != selected.transform)
-            contentRoot.transform.SetParent(selected.transform, false);
+        if (contentRoot == null && spatialAnchor == null && !anchorRequestPending)
+            CreateAnchorAtImagePose(selected);
 
         ApplyRegistrationTransform();
-        SetContentVisible(tracking);
-        status = tracking
-            ? "Imagen detectada | pose y anchor activos"
-            : "Imagen detectada | tracking limitado";
+        bool contentTracking = spatialAnchor != null
+            ? spatialAnchor.trackingState == TrackingState.Tracking
+            : tracking;
+        SetContentVisible(contentTracking);
+        status = spatialAnchor != null && contentTracking
+            ? "Imagen detectada | pose y ARAnchor activos"
+            : tracking
+                ? "Imagen detectada | creando anchor..."
+                : "Imagen detectada | tracking limitado";
 
+        FaceLabelToCamera(contentTracking);
+    }
+
+    void FaceLabelToCamera(bool tracking)
+    {
         if (worldLabel != null && arCamera != null && tracking)
         {
             Vector3 towardCamera = worldLabel.transform.position - arCamera.transform.position;
             if (towardCamera.sqrMagnitude > 0.000001f)
                 worldLabel.transform.rotation = Quaternion.LookRotation(towardCamera.normalized, Vector3.up);
+        }
+    }
+
+    async void CreateAnchorAtImagePose(ARTrackedImage image)
+    {
+        anchorRequestPending = true;
+        status = "Imagen detectada | creando anchor...";
+
+        if (anchorManager != null && anchorManager.enabled)
+        {
+            var result = await anchorManager.TryAddAnchorAsync(
+                new Pose(image.transform.position, image.transform.rotation));
+            spatialAnchor = result.value;
+        }
+
+        if (this == null) return;
+        anchorRequestPending = false;
+
+        if (spatialAnchor != null)
+        {
+            spatialAnchor.gameObject.name = "ARAnchor_ElementTag_" + elementTag;
+            BuildContent(spatialAnchor.transform);
+            Debug.Log("[Semana6 AR] ARAnchor creado para elementTag " + elementTag + ".");
+        }
+        else if (image != null)
+        {
+            // Un tracked image tambien entrega una pose rastreada estable. Este
+            // respaldo permite continuar y deja la condicion visible en Console.
+            BuildContent(image.transform);
+            Debug.LogWarning("[Semana6 AR] No se pudo crear ARAnchor; se usa ARTrackedImage como anchor de respaldo.");
         }
     }
 
@@ -161,17 +247,9 @@ public sealed class ARStructuralDemo : MonoBehaviour
             contentRoot.SetActive(visible);
     }
 
-    bool TryLoadElementAndResult(out string error)
+    bool TryLoadElementAndResult(string json, out string error)
     {
         error = "";
-        string path = Path.Combine(Application.streamingAssetsPath, jsonFileName);
-        if (!File.Exists(path))
-        {
-            error = "No se encontro " + path;
-            return false;
-        }
-
-        string json = File.ReadAllText(path);
         ModeloCombinado root = JsonUtility.FromJson<ModeloCombinado>(json);
         if (root == null || root.nodes == null || root.elements == null)
         {
@@ -244,7 +322,7 @@ public sealed class ARStructuralDemo : MonoBehaviour
     void OnGUI()
     {
         // Limitar el tamano evita que la linea caso/resultado quede recortada
-        // en Game View de escritorio y en pantallas de iPhone.
+        // en Game View de escritorio y en pantallas de telefono.
         GUI.skin.label.fontSize = Mathf.Clamp(Screen.width / 55, 20, 34);
         GUI.skin.box.fontSize = Mathf.Clamp(Screen.width / 65, 16, 28);
         var rect = new Rect(20, 20, Screen.width - 40, Mathf.Min(320, Screen.height * 0.38f));

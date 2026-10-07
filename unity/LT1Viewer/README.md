@@ -13,6 +13,15 @@ espesor y ángulo forman un anchor visual equivalente sobre el que se registra
 el elemento `800205`, sin ARCore. Instalación, coordenadas, resultados y prueba
 en el A05 están documentados en `SEMANA06_AR.md`.
 
+## Semana 7 — Honors H3
+
+La misma escena agrega, sin alterar el núcleo de cámara y tracking, tres capas
+AR interactivas para el `elementTag 800205`: diagrama parabólico `My` de
+`COMBO_R` reconstruido por equilibrio con G+Q, deformada nodal ×100 y banda de
+área tributaria equivalente. Los botones aparecen solamente después de
+confirmar la viga. Alcance, ecuaciones, evidencia y limitaciones están en
+`03_HONORS_TRACK.md` en la raíz del repositorio.
+
 ## Abrir y ejecutar
 
 1. Abrir `unity/LT1Viewer` con Unity 6000.5.0f1.
@@ -148,17 +157,20 @@ rigideces ni geometría OpenSees.
 
 ## Demanda–capacidad P–M
 
-Al seleccionar la columna `113022` o cualquiera de los dos objetos Unity del
-muro M001 (`4001`, `4002`), se muestra su curva P–M, el punto de demanda, el
-caso activo y la condición DENTRO/FUERA. Los objetos 4001+4002 se agrupan para
-la comprobación del muro físico M001.
+El panel muestra exclusivamente las dos verificaciones que contiene
+`results.pm`:
 
-Las curvas y demandas provienen de `results.pm`. El JSON documenta dentro de
-cada bloque los datos confirmados y los supuestos empleados; la defensa debe
-explicar esas salvedades y no presentarlas como información extraída del
-plano. Unity presenta directamente las figuras auditadas
-`pm_column_113022.png` y `pm_wall_M001.png`, con ejes, leyendas y demandas de
-todos los casos; debajo identifica el caso activo.
+- columna `113022`: curva P–M P70x70 con 16Ø22 y demandas de los casos
+  exportados;
+- muro físico M001: selección mediante cualquiera de sus dos objetos Unity
+  `4001` o `4002`, agrupados para recomponer una sola demanda de muro y
+  compararla con sus curvas de eje fuerte y débil.
+
+No se presenta capacidad para la viga `2118` ni para la columna `112041`:
+esas ampliaciones experimentales fueron retiradas al restaurar el alcance
+auditado. Las curvas y demandas provienen de `results.pm`; el JSON documenta
+los datos confirmados y los supuestos empleados. La defensa debe explicar
+esas salvedades y no presentarlas como información extraída del plano.
 
 ## Trazabilidad
 

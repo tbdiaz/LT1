@@ -9,6 +9,7 @@ public class VisibilityController : MonoBehaviour
     private GameObject constraintLinksGroup;
     private GameObject supportsGroup;
     private GameObject diaphragmsGroup;
+    private GameObject aestheticSlabsGroup;
 
     private bool showNodes = true;
     private bool showBeams = true;
@@ -17,6 +18,7 @@ public class VisibilityController : MonoBehaviour
     private bool showConstraintLinks = false;
     private bool showSupports = true;
     private bool showDiaphragms = true;
+    private bool showAestheticSlabs = true;
     private bool showPendingInfo;
 
     private bool initialized;
@@ -44,6 +46,7 @@ public class VisibilityController : MonoBehaviour
         constraintLinksGroup = FindChild(structure, "ConstraintLinks");
         supportsGroup = FindChild(structure, "Supports");
         diaphragmsGroup = FindChild(structure, "Diaphragms");
+        aestheticSlabsGroup = FindChild(structure, "AestheticSlabs");
 
         if (wallsGroup == null)
         {
@@ -72,6 +75,7 @@ public class VisibilityController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha6)) ToggleDiaphragms();
         if (Input.GetKeyDown(KeyCode.Alpha7)) ToggleConstraintLinks();
         if (Input.GetKeyDown(KeyCode.Alpha8)) TogglePendingInfo();
+        if (Input.GetKeyDown(KeyCode.Alpha9)) ToggleAestheticSlabs();
         if (Input.GetKeyDown(KeyCode.P)) TogglePendingInfo();
     }
 
@@ -82,11 +86,12 @@ public class VisibilityController : MonoBehaviour
     public bool ShowSupports => showSupports;
     public bool ShowDiaphragms => showDiaphragms;
     public bool ShowConstraintLinks => showConstraintLinks;
+    public bool ShowAestheticSlabs => showAestheticSlabs;
 
     void OnGUI()
     {
         // La interfaz principal se dibuja en ViewerHUD para evitar paneles
-        // superpuestos. Las teclas 1..8 siguen disponibles.
+        // superpuestos. Las teclas 1..9 siguen disponibles.
         return;
 #pragma warning disable CS0162
         GUILayout.BeginArea(new Rect(10, 10, 240, 250));
@@ -183,6 +188,7 @@ public class VisibilityController : MonoBehaviour
     public void ToggleConstraintLinks(){ showConstraintLinks = !showConstraintLinks; SetGroup(constraintLinksGroup, showConstraintLinks); }
     public void ToggleSupports()       { showSupports = !showSupports;     SetGroup(supportsGroup, showSupports); }
     public void ToggleDiaphragms()     { showDiaphragms = !showDiaphragms; SetGroup(diaphragmsGroup, showDiaphragms); }
+    public void ToggleAestheticSlabs() { showAestheticSlabs = !showAestheticSlabs; SetGroup(aestheticSlabsGroup, showAestheticSlabs); }
     public void TogglePendingInfo()    { showPendingInfo = !showPendingInfo; }
 
     void SetGroup(GameObject go, bool active)

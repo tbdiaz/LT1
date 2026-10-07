@@ -14,4 +14,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/LT1Viewer.unity
     guid: 44ad4867b9f07084f890d97540f06d9b
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: dcc3e81d992310d459095f6380451235, type: 2}

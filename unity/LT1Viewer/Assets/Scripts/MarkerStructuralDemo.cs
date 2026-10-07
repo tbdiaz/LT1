@@ -61,6 +61,9 @@ public sealed class MarkerStructuralDemo : MonoBehaviour
     Material backgroundMaterial;
     GameObject markerAnchor;
     GameObject contentRoot;
+    GameObject momentDiagramRoot;
+    GameObject deformedShapeRoot;
+    GameObject tributaryAreaRoot;
     TextMesh worldLabel;
     Vector3 unityI;
     Vector3 unityJ;
@@ -99,6 +102,11 @@ public sealed class MarkerStructuralDemo : MonoBehaviour
     Vector2 cameraCropSize = Vector2.one;
     readonly string[] dataLoadSteps = new string[6];
     bool dataDiagnosticsVisible;
+    bool showMomentDiagram;
+    bool showDeformedShape;
+    bool showTributaryArea;
+    float momentDiagramClosureError;
+    float tributaryEquivalentWidth;
 
     IEnumerator Start()
     {
@@ -1174,14 +1182,7 @@ public sealed class MarkerStructuralDemo : MonoBehaviour
         Semana06ForceCase combo = Array.Find(structuralData.forceCases,
             item => item.caseName == "COMBO_R");
         if (combo != null)
-        {
-            float normalizer = Mathf.Max(Mathf.Abs(combo.My1), Mathf.Abs(combo.My2), 0.001f);
-            Vector3 up = Vector3.up;
-            CreateResultLine("COMBO_R_My_Extremos", new[] {
-                unityI + up * (combo.My1 / normalizer) * 0.75f,
-                unityJ + up * (combo.My2 / normalizer) * 0.75f
-            }, new Color(0.1f, 0.9f, 1f, 1f), 0.035f);
-        }
+            CreateMomentDiagram(combo);
 
         Semana06DisplacementCase deformation = Array.Find(structuralData.displacementCases,
             item => item.caseName == "COMBO_R");
@@ -1193,21 +1194,113 @@ public sealed class MarkerStructuralDemo : MonoBehaviour
                                          deformation.nodeI[2]) * amplification;
             Vector3 dJ = OpenSeesToUnity(deformation.nodeJ[0], deformation.nodeJ[1],
                                          deformation.nodeJ[2]) * amplification;
-            var points = new Vector3[17];
+            deformedShapeRoot = new GameObject("H3_DeformadaNodal_COMBO_R_x100");
+            deformedShapeRoot.transform.SetParent(contentRoot.transform, false);
+            var points = new Vector3[33];
             for (int i = 0; i < points.Length; i++)
             {
                 float t = i / (points.Length - 1f);
                 points[i] = Vector3.Lerp(unityI + dI, unityJ + dJ, t);
             }
             CreateResultLine("COMBO_R_DeformadaNodal_x100", points,
-                new Color(1f, 0.15f, 0.85f, 1f), 0.045f);
+                new Color(1f, 0.15f, 0.85f, 1f), 0.045f,
+                deformedShapeRoot.transform);
+            deformedShapeRoot.SetActive(false);
         }
+
+        CreateTributaryAreaVisual();
     }
 
-    void CreateResultLine(string lineName, Vector3[] positions, Color color, float width)
+    void CreateMomentDiagram(Semana06ForceCase combo)
+    {
+        // Convencion de seccion usada tambien por ForceDiagramController:
+        // q_i=-F_i, q_j=+F_j. Para COMBO_R, q=G+Q; EX no agrega carga
+        // distribuida vertical al miembro. Por equilibrio:
+        // My(x)=My_i+Vz_i*x+q*x^2/2.
+        const int subdivisions = 64;
+        float length = Mathf.Max(structuralData.element.length_m, 0.001f);
+        float uniformLoad = 0f;
+        foreach (Semana06Load load in structuralData.loads)
+            if (load != null && (load.caseName == "G" || load.caseName == "Q"))
+                uniformLoad += load.w_kN_m;
+
+        float sectionMomentI = -combo.My1;
+        float sectionShearI = -combo.Vz1;
+        float sectionMomentJ = combo.My2;
+        var values = new float[subdivisions + 1];
+        float maxAbs = 0f;
+        for (int i = 0; i <= subdivisions; i++)
+        {
+            float x = length * i / subdivisions;
+            values[i] = sectionMomentI + sectionShearI * x
+                + 0.5f * uniformLoad * x * x;
+            maxAbs = Mathf.Max(maxAbs, Mathf.Abs(values[i]));
+        }
+        momentDiagramClosureError = values[subdivisions] - sectionMomentJ;
+
+        momentDiagramRoot = new GameObject("H3_DiagramaMy_COMBO_R_" + elementTag);
+        momentDiagramRoot.transform.SetParent(contentRoot.transform, false);
+        Vector3 normal = Vector3.up;
+        float amplitude = 0.70f / Mathf.Max(maxAbs, 0.001f);
+        var curve = new Vector3[subdivisions + 1];
+        for (int i = 0; i <= subdivisions; i++)
+        {
+            float t = i / (float)subdivisions;
+            curve[i] = Vector3.Lerp(unityI, unityJ, t)
+                + normal * values[i] * amplitude;
+        }
+        CreateResultLine("My_Base", new[] { unityI, unityJ },
+            new Color(0.75f, 0.75f, 0.75f, 0.9f), 0.018f,
+            momentDiagramRoot.transform);
+        CreateResultLine("My_Parabola", curve,
+            new Color(0.10f, 0.90f, 1f, 1f), 0.045f,
+            momentDiagramRoot.transform);
+        for (int i = 0; i <= subdivisions; i += 8)
+            CreateResultLine("My_Ordenada_" + i,
+                new[] { Vector3.Lerp(unityI, unityJ, i / (float)subdivisions), curve[i] },
+                new Color(0.10f, 0.90f, 1f, 0.85f), 0.018f,
+                momentDiagramRoot.transform);
+        momentDiagramRoot.SetActive(false);
+    }
+
+    void CreateTributaryAreaVisual()
+    {
+        Semana06Load liveLoad = Array.Find(structuralData.loads,
+            item => item.caseName == "Q" && item.hasTributaryArea);
+        if (liveLoad == null || liveLoad.tributaryArea_m2 <= 0f) return;
+
+        float length = Mathf.Max(structuralData.element.length_m, 0.001f);
+        tributaryEquivalentWidth = liveLoad.tributaryArea_m2 / length;
+        tributaryAreaRoot = new GameObject("H3_AreaTributariaEquivalente_" + elementTag);
+        tributaryAreaRoot.transform.SetParent(contentRoot.transform, false);
+
+        Vector3 offset = Vector3.forward * 0.025f;
+        Vector3 side = Vector3.up * tributaryEquivalentWidth;
+        var meshObject = new GameObject("Area_" + liveLoad.tributaryArea_m2.ToString("F3",
+            CultureInfo.InvariantCulture) + "m2");
+        meshObject.transform.SetParent(tributaryAreaRoot.transform, false);
+        Mesh mesh = new Mesh { name = "AreaTributariaEquivalenteMesh" };
+        mesh.vertices = new[] { unityI + offset, unityJ + offset,
+                                unityJ + side + offset, unityI + side + offset };
+        mesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
+        mesh.RecalculateNormals();
+        meshObject.AddComponent<MeshFilter>().sharedMesh = mesh;
+        Material fill = new Material(Shader.Find("Sprites/Default"))
+        { color = new Color(1f, 0.78f, 0.05f, 0.28f) };
+        meshObject.AddComponent<MeshRenderer>().material = fill;
+
+        Color outline = new Color(1f, 0.82f, 0.10f, 1f);
+        CreateResultLine("Area_Borde", new[] { unityI + offset, unityJ + offset,
+            unityJ + side + offset, unityI + side + offset, unityI + offset },
+            outline, 0.035f, tributaryAreaRoot.transform);
+        tributaryAreaRoot.SetActive(false);
+    }
+
+    void CreateResultLine(string lineName, Vector3[] positions, Color color, float width,
+                          Transform parent = null)
     {
         GameObject lineObject = new GameObject(lineName);
-        lineObject.transform.SetParent(contentRoot.transform, false);
+        lineObject.transform.SetParent(parent != null ? parent : contentRoot.transform, false);
         LineRenderer line = lineObject.AddComponent<LineRenderer>();
         line.useWorldSpace = false;
         line.positionCount = positions.Length;
@@ -1581,8 +1674,46 @@ public sealed class MarkerStructuralDemo : MonoBehaviour
             Array.Find(structuralData.forceCases, item => item.caseName == "COMBO_R");
         string moments = combo == null ? "" :
             $"\nCOMBO_R My: I={combo.My1:F2}, J={combo.My2:F2} kN.m";
+        string active = "";
+        if (showMomentDiagram) active += " | My";
+        if (showDeformedShape) active += " | deformada x100";
+        if (showTributaryArea) active += " | área tributaria";
+        if (active.Length == 0) active = " | elemento";
         return $"OpenSees elementTag {elementTag}\n{elementType} | {elementOrigin}" + moments +
-               "\nCian: My extremos | Magenta: deformada nodal x100";
+               "\nH3 activo" + active;
+    }
+
+    void DrawHonorsControls()
+    {
+        GUILayout.Space(4f);
+        GUILayout.Label("HONORS H3 | CAPAS SOBRE LA VIGA REAL");
+        GUILayout.BeginHorizontal();
+        DrawOverlayToggle("DIAGRAMA My", ref showMomentDiagram, momentDiagramRoot);
+        DrawOverlayToggle("DEFORMADA ×100", ref showDeformedShape, deformedShapeRoot);
+        DrawOverlayToggle("ÁREA TRIBUTARIA", ref showTributaryArea, tributaryAreaRoot);
+        GUILayout.EndHorizontal();
+        GUILayout.Label($"My por equilibrio G+Q · cierre={momentDiagramClosureError:F3} kN·m | " +
+                        $"área equivalente A/L={tributaryEquivalentWidth:F3} m | " +
+                        "P-M: PENDIENTE");
+    }
+
+    void DrawOverlayToggle(string caption, ref bool state, GameObject target)
+    {
+        bool enabled = target != null;
+        Color previous = GUI.backgroundColor;
+        GUI.backgroundColor = state && enabled
+            ? new Color(0.12f, 0.72f, 0.34f)
+            : new Color(0.32f, 0.35f, 0.42f);
+        GUI.enabled = enabled;
+        if (GUILayout.Button(caption, GUILayout.Height(Mathf.Clamp(
+                Screen.height / 20f, 42f, 62f))))
+        {
+            state = !state;
+            target.SetActive(state);
+            if (worldLabel != null) worldLabel.text = LabelText();
+        }
+        GUI.enabled = true;
+        GUI.backgroundColor = previous;
     }
 
     void DrawCleanResultsPanel()
@@ -1730,6 +1861,7 @@ public sealed class MarkerStructuralDemo : MonoBehaviour
                         $"viga detectada: {(showConfirmedContent ? "sí" : "no")}");
         if (showConfirmedContent)
         {
+            DrawHonorsControls();
             resultsScroll = GUILayout.BeginScrollView(resultsScroll);
             DrawCleanResultsPanel();
             GUILayout.EndScrollView();
